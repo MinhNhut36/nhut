@@ -16,7 +16,7 @@ class LogoutIfAuthenticated
     public function handle(Request $request, Closure $next): Response
     {
         Auth::logout();
-        // Invalidate the session and regenerate token
+        // hủy phiên làm việc của người dùng và tạo lại token CSRF để bảo mật
         $request->session()->invalidate();
         $request->session()->regenerateToken();
         return $next($request);

@@ -12,7 +12,7 @@ use function Psy\debug;
 
 class StudentController extends Controller
 {
-   public function login(StudentRequest $request)
+   public function Studentlogin(StudentRequest $request)
     {
         
         $credentials = $request->only('username', 'password');
@@ -21,22 +21,21 @@ class StudentController extends Controller
 
         if ($student) {
             if ($student->is_status == 0) {
-                return redirect()->back()->withErrors(['LoginFail' => 'Tài khoản đã bị khóa.']);
-            }
-            
+                return redirect()->back()->withErrors(['StudentLoginFail' => 'Tài khoản đã bị khóa.']);
+            }         
             // Nếu tài khoản hoạt động, đăng nhập
-            if (Auth::guard('students')->attempt($credentials)) {
+            if (Auth::guard('student')->attempt($credentials)) {
           
-                 return redirect()->route('home');
+                 return redirect()->route('student.home');
             }
         }
 
         // Sai username hoặc password
-        return redirect()->back()->withErrors(['LoginFail' => 'Sai tên đăng nhập hoặc mật khẩu']);
+        return redirect()->back()->withErrors(['StudentLoginFail' => 'Sai tên đăng nhập hoặc mật khẩu']);
     }
 
     public function home()
     {
-        return view('students.home');
+        return view('student.home');
     }
 }

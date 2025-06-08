@@ -16,6 +16,9 @@ Route::get('/', function () {
 });
 
 Route::get('/login', function () {
-    return view('login');
-})->name('login');
+    return view('student.login');
+})->name('login')->middleware('logout');
 
+Route::get('/Teacherlogin', function () {
+    return view('teacher.login');
+})->name('teacher.login')->middleware('logout');

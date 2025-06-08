@@ -151,22 +151,6 @@
             padding: 0 10px;
         }
 
-        .student-form {
-            transform: translateX(0);
-        }
-
-        .teacher-form {
-            transform: translateX(100%);
-        }
-
-        .student-form.slide-out {
-            transform: translateX(-100%);
-        }
-
-        .teacher-form.slide-in {
-            transform: translateX(0);
-        }
-
         /* Divider title */
         .divider-title {
             display: flex;
@@ -271,12 +255,12 @@
                                     <div class="divider-title">
                                         <h5 class="fw-bold">Sinh Viên Đăng Nhập</h5>
                                     </div>
-                                    @if ($errors->has('LoginFail'))
+                                    @if ($errors->has('StudentLoginFail'))
                                         <div class="alert alert-danger">
-                                            {{ $errors->first('LoginFail') }}
+                                            {{ $errors->first('StudentLoginFail') }}
                                         </div>
                                     @endif
-                                    <form action="{{ route('student.login') }}" method="POST">
+                                    <form action="{{ route('student.authlogin') }}" method="POST">
                                         @csrf
                                         <div class="mb-3">
                                             <input type="text" name="username" class="form-control"
@@ -306,38 +290,9 @@
                                     <div class="form-wrapper student-form">                           
                                     </div>
                                     <div class="switch-role mt-3">
-                                        <button type="button" class="btn-switch">Giảng Viên Đăng Nhập</button>
+                                        <a href="{{route('teacher.login')}}">Giảng Viên Đăng Nhập</a>
                                     </div>
-                                </div>
-
-                                <!-- Teacher Form -->
-                                <div class="form-wrapper teacher-form">
-                                    <div class="divider-title">
-                                        <h5 class="fw-bold">Giảng Viên Đăng Nhập</h5>
-                                    </div>
-                                    <form action="" method="POST">
-                                        @csrf
-                                        <div class="mb-3">
-                                            <input type="text" name="username" class="form-control"
-                                                placeholder="Tài Khoản">
-
-                                        </div>
-
-                                        <div class="mb-3 password-container">
-                                            <input type="password" name="password" class="form-control"
-                                                placeholder="Mật Khẩu">
-
-                                            <span class="password-toggle">
-                                                <i class="bi bi-eye"></i>
-                                            </span>
-                                        </div>
-                                        <button type="submit" class="btn btn-primary">Đăng Nhập</button>
-                                    </form>
-
-                                    <div class="switch-role mt-3">
-                                        <button type="button" class="btn-switch">Sinh Viên Đăng Nhập</button>
-                                    </div>
-                                </div>
+                                </div>                              
                             </div>
                         </div>
                     </div>
@@ -366,22 +321,6 @@
                 }
             });
         });
-        const studentForm = document.querySelector('.student-form');
-        const teacherForm = document.querySelector('.teacher-form');
-        const loginInner = document.querySelector('.login-inner');
-        document.querySelectorAll('.btn-switch').forEach(button => {
-            button.addEventListener('click', function() {
-                if (studentForm.classList.contains('slide-out')) {
-                    studentForm.classList.remove('slide-out');
-                    teacherForm.classList.remove('slide-in');
-                } else {
-                    studentForm.classList.add('slide-out');
-                    teacherForm.classList.add('slide-in');
-                }
-                loginInner.classList.toggle('reverse');
-            });
-        });
-
     // Chờ DOM tải xong
     document.addEventListener('DOMContentLoaded', function () {
         // Chọn tất cả các thông báo lỗi

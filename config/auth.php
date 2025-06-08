@@ -40,11 +40,11 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
-        'teachers' => [
+        'teacher' => [
             'driver' => 'session',
             'provider' => 'teachers',
         ],
-        'students' => [
+        'student' => [
             'driver' => 'session',
             'provider' => 'students',
         ],

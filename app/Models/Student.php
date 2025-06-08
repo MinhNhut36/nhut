@@ -18,6 +18,8 @@ class Student extends Authenticatable
         'gender',
         'is_status',
     ];
+    protected $primaryKey = 'student_id';
+    
     public function Courses()
     {
         return $this->belongsToMany(Course::class, 'Course_Enrollments');

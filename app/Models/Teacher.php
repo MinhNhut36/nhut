@@ -16,6 +16,7 @@ class Teacher extends Authenticatable
         'password',
         'is_status',
     ];
+    protected $primaryKey = 'teacher_id';
    public function Courses()
    {
             return $this->belongsToMany(Course::class, 'teacher_course_assignments');

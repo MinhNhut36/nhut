@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\TeacherRequest;
 use App\Models\Teacher;
 
+
 class TeacherController extends Controller
 {
     public function Teacherlogin(TeacherRequest $request)
@@ -42,17 +43,7 @@ class TeacherController extends Controller
     public function home()
     {
         $teacher = Auth::guard('teacher')->user();
-        $safeData = [
-        'teacher_id' => $teacher->teacher_id,
-        'fullname' => $teacher->fullname,
-        'email' => $teacher->email,
-        'gender' => $teacher->gender,
-        'date_of_birth' => $teacher->date_of_birth,
-        'is_status' => $teacher->is_status,
-        'created_at' => $teacher->created_at,
-        'updated_at' => $teacher->updated_at,  
-        ];
-        return view('teacher.home')->with('teacher', $safeData);
+        return view('teacher.home')->with('teacher', $teacher);
     }
      public function AdminHome()
     {

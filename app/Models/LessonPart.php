@@ -13,6 +13,8 @@ class LessonPart extends Model
         'content',
         'order_index',
     ];
+    protected $primaryKey = 'lesson_part_id';
+    //định nghĩa các quan hệ với các model khác
     public function Lesson()
     {
         return $this->belongsTo(Lesson::class, 'level');

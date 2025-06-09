@@ -16,6 +16,8 @@ class ExamResult extends Model
         'speaking_score',
         'overall_status',
     ];
+    protected $primaryKey = 'exam_result_id';
+    //định nghĩa các quan hệ với các model khác
     public function StudentEvaluation()
     {
         return $this->hasOne(StudentEvaluation::class, 'exam_result_id');

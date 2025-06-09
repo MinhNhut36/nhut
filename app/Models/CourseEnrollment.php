@@ -14,6 +14,8 @@ class CourseEnrollment extends Model
         'registration_date',
         'status',
     ];
+    protected $primaryKey = 'enrollment_id';
+    //định nghĩa các quan hệ với các model khác
     public function Student()
     {
         return $this->belongsTo(Student::class, 'student_id');

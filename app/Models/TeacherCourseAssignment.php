@@ -13,6 +13,8 @@ class TeacherCourseAssignment extends Model
         'role',
         'assigned_at',
     ];
+    protected $primaryKey = 'assignment_id';
+    //định nghĩa các quan hệ với các model khác
         public function Teacher()
     {
         return $this->belongsTo(Teacher::class,'teacher_id');

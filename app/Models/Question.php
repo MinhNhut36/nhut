@@ -14,6 +14,8 @@ class Question extends Model
         'media_url',
         'order_index',
     ];
+    protected $primaryKey = 'question_id';
+    //định nghĩa các quan hệ với các model khác
     public function LessonPartContents()
     {
         return $this->belongsToMany(LessonPartContent::class, 'contents_id');

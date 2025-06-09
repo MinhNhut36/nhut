@@ -15,6 +15,8 @@ class StudentEvaluation extends Model
         'final_status',
         'remarks',
     ];
+    protected $primaryKey = 'aveluation_id';
+    //định nghĩa các quan hệ với các model khác
     public function StudentProgres()
     {
         return $this->belongsTo(StudentProgres::class, 'progress_id');

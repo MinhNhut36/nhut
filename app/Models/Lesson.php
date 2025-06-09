@@ -10,8 +10,11 @@ class Lesson extends Model
         'level',
         'title',
         'description',
+        'status',
         'order_index',
     ];
+    protected $primaryKey = 'level';
+    //định nghĩa các quan hệ với các model khác
     public function Courses()
     {
         return $this->hasMany(Course::class, 'level');

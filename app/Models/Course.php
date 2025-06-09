@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Course extends Model
 {
@@ -14,6 +15,9 @@ class Course extends Model
         'description',
         'status',
     ];
+    protected $primaryKey = 'course_id';
+
+    //định nghĩa các quan hệ với các model khác
     public function Teachers()
     {
         return $this->belongsToMany(Teacher::class, 'teacher_course_assignments');
@@ -22,7 +26,7 @@ class Course extends Model
     {
         return $this->belongsToMany(Student::class, 'Course_Enrollments');
     }
-    public function Lesson()
+    public function lesson()
     {
         return $this->belongsTo(Lesson::class, 'level');
     }

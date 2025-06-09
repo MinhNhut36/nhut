@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Trang chủ</title>
+  <title>@yield('title','Trang chủ')</title>
   <!-- Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <!-- Font Awesome -->
@@ -13,6 +13,7 @@
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="https://cdn.haitrieu.com/wp-content/uploads/2023/01/Logo-Truong-Cao-dang-Ky-thuat-Cao-Thang.png">
   <style>
+    @yield('styles')
     body {
       font-family: 'Inter', sans-serif;
       background-color: #f8f9fa;
@@ -23,14 +24,14 @@
       flex-direction: column;
     }
     .nav-button.active {
-    background-color: #e6ddfb !important;
-    border-color: #6f42c1 !important;
-    color: #6f42c1 !important;;
+      background-color: #e6ddfb !important;
+      border-color: #6f42c1 !important;
+      color: #6f42c1 !important;
     }
     .nav-button:hover {
-    background-color: #e6ddfb !important;
-    border-color: #6f42c1 !important;
-    color: #6f42c1 !important;
+      background-color: #e6ddfb !important;
+      border-color: #6f42c1 !important;
+      color: #6f42c1 !important;
     }
 
     .btn-logout:hover {
@@ -49,11 +50,15 @@
         <img src="https://cdn.haitrieu.com/wp-content/uploads/2023/01/Logo-Truong-Cao-dang-Ky-thuat-Cao-Thang.png" alt="Logo" class="img-fluid" style="height: 50px;">
       </a>
       <div class="d-flex gap-2">
-        <a href="{{route('teacher.home')}}" id="btn-thongtin"  class="btn nav-button active text-dark">Thông tin giáo viên</a>
-        <a href="" id="btn-khoahoc"  class="btn nav-button text-dark">Khóa Học</a>
+        <a href="{{ route('teacher.home') }}" class="btn nav-button text-dark {{ request()->routeIs('teacher.home') ? 'active' : '' }}">
+          Thông tin giáo viên
+        </a>
+        <a href="" class="btn nav-button text-dark {{ request()->routeIs('teacher.courses') ? 'active' : '' }}">
+          Khóa học
+        </a>
       </div>
       <div>
-        <a href="{{route('login')}}" class="btn btn-outline-dark d-flex align-items-center gap-2 btn-logout">
+        <a href="{{ route('login') }}" class="btn btn-outline-dark d-flex align-items-center gap-2 btn-logout">
           <i class="fas fa-sign-out-alt"></i> Đăng xuất
         </a>
       </div>
@@ -69,19 +74,5 @@
 
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
-  <!-- Navigation Button Active Script -->
-  <script>
-    const buttons = [
-      document.getElementById('btn-thongtin'),
-      document.getElementById('btn-khoahoc'),
-    ];
-    buttons.forEach(btn => {
-      btn.addEventListener('click', () => {
-        buttons.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-      });
-    });
-  </script>
 </body>
 </html>

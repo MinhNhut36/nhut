@@ -23,7 +23,7 @@ class Teacher extends Authenticatable
         'gender' => gender::class,
         ];   
     protected $primaryKey = 'teacher_id';
-    protected $hidden = ['password'];
+    //định nghĩa các quan hệ với các model khác
    public function Courses()
    {
             return $this->belongsToMany(Course::class, 'teacher_course_assignments');

@@ -20,7 +20,6 @@ class Student extends Authenticatable
         'is_status',
     ];
     protected $primaryKey = 'student_id';
-    protected $hidden = ['password'];
     
     protected $casts = [
         'gender' => gender::class,
@@ -29,7 +28,7 @@ class Student extends Authenticatable
 
 
 
-
+    //định nghĩa các quan hệ với các model khác
     public function Courses()
     {
         return $this->belongsToMany(Course::class, 'Course_Enrollments');

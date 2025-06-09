@@ -15,6 +15,8 @@ class Notification extends Model
         'notification_date',
         'status',
     ];
+    protected $primaryKey = 'notification_id';
+    //định nghĩa các quan hệ với các model khác
      public function User()
     {
         return $this->belongsTo(User::class);

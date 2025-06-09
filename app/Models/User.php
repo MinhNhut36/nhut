@@ -18,8 +18,8 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
+        'admin_id',
         'fullname',
-        'email',
         'username',
         'password', 
     ];
@@ -46,6 +46,7 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+    //định nghĩa các quan hệ với các model khác
       public function Notifications()
     {
         return $this->hasMany(Notification::class);

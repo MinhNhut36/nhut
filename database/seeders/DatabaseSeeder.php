@@ -47,28 +47,28 @@ class DatabaseSeeder extends Seeder
             ]);
                $lessons = [
             [
-                'level' => '1',
+                'level' => 'A1',
                 'title' => 'Anh Văn 1',
                 'description' => '...',
                 'order_index' => 1,
             ],
             [
-                'level' => '2',
+                'level' => 'A2',
                 'title' => 'Anh Văn 2',
                 'description' => '...',
                 'order_index' => 2,
             ],
             [
-                'level' => '3',
+                'level' => 'A3',
                 'title' => 'Anh Văn 3',
                 'description' => '...',
-                'order_index' => 2,
+                'order_index' => 3,
             ],
             [
-                'level' => '4',
+                'level' => 'A2/6',
                 'title' => 'Anh Văn 2/6',
                 'description' => '...',
-                'order_index' => 2,
+                'order_index' => 4,
             ],
         ];
 
@@ -77,28 +77,39 @@ class DatabaseSeeder extends Seeder
         }
         $courses = [
         [
-            'level' => '1',
+            'level' => 'A1',
             'year' => now(),
-            'description' => 'KH20',
-            'status' => 1,
+            'course_name' => 'Khóa học A1 KH01',
+            'description' => 'KH01',
+            'status' => 'Đang mở lớp',
         ],
         [
-            'level' => '3',
+            'level' => 'A1',
             'year' => now(),
-            'description' => 'KH80',
-            'status' => 1,
+            'course_name' => 'Khóa học A1 KH02',
+            'description' => 'KH02',
+            'status' => 'Đang mở lớp',
         ],
         [
-            'level' => '4',
+            'level' => 'A2',
             'year' => now(),
+            'course_name' => 'Khóa học A2 KH70',
             'description' => 'KH70',
-            'status' => 1,
+            'status' => 'Đang mở lớp',
         ],
         [
-            'level' => '2',
+            'level' => 'A3',
             'year' => now(),
+            'course_name' => 'Khóa học A3 KH21',
             'description' => 'KH22',
-            'status' => 0,
+            'status' => 'Đang mở lớp',
+        ],
+          [
+            'level' => 'A2/6',
+            'year' => now(),
+            'course_name' => 'Khóa học A2/6 KH22',
+            'description' => 'KH22',
+            'status' => 'Đã hoàn thành',
         ],
         ];
 

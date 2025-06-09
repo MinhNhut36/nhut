@@ -7,11 +7,12 @@ use App\Http\Requests\StudentRequest;
 use App\Models\Student;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-
+use App\Models\Course;
 use function Psy\debug;
 
 class StudentController extends Controller
 {
+   //xử lý đăng nhập của học sinh
    public function Studentlogin(StudentRequest $request)
     {
         
@@ -33,22 +34,31 @@ class StudentController extends Controller
         // Sai username hoặc password
         return redirect()->back()->withErrors(['StudentLoginFail' => 'Sai tên đăng nhập hoặc mật khẩu']);
     }
-
+    // Hiển thị thông tin trang chủ của học sinh
     public function home()
     {
         $student = Auth::guard('student')->user();
-        $safeData = [
-        'student_id' => $student->student_id,
-        'avatar' => $student->avatar,
-        'fullname' => $student->fullname,
-        'email' => $student->email,
-        'gender' => $student->gender,
-        'date_of_birth' => $student->date_of_birth,
-        'is_status' => $student->is_status,
-        'created_at' => $student->created_at,
-        'updated_at' => $student->updated_at,       
-        ];
         return view('student.home')
-            ->with('student', $safeData);
+            ->with('student', $student);
+    }
+
+    // Hiển thị danh sách khóa học
+    public function ShowListCourses()
+    {
+        $courses = Course::where('status','Đang mở lớp')->get();
+        return view('student.Courselist')
+            ->with('courses', $courses);
+    }
+    // Hiển thị chi tiết khóa học
+    public function ShowDetailCourses($id)
+    {
+        $course = Course::with('lesson')->find($id);
+        dd([
+            'course_level' => $course->level,
+            'lesson_exists' => \App\Models\Lesson::where('level', $course->level)->exists(),
+            'lesson_data' => $course->lesson,
+        ]);
+        return view('student.CourseDetail')
+            ->with('course', $course);
     }
 }

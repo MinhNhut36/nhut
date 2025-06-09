@@ -36,6 +36,19 @@ class StudentController extends Controller
 
     public function home()
     {
-        return view('student.home');
+        $student = Auth::guard('student')->user();
+        $safeData = [
+        'student_id' => $student->student_id,
+        'avatar' => $student->avatar,
+        'fullname' => $student->fullname,
+        'email' => $student->email,
+        'gender' => $student->gender,
+        'date_of_birth' => $student->date_of_birth,
+        'is_status' => $student->is_status,
+        'created_at' => $student->created_at,
+        'updated_at' => $student->updated_at,       
+        ];
+        return view('student.home')
+            ->with('student', $safeData);
     }
 }

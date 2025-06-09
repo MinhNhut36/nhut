@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id('course_id');
             $table->string('level'); // Tiêu đề khóa học
             $table->date('year');
-            $table->longText('déscription');
+            $table->longText('description');
             $table->string('status')->default('Không hoạt động'); // Trạng thái khóa học
             $table->timestamps();
               $table->foreign('level')

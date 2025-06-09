@@ -4,6 +4,7 @@ namespace App\Models;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
+use App\Enum\gender;
 class Student extends Authenticatable
 {
     use Notifiable;
@@ -19,7 +20,16 @@ class Student extends Authenticatable
         'is_status',
     ];
     protected $primaryKey = 'student_id';
+    protected $hidden = ['password'];
     
+    protected $casts = [
+        'gender' => gender::class,
+        ];        
+
+
+
+
+
     public function Courses()
     {
         return $this->belongsToMany(Course::class, 'Course_Enrollments');

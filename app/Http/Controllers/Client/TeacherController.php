@@ -41,6 +41,22 @@ class TeacherController extends Controller
     
     public function home()
     {
-        return view('teacher.home');
+        $teacher = Auth::guard('teacher')->user();
+        $safeData = [
+        'teacher_id' => $teacher->teacher_id,
+        'fullname' => $teacher->fullname,
+        'email' => $teacher->email,
+        'gender' => $teacher->gender,
+        'date_of_birth' => $teacher->date_of_birth,
+        'is_status' => $teacher->is_status,
+        'created_at' => $teacher->created_at,
+        'updated_at' => $teacher->updated_at,  
+        ];
+        return view('teacher.home')->with('teacher', $safeData);
+    }
+     public function AdminHome()
+    {
+        $admin = Auth::user();
+        return view('admin.home')->with('admin', $admin);
     }
 }

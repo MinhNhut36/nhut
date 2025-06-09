@@ -28,7 +28,7 @@ class Course extends Model
     }
     public function lesson()
     {
-        return $this->belongsTo(Lesson::class, 'level');
+        return $this->belongsTo(Lesson::class, 'level','level');
     }
     public function StudentAnwers()
     {

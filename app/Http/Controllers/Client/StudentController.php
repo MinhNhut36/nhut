@@ -50,14 +50,9 @@ class StudentController extends Controller
             ->with('courses', $courses);
     }
     // Hiển thị chi tiết khóa học
-    public function ShowDetailCourses($id)
+    public function ShowDetailCourses(int $id)
     {
-        $course = Course::with('lesson')->find($id);
-        dd([
-            'course_level' => $course->level,
-            'lesson_exists' => \App\Models\Lesson::where('level', $course->level)->exists(),
-            'lesson_data' => $course->lesson,
-        ]);
+        $course = Course::with('lesson')->find($id);   
         return view('student.CourseDetail')
             ->with('course', $course);
     }

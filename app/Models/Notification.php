@@ -17,8 +17,8 @@ class Notification extends Model
     ];
     protected $primaryKey = 'notification_id';
     //định nghĩa các quan hệ với các model khác
-     public function User()
+   public function admin()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'admin_id');
     }
 }

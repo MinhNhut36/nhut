@@ -58,30 +58,18 @@
     <!-- HEADER -->
     <header class="sticky-top bg-white border-bottom shadow-sm">
         <nav class="container d-flex align-items-center justify-content-between py-2">
-            <a href="#">
-                <img src="https://cdn.haitrieu.com/wp-content/uploads/2023/01/Logo-Truong-Cao-dang-Ky-thuat-Cao-Thang.png"
-                    alt="Logo" class="img-fluid" style="height: 50px;">
-            </a>
+            <img src="https://cdn.haitrieu.com/wp-content/uploads/2023/01/Logo-Truong-Cao-dang-Ky-thuat-Cao-Thang.png"
+                alt="Logo" class="img-fluid" style="height: 50px;">
 
-            <div class="d-flex gap-2">
-                <a href="{{ route('student.home') }}"
-                    class="btn nav-button text-dark {{ request()->routeIs('student.home') ? 'active' : '' }}">
-                    Thông tin sinh viên
-                </a>
-
-                <a href="{{ route('student.courses') }}"
-                    class="btn nav-button text-dark {{ request()->routeIs('student.courses') ? 'active' : '' }}">
-                    Khóa Học
-                </a>
-
-                <a href=""
-                    class="btn nav-button text-dark {{ request()->routeIs('student.studying') ? 'active' : '' }}">
-                    Đang học
-                </a>
+            <div class="d-flex gap-2" id="student-tabs">
+                <a href="{{ route('student.home') }}" class="btn nav-button text-dark">Thông tin sinh viên</a>
+                <a href="{{ route('student.courses') }}" class="btn nav-button text-dark">Khóa Học</a>
+                <a href="{{ route('student.myCourses') }}" class="btn nav-button text-dark">Đang học</a>
             </div>
 
             <div>
-                <a href="{{ route('login') }}" class="btn btn-outline-dark d-flex align-items-center gap-2 btn-logout">
+                <a href="{{ route('login') }}" class="btn btn-outline-dark d-flex align-items-center gap-2 btn-logout"
+                    onclick="clearActiveTabs()">
                     <i class="fas fa-sign-out-alt"></i> Đăng xuất
                 </a>
             </div>
@@ -97,7 +85,37 @@
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        @yield('js');
+        document.addEventListener('DOMContentLoaded', function() {
+            const buttons = document.querySelectorAll('#student-tabs a');
 
+            // Lưu nút đã active vào localStorage
+            const activeRoute = localStorage.getItem('activeTabRoute');
+            if (activeRoute) {
+                buttons.forEach(btn => {
+                    if (btn.getAttribute('href') === activeRoute) {
+                        btn.classList.add('active');
+                    } else {
+                        btn.classList.remove('active');
+                    }
+                });
+            }
+
+            // Gán sự kiện click để cập nhật active và lưu vào localStorage
+            buttons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    localStorage.setItem('activeTabRoute', this.getAttribute('href'));
+                });
+            });
+        });
+
+        function clearActiveTabs() {
+            localStorage.removeItem('activeTabRoute'); // student
+            localStorage.removeItem('activeTeacherTab'); // teacher
+            localStorage.removeItem('activeDropdownItem'); // Dropdown
+        }
+    </script>
 </body>
 
 </html>

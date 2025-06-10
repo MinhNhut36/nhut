@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Models;
-
+use App\Enum\enrollment;
 use Illuminate\Database\Eloquent\Model;
 
 class CourseEnrollment extends Model
@@ -15,13 +15,16 @@ class CourseEnrollment extends Model
         'status',
     ];
     protected $primaryKey = 'enrollment_id';
+    protected $casts = [
+        'status' => enrollment::class,
+    ];
     //định nghĩa các quan hệ với các model khác
-    public function Student()
+    public function student()
     {
         return $this->belongsTo(Student::class, 'student_id');
     }
-    public function Course()
+    public function course()
     {
-        return $this->belongsTo(Course::class, 'assigned_course_id');
+        return $this->belongsTo(Course::class, 'assigned_course_id','course_id');
     }
 }

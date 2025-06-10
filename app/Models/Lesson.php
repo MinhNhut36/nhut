@@ -21,7 +21,7 @@ class Lesson extends Model
     {
         return $this->hasMany(Course::class, 'level','level');
     }
-    public function LessonParts()
+    public function lessonParts()
     {
         return $this->hasMany(LessonPart::class, 'level');
     }

@@ -6,6 +6,7 @@ use App\Models\Course;
 use App\Models\Lesson;
 use App\Models\Student;
 use App\Models\Teacher;
+use App\Models\TeacherCourseAssignment;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -121,5 +122,6 @@ class DatabaseSeeder extends Seeder
         foreach ($courses as $course) {
             Course::create($course); 
         }
+        
     }
 }

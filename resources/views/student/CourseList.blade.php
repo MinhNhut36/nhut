@@ -22,7 +22,7 @@
     }
 @endsection
 @section('content')
-<div class="container py-5">
+
   <h2 class="mb-4 fw-bold text-center">Danh sách khóa học</h2>
   <div class="row g-4">
     @foreach ($courses as $course)
@@ -50,7 +50,7 @@
       </div>
     @endforeach
   </div>
-</div>
+
 
 
 @endsection

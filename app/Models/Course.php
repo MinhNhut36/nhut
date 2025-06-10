@@ -18,27 +18,36 @@ class Course extends Model
     protected $primaryKey = 'course_id';
 
     //định nghĩa các quan hệ với các model khác
-    public function Teachers()
+    public function students()
     {
-        return $this->belongsToMany(Teacher::class, 'teacher_course_assignments');
+        return $this->belongsToMany(Student::class, 'course_enrollment', 'assigned_course_id', 'student_id');
     }
-    public function Students()
+    public function enrollments()
     {
-        return $this->belongsToMany(Student::class, 'Course_Enrollments');
+        return $this->hasMany(CourseEnrollment::class, 'assigned_course_id');
+    }
+    public function teacherAssignments()
+    {
+        return $this->hasMany(TeacherCourseAssignment::class, 'course_id');
+    }
+    public function teachers()
+    {
+        return $this->belongsToMany(Teacher::class, 'teacher_course_assignments', 'course_id', 'teacher_id')
+            ->withPivot('role', 'assigned_at');
     }
     public function lesson()
     {
-        return $this->belongsTo(Lesson::class, 'level','level');
+        return $this->belongsTo(Lesson::class, 'level', 'level');
     }
-    public function StudentAnwers()
+    public function studentAnwers()
     {
         return $this->hasMany(StudentAnswer::class, 'course_id');
     }
-    public function LessonPartScores()
+    public function lessonPartScores()
     {
         return $this->hasMany(LessonPartScore::class, 'course_id');
     }
-    public function ExamResult()
+    public function examResult()
     {
         return $this->hasOne(ExamResult::class, 'course_id');
     }

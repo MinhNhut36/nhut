@@ -18,15 +18,15 @@ class ExamResult extends Model
     ];
     protected $primaryKey = 'exam_result_id';
     //định nghĩa các quan hệ với các model khác
-    public function StudentEvaluation()
+    public function studentEvaluation()
     {
         return $this->hasOne(StudentEvaluation::class, 'exam_result_id');
     }
-    public function Course()
+    public function course()
     {
         return $this->belongsTo(Course::class, 'course_id');
     }
-    public function Student()
+    public function student()
     {
         return $this->belongsTo(Student::class, 'student_id');
     }

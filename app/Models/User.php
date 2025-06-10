@@ -21,7 +21,7 @@ class User extends Authenticatable
         'admin_id',
         'fullname',
         'username',
-        'password', 
+        'password',
     ];
     protected $primaryKey = 'admin_id';
     /**
@@ -47,8 +47,8 @@ class User extends Authenticatable
         ];
     }
     //định nghĩa các quan hệ với các model khác
-      public function Notifications()
+    public function notifications()
     {
-        return $this->hasMany(Notification::class);
+        return $this->hasMany(Notification::class, 'admin_id');
     }
 }

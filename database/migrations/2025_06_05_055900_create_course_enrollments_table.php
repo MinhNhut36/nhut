@@ -19,7 +19,7 @@ return new class extends Migration
             $table->foreignId('assigned_course_id')
                   ->constrained('courses', 'course_id') 
                     ->onDelete('cascade');  
-            $table->string('level'); // Trình độ của học viên trong khóa học
+            $table->date('registration_date');
             $table->integer('status')->default(0); // 0: chưa bắt đầu, 1: đang học, 2: đã hoàn thành
             $table->timestamps();
         });

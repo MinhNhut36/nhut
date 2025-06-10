@@ -10,11 +10,12 @@ class Lesson extends Model
         'level',
         'title',
         'description',
-        'status',
         'order_index',
     ];
+    
     protected $primaryKey = 'level';
     protected $keyType = 'string';
+
     //định nghĩa các quan hệ với các model khác
     public function courses()
     {

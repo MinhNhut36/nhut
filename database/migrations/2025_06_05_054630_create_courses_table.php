@@ -15,9 +15,10 @@ return new class extends Migration
             $table->id('course_id');
             $table->string('course_name'); 
             $table->string('level'); 
-            $table->date('year');
+            $table->year('year');
             $table->longText('description');
             $table->string('status')->default('Không hoạt động');
+            $table->date('starts_date');
             $table->timestamps();
             $table->foreign('level')
                     ->references('level')

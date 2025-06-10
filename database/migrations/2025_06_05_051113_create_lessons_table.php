@@ -15,7 +15,6 @@ return new class extends Migration
             $table->string('level')->primary();
             $table->string('title');
             $table->longText('description')->nullable();
-            $table->string('status')->default('Không hoạt động'); 
             $table->integer('order_index');
             $table->timestamps();
         });

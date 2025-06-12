@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use App\Models\Teacher;
 
 class TeacherSeeder extends Seeder
 {
@@ -12,25 +13,23 @@ class TeacherSeeder extends Seeder
      */
     public function run(): void
     {
-        Teacher::create(
-            [         
-                'fullname' => 'Nguyễn Viết Hoàng Nguyên',
-                'username' => 'gvnguyen',
-                'password' => bcrypt('123456'),
-                'date_of_birth' => '1980-06-30',
-                'gender' => 1,
-                'email' => 'nguyen@gmail.com',
-                'is_status' => 1
-            ],
-            [         
-                'fullname' => 'Phạm Phú Hoàng Sơn',
-                'username' => 'gvson',
-                'password' => bcrypt('123456'),
-                'date_of_birth' => '1990-02-20',
-                'gender' => 1,
-                'email' => 'son@gmail.com',
-                'is_status' => 1
-            ],
-        );
+        Teacher::create([
+            'fullname' => 'John Smith',
+            'username' => 'johnsmith',
+            'password' => bcrypt('123456'),
+            'date_of_birth' => '1985-07-10',
+            'gender' => 1,
+            'email' => 'john.smith@englishcenter.com',
+            'is_status' => 1
+        ]);
+        Teacher::create([
+            'fullname' => 'Emily nhut',
+            'username' => 'gvnhut',
+            'password' => bcrypt('123456'),
+            'date_of_birth' => '1990-03-22',
+            'gender' => 0,
+            'email' => 'emily.nguyen@englishcenter.com',
+            'is_status' => 1
+        ]);
     }
 }

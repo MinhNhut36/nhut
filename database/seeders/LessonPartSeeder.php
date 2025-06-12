@@ -4,7 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-
+use App\Models\LessonPart;
 class LessonPartSeeder extends Seeder
 {
     /**
@@ -12,29 +12,29 @@ class LessonPartSeeder extends Seeder
      */
     public function run(): void
     {
-        $lessonParts = [
-            [
-                'level' => '1',
-                'part_type' => 'nghe',
-                'content' => 'audio',
-                'order_index' => 1,
-            ],
-            [
-                'level' => '1',
-                'part_type' => 'viết',
-                'content' => 'văn bản',
-                'order_index' => 2,
-            ],
-            [
-                'level' => '2',
-                'part_type' => 'nghe',
-                'content' => 'audio',
-                'order_index' => 3,
-            ],
+        $lessons = [
+            1 => 'A1',
+            2 => 'A2',
+            3 => 'A3',
+            4 => 'A2/6',
         ];
 
-        foreach ($lessonParts as $part) {
-            LessonPart::create($part);
+        $parts = [
+            ['title' => 'Vocabulary', 'desc' => 'Từ vựng cơ bản cho trình độ %s'],
+            ['title' => 'Grammar', 'desc' => 'Ngữ pháp nền tảng cho trình độ %s'],
+            ['title' => 'Listening', 'desc' => 'Luyện nghe tiếng Anh trình độ %s'],
+            ['title' => 'Grammar', 'desc' => 'Luyện ngữ pháp nâng cao tiếng Anh trình độ %s'],
+        ];
+
+        foreach ($lessons as $lesson_id => $level) {
+            foreach ($parts as $index => $part) {
+                LessonPart::create([
+                    'level' => $level,
+                    'part_type' => $part['title'],
+                    'content' => sprintf($part['desc'], $level),
+                    'order_index' => $index + 1,
+                ]);
+            }
         }
     }
 }

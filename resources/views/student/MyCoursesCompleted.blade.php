@@ -1,8 +1,16 @@
 @extends('layouts.student')
-@section('titile', 'CÁC KHÓA ĐANG HỌC')
+@section('title', 'CÁC KHÓA ĐANG HỌC')
 @section('styles')
-    .card-status-completed {
+    .card-status-pass {
     background-color: #007BFF;
+    color: #FFFFFF;
+    padding: 4px 12px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    border-radius: 9999px;
+    }
+    .card-status-fail {
+    background-color: #F44336;
     color: #FFFFFF;
     padding: 4px 12px;
     font-weight: 600;

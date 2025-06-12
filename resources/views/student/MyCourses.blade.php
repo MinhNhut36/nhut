@@ -70,7 +70,7 @@
                             <span class="{{ $MyCourse->status->getStatus() }}">{{ $MyCourse->status->getEnrollment() }}</span>
                         </div>
                     </div>
-                    <a href=""
+                    <a href="{{route('lesson',$MyCourse->course->level)}}"
                         class="btn custom-btn w-100 py-2 d-flex align-items-center justify-content-center gap-2 border-0">
                         <span>{{ $MyCourse->course->course_name }} </span>
                         <i class="fas fa-chevron-right"></i>

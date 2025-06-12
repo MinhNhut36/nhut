@@ -9,8 +9,5 @@ use Illuminate\Support\Facades\Auth;
 
 class ApiStudentController extends Controller
 {
-    public function login(StudentRequest $request)
-    {
 
-    }
 }

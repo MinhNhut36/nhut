@@ -16,7 +16,9 @@ class Answer extends Model
         'media_url',
         'order_index',
     ];
-    public function Question()
+    protected $primaryKey = 'answers_id';
+    //định nghĩa các quan hệ với các model khác
+    public function question()
     {
         return $this->belongsTo(Question::class, 'question_id');
     }

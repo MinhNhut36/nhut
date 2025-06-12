@@ -13,7 +13,9 @@ class StudentProgres extends Model
         'completion_status',
         'last_updated',
     ];
-    public function LessonPartScores()
+    protected $primaryKey = 'progress_id';
+    //định nghĩa các quan hệ với các model khác
+    public function score()
     {
         return $this->hasMany(LessonPartScore::class, 'score_id');
     }
@@ -21,7 +23,7 @@ class StudentProgres extends Model
     {
         return $this->belongsTo(Student::class, 'student_id');
     }
-    public function StudentEvaluation()
+    public function evaluation()
     {
         return $this->hasOne(StudentEvaluation::class, 'progress_id');
     }

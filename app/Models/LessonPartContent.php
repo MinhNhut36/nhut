@@ -13,6 +13,8 @@ class LessonPartContent extends Model
         'content_data',
         'mini_game_type',
     ];
+    protected $primaryKey = 'contents_id';
+    //định nghĩa các quan hệ với các model khác
     public function lessonPart()
     {
         return $this->belongsTo(LessonPart::class, 'lesson_part_id');

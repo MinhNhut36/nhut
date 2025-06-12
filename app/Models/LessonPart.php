@@ -13,15 +13,17 @@ class LessonPart extends Model
         'content',
         'order_index',
     ];
-    public function Lesson()
+    protected $primaryKey = 'lesson_part_id';
+    //định nghĩa các quan hệ với các model khác
+    public function lesson()
     {
         return $this->belongsTo(Lesson::class, 'level');
     }
-    public function LessonPartContent()
+    public function contents()
     {
         return $this->hasOne(LessonPartContent::class, 'lesson_part_id');
     }
-    public function LessonPartScores()
+    public function scores()
     {
         return $this->hasMany(LessonPartScore::class, 'lesson_part_id');
     }

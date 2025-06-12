@@ -14,6 +14,8 @@ class StudentAnswer extends Model
         'course_id',
         'answered_at',
     ];
+    protected $primaryKey = 'student_answer_id';
+    //định nghĩa các quan hệ với các model khác
     public function Question()
     {
         return $this->belongsTo(Question::class, 'question_id');

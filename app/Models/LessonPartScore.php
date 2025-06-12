@@ -17,6 +17,9 @@ class LessonPartScore extends Model
         'correct_answers',
         'submit_time',
     ];
+    protected $primaryKey = 'score_id';
+
+    //định nghĩa các quan hệ với các model khác
     public function LessonPart()
     {
         return $this->belongsTo(LessonPart::class, 'lesson_part_id');

@@ -12,11 +12,16 @@ class Lesson extends Model
         'description',
         'order_index',
     ];
-    public function Courses()
+    
+    protected $primaryKey = 'level';
+    protected $keyType = 'string';
+
+    //định nghĩa các quan hệ với các model khác
+    public function courses()
     {
-        return $this->hasMany(Course::class, 'level');
+        return $this->hasMany(Course::class, 'level','level');
     }
-    public function LessonParts()
+    public function lessonParts()
     {
         return $this->hasMany(LessonPart::class, 'level');
     }

@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class StudentEvaluation extends Model
 {
     protected $fillable = [
-        'aveluation_id',
+        'evaluation_id',
         'student_id',
         'progress_id',
         'exam_result_id',
@@ -15,15 +15,17 @@ class StudentEvaluation extends Model
         'final_status',
         'remarks',
     ];
-    public function StudentProgres()
+    protected $primaryKey = 'evaluation_id';
+    //định nghĩa các quan hệ với các model khác
+    public function progress()
     {
         return $this->belongsTo(StudentProgres::class, 'progress_id');
     }
-    public function Student()
+    public function student()
     {
         return $this->belongsTo(Student::class, 'student_id');
     }
-    public function ExamResult()
+    public function examResult()
     {
         return $this->belongsTo(ExamResult::class, 'exam_result_id');
     }

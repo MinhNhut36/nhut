@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\TeacherRequest;
 use App\Models\Teacher;
 
+
 class TeacherController extends Controller
 {
     public function Teacherlogin(TeacherRequest $request)
@@ -38,9 +39,17 @@ class TeacherController extends Controller
     // Nếu không đăng nhập được
     return redirect()->back()->withErrors(['TeacherLoginFail' => 'Thông tin đăng nhập không chính xác']);
     }
-    
+    // hiển thị thông tin của giáo viên
     public function home()
     {
-        return view('teacher.home');
+        $teacher = Auth::guard('teacher')->user();
+        return view('teacher.home')->with('teacher', $teacher);
     }
+    // hiển thị thông tin của admin
+     public function AdminHome()
+    {
+        $admin = Auth::user();
+        return view('admin.home')->with('admin', $admin);
+    }
+    
 }

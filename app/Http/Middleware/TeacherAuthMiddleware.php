@@ -5,7 +5,8 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
-
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 class TeacherAuthMiddleware
 {
     /**
@@ -15,6 +16,13 @@ class TeacherAuthMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        return $next($request);
+            if (Auth::guard('teacher')->check())
+        {
+            Log::info('thành công');
+            return $next($request);
+        } else {
+            Log::info('thất bại');
+            return redirect()->route('login');
+        }
     }
 }

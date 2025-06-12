@@ -2,12 +2,7 @@
 use Illuminate\Support\Facades\Route;
 
 
-Route::group(['middleware' => 'web'], function () {
-    Route::prefix('admin')->name('admin.')->group(function () {
-        Route::get('/home', function () {
-            return view('admin.home');
-        })->name('home');
-        
-    });
-});
+Route::middleware(['web', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/home','App\Http\Controllers\Client\TeacherController@AdminHome')->name('home');
 
+});

@@ -1,11 +1,13 @@
 <?php
 
 namespace Database\Seeders;
-
+use Carbon\Carbon;
+use App\Models\Course;
+use App\Models\Lesson;
 use App\Models\Student;
 use App\Models\Teacher;
+use App\Models\TeacherCourseAssignment;
 use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -16,15 +18,15 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+   
 
         Student::create([         
                 'avatar' => 'avatar1.png',
-                'fullname' => 'sv nhut',
-                'username' => 'nhut',
+                'fullname' => 'Nguyễn Thị Huyền Trang',
+                'username' => 'trang',
                 'password' => bcrypt('123456'),
                 'date_of_birth' => '2002-05-10',
-                'gender' => 1,
+                'gender' => 0,
                 'email' => 'vana@example.com',
                 'is_status' => 1
             ]);
@@ -44,5 +46,82 @@ class DatabaseSeeder extends Seeder
                 'password' => bcrypt('123456'), 
                 'email' => 'vana@example.com',
             ]);
+               $lessons = [
+            [
+                'level' => 'A1',
+                'title' => 'Anh Văn 1',
+                'description' => 'Dài lắm',
+                'order_index' => 1,
+            ],
+            [
+                'level' => 'A2',
+                'title' => 'Anh Văn 2',
+                'description' => 'Dài lắm',
+                'order_index' => 2,
+            ],
+            [
+                'level' => 'A3',
+                'title' => 'Anh Văn 3',
+                'description' => 'Dài lắm',
+                'order_index' => 3,
+            ],
+            [
+                'level' => 'A2/6',
+                'title' => 'Anh Văn 2/6',
+                'description' => 'Dài lắm',
+                'order_index' => 4,
+            ],
+        ];
+
+        foreach ($lessons as $lesson) {
+            Lesson::create($lesson); // Laravel sẽ tự động thêm created_at và updated_at
+        }
+        $courses = [
+        [
+            'level' => 'A1',
+            'year' => Carbon::now()->year,
+            'course_name' => 'Khóa học A1 KH01',
+            'description' => 'KH01',
+            'status' => 'Đang mở lớp',
+            'starts_date' => now(),
+        ],
+        [
+            'level' => 'A1',
+            'year' => Carbon::now()->year,
+            'course_name' => 'Khóa học A1 KH02',
+            'description' => 'KH02',
+            'status' => 'Đang mở lớp',
+            'starts_date' => now(),
+        ],
+        [
+            'level' => 'A2',
+            'year' => Carbon::now()->year,
+            'course_name' => 'Khóa học A2 KH70',
+            'description' => 'KH70',
+            'status' => 'Đang mở lớp',
+            'starts_date' => now(),
+        ],
+        [
+            'level' => 'A3',
+            'year' => Carbon::now()->year,
+            'course_name' => 'Khóa học A3 KH21',
+            'description' => 'KH22',
+            'status' => 'Đang mở lớp',
+            'starts_date' => now(),
+        ],
+          [
+            'level' => 'A2/6',
+            'year' => Carbon::now()->year,
+            'course_name' => 'Khóa học A2/6 KH22',
+            'description' => 'KH22',
+            'status' => 'Đã hoàn thành',
+            'starts_date' => now(),
+        ],
+        ];
+
+        foreach ($courses as $course) {
+            Course::create($course); 
+        }
+        
     }
 }

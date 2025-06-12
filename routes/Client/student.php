@@ -10,6 +10,7 @@ Route::prefix('student')->name('student.')->middleware(['web','student'])->group
         Route::get('/coursesRegister/{id?}', [StudentController::class, 'CourseRegister'])->name('CourseRegister');
         Route::get('/myCourses', [StudentController::class, 'ListMyCourses'])->name('myCourses');
         Route::get('/myCoursesCompleted', [StudentController::class, 'CoursesCompleted'])->name('MyCoursesCompleted');
+        Route::get('/lesson', [StudentController::class, 'StudentLearning'])->name('lesson');
 });
 
 Route::POST('/StudentAuthLogin', [StudentController::class, 'Studentlogin'])->name('student.authlogin');

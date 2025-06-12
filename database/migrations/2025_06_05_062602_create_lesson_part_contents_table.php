@@ -17,8 +17,8 @@ return new class extends Migration
                   ->constrained('lesson_parts', 'lesson_part_id')
                   ->onDelete('cascade');
             $table->string('content_type'); // Loại nội dung: video, audio, text, quiz, etc.
-            $table->longText('content'); // Nội dung của phần học, có thể là video URL, audio file, text, etc.
-            $table->string('mini_game_type'); // Loại mini game nếu có, ví dụ: "word_search", "crossword", etc.
+            $table->longText('content_data'); // Nội dung của phần học, có thể là video URL, audio file, text, etc.
+            $table->string('mini_game_type')->nullable(); // Loại mini game nếu có, ví dụ: "word_search", "crossword", etc.
             $table->timestamps();
         });
     }

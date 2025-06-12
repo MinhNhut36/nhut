@@ -49,10 +49,11 @@ class StudentController extends Controller
         return view('student.Courselist')
             ->with('courses', $courses);
     }
+   
     // Hiển thị chi tiết khóa học
     public function ShowDetailCourses(int $id)
-    {
-        $course = Course::with('lesson')->find($id);   
+    {      
+        $course = Course::with('lesson')->find($id);      
         return view('student.CourseDetail')
             ->with('course', $course);
     }
@@ -70,7 +71,7 @@ class StudentController extends Controller
             'student_id' => $student->student_id,
             'assigned_course_id' => $id,
             'registration_date' => now(),
-            'status' => '0',
+            'status' => '1',
         ]);
         return redirect()->back()->with('DangKyThanhCong', 'Đăng ký khóa học thành công!');
     }
@@ -78,15 +79,18 @@ class StudentController extends Controller
     public function ListMyCourses()
     {
         $student = Auth::guard('student')->user();
-        $MyCourses = CourseEnrollment::with('course')->where('student_id', $student->student_id)->where('status', 0)->get();
-        
+        $MyCourses = CourseEnrollment::with('course')->where('student_id', $student->student_id)->where('status', 1)->get();    
         return view('student.MyCourses')->with('enrollment', $MyCourses);
     }
     //Danh sách các khóa học đã hoàn thành
     public function CoursesCompleted(){
         $student = Auth::guard('student')->user();
-        $MyCourses = CourseEnrollment::with('course')->where('student_id', $student->student_id)->where('status', 1)->get();
-        
+        $MyCourses = CourseEnrollment::with('course')->where('student_id', $student->student_id)->whereIn('status', [2, 3])->get();      
         return view('student.MyCoursesCompleted')->with('enrollment', $MyCourses);
+    }
+    //Học sinh vào khóa học và xem danh sách các unit
+    public function ShowListLesson()
+    {
+        
     }
 }

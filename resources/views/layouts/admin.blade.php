@@ -64,7 +64,7 @@
                         Quản lý thông tin
                     </button>
                     <ul class="dropdown-menu" aria-labelledby="dropdownThongTin">
-                        <li><a class="dropdown-item" href="#" data-id="sv">Quản lý sinh viên</a></li>
+                        <li><a class="dropdown-item" href="{{route('admin.studentlist')}}" data-id="sv">Quản lý sinh viên</a></li>
                         <li><a class="dropdown-item" href="#" data-id="gv">Quản lý giảng viên</a></li>
                     </ul>
                 </div>

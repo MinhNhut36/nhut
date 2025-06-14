@@ -14,4 +14,11 @@ enum gender :int
             self::FEMALE => 'Nữ', 
         };
     }
+     public function getLabelStyles(): string
+    {
+        return match ($this) {
+            self::MALE => 'gender-male', 
+            self::FEMALE => 'gender-female', 
+        };
+    }
 }

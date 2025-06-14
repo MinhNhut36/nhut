@@ -6,7 +6,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 use App\Enum\gender;
-
+use App\Enum\personStatus;
 class Student extends Authenticatable
 {
     use Notifiable;
@@ -25,9 +25,8 @@ class Student extends Authenticatable
 
     protected $casts = [
         'gender' => gender::class,
+        'is_status' => personStatus::class,
     ];
-
-
 
 
     //định nghĩa các quan hệ với các model khác

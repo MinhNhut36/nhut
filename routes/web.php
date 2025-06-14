@@ -8,8 +8,6 @@ use Illuminate\Http\Request;
 require __DIR__.'/Admin/admin.php';
 require __DIR__.'/Client/student.php';
 require __DIR__.'/Client/teacher.php';
-require __DIR__.'/Api/student.php';
-require __DIR__.'/Api/teacher.php';
 
 Route::get('/', function () {
     return redirect()->route('login');

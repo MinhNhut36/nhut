@@ -66,32 +66,42 @@
     </div>
     <div class="row g-4">
         @foreach ($enrollment as $MyCourse)
-            <div class="col-md-3 col-sm-6">
-                <div class="card border rounded shadow-sm h-100">
+            <div class="col-md-3 col-sm-6 mb-4">
+                <div class="card h-100 border-0 shadow rounded-4">
                     <div class="card-body">
-                        <div class="d-flex justify-content-between mb-2">
-                            <span class="text-dark small fw-bold">Ngày bắt đầu học</span>
-                            <span
-                                class="fw-semibold">{{ \Carbon\Carbon::parse($MyCourse->registration_date)->format('d/m/Y') }}</span>
-                        </div>
-                        <div class="d-flex justify-content-between mb-2">
-                            <span class="text-dark small fw-bold">Trình độ</span>
-                            <span class="fw-semibold">{{ $MyCourse->course->level }}</span>
-                        </div>
-                        <div class="d-flex justify-content-between mb-3">
-                            <span class="text-dark small fw-bold">Trạng thái</span>
-                            <span
-                                class="{{ $MyCourse->status->getStatus() }}">{{ $MyCourse->status->getEnrollment() }}</span>
-                        </div>
+                        <h6 class="fw-bold text-primary mb-3 text-truncate">
+                            {{ $MyCourse->course->course_name }}
+                        </h6>
+
+                        <ul class="list-unstyled small text-dark mb-3">
+                            <li class="d-flex justify-content-between mb-2">
+                                <span class="fw-semibold text-dark">Ngày bắt đầu:</span>
+                                <span
+                                    class="fw-semibold">{{ \Carbon\Carbon::parse($MyCourse->registration_date)->format('d/m/Y') }}</span>
+                            </li>
+                            <li class="d-flex justify-content-between mb-2">
+                                <span class="fw-semibold text-dark">Trình độ:</span>
+                                <span class="fw-semibold text-dark">{{ $MyCourse->course->level }}</span>
+                            </li>
+                            <li class="d-flex justify-content-between mb-2">
+                                <span class="fw-semibold text-dark">Buổi học:</span>
+                                <span class="fw-semibold text-dark">{{ $MyCourse->course->description }}</span>
+                            </li>
+                            <li class="d-flex justify-content-between">
+                                <span class="fw-semibold text-dark">Trạng thái:</span>
+                                <span
+                                    class="badge 
+                            {{ $MyCourse->status->getStatus() }} 
+                            rounded-pill px-3 py-1 fw-semibold">
+                                    {{ $MyCourse->status->getEnrollment() }}
+                                </span>
+                            </li>
+                        </ul>
                     </div>
-                    <button
-                        class="btn custom-btn w-100 py-2 d-flex align-items-center justify-content-center gap-2 border-0">
-                        <span>{{ $MyCourse->course->course_name }} </span>
-                        <i class="fas fa-chevron-right"></i>
-                    </button>
                 </div>
             </div>
         @endforeach
+
     </div>
 @endsection
 

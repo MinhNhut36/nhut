@@ -21,7 +21,7 @@ class LessonPart extends Model
     }
     public function contents()
     {
-        return $this->hasOne(LessonPartContent::class, 'lesson_part_id');
+        return $this->hasMany(LessonPartContent::class, 'lesson_part_id','lesson_part_id');
     }
     public function scores()
     {

@@ -58,55 +58,49 @@
 
 @section('content')
     <div style="position: relative;">
-    @if (session('LoiDangKy'))
-        <div id="thongBaoLoi" class="alert alert-danger alert-dismissible fade show position-absolute"
-             style="top: 0; left: 0; z-index: 10; min-width: 250px;">
-            {{ session('LoiDangKy') }}
-        </div>
-    @endif
-
-    @if (session('DangKyThanhCong'))
-        <div id="thongBaoThanhCong" class="alert alert-success alert-dismissible fade show position-absolute"
-             style="top: 0; left: 0; z-index: 10; min-width: 250px;">
-            {{ session('DangKyThanhCong') }}
-        </div>
-    @endif
-</div>
-    <div class="course-card">
-        <h1 class="text-center mb-4 text-primary">{{ $course->course_name }}</h1>
-
-        <div class="row mb-4">
-            <div class="col-12 col-md-6 mb-3">
-                <div class="info-label fw-bold">Trình độ</div>
-                <div class="info-value">{{ $course->lesson->level }}</div>
+        @if (session('LoiDangKy'))
+            <div id="thongBaoLoi" class="alert alert-danger alert-dismissible fade show position-absolute"
+                style="top: 0; left: 0; z-index: 10; min-width: 250px;">
+                {{ session('LoiDangKy') }}
             </div>
-            <div class="col-12 col-md-6 mb-3">
-                <div class="info-label">Thời gian khai giảng</div>
-                <div class="info-value">{{ \Carbon\Carbon::parse($course->starts_date)->format('d/m/Y') }}</div>
-            </div>
-            <div class="col-12 col-md-6 mb-3">
-                <div class="info-label">Năm học</div>
-                <div class="info-value">{{ $course->year }}</div>
-            </div>
-            <div class="col-12 col-md-6 mb-3">
-                <div class="info-label">Trạng thái</div>
-                <div class="status-badge">{{ $course->status }}</div>
-            </div>
-        </div>
+        @endif
 
-        <div class="mb-5">
-            <h4 class="fw-bold mb-2">Mô tả chương trình học</h4>
-            <p class="description">{{ $course->lesson->description }}</p>
-        </div>
-
-        <div class="text-center mt-4">
-            <a href="{{ route('student.CourseRegister', ['id' => $course->course_id]) }}"
-                class="btn btn-primary btn-lg shadow rounded-pill px-4 py-2">
-                <i class="fas fa-pen-nib me-2"></i> Đăng ký khóa học
-            </a>
-        </div>
-
+        @if (session('DangKyThanhCong'))
+            <div id="thongBaoThanhCong" class="alert alert-success alert-dismissible fade show position-absolute"
+                style="top: 0; left: 0; z-index: 10; min-width: 250px;">
+                {{ session('DangKyThanhCong') }}
+            </div>
+        @endif
     </div>
+    <h1 class="text-center mb-4 text-primary">{{ $CourseName->course_name }}</h1>
+    @foreach ($course as $course)
+        <div class="card mb-4 shadow-sm">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-9">
+                        <p class="mb-1"><strong>Trình độ:</strong> {{ $course->lesson->level ?? 'Không có' }}</p>
+                        <p class="mb-1"><strong>Khai giảng:</strong>
+                            {{ \Carbon\Carbon::parse($course->starts_date)->format('d/m/Y') }}</p>
+                        <p class="mb-2">
+                            <strong>Trạng thái:</strong>
+                            <span class="badge bg-{{ $course->status === 'Đang mở lớp' ? 'success' : 'secondary' }}">
+                                {{ $course->status }}
+                            </span>
+                        </p>
+                        <p class="text-dark mb-2">
+                            <strong>Buổi học:</strong>
+                            {{ $course->description ?? 'Chưa có mô tả cho khóa học này.' }}</p>
+                    </div>
+                    <div class="col-md-3 text-md-end text-start mt-3 mt-md-0">
+                        <a href="{{ route('student.CourseRegister', ['id' => $course->course_id]) }}"
+                            class="btn btn-outline-primary rounded-pill px-4">
+                            <i class="fas fa-pen-nib me-2"></i> Đăng ký
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endforeach
 @endsection
 @section('js')
     document.querySelectorAll('#thongBaoLoi, #thongBaoThanhCong').forEach(tb => {

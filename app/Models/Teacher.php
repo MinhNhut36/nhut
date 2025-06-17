@@ -34,4 +34,20 @@ class Teacher extends Authenticatable
         return $this->belongsToMany(Course::class, 'teacher_course_assignments', 'teacher_id', 'course_id')
             ->withPivot('role', 'assigned_at');
     }
+
+    public function classPosts()
+    {
+        return $this->hasMany(ClassPost::class, 'author_id', 'teacher_id')
+                    ->where('author_type', 'teacher')
+                    ->where('status', 1)
+                    ->orderBy('created_at', 'desc');
+    }
+
+    public function classPostComments()
+    {
+        return $this->hasMany(ClassPostComment::class, 'author_id', 'teacher_id')
+                    ->where('author_type', 'teacher')
+                    ->where('status', 1)
+                    ->orderBy('created_at', 'desc');
+    }
 }

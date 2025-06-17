@@ -18,9 +18,8 @@
     <!-- Favicon -->
     <link rel="icon" type="image/png"
         href="https://cdn.haitrieu.com/wp-content/uploads/2023/01/Logo-Truong-Cao-dang-Ky-thuat-Cao-Thang.png">
-
-    <style>
         @yield('styles')
+    <style>
 
         body {
             font-family: 'Inter', sans-serif;
@@ -85,8 +84,9 @@
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    @yield('js');
     <script>
-        @yield('js');
+
         document.addEventListener('DOMContentLoaded', function() {
             const buttons = document.querySelectorAll('#student-tabs a');
 

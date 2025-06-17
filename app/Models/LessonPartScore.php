@@ -10,6 +10,7 @@ class LessonPartScore extends Model
         'score_id',
         'student_id',
         'lesson_part_id',
+        'student_id',
         'course_id',
         'attempt_no',
         'score',
@@ -28,9 +29,12 @@ class LessonPartScore extends Model
     {
         return $this->belongsTo(Course::class, 'course_id');
     }
+    public function student()
+    {
+        return $this->belongsTo(Student::class, 'student_id');
+    }
     public function StudentProces()
     {
         return $this->belongsTo(StudentProgres::class, 'score_id');
     }
-
 }

@@ -16,9 +16,9 @@ class Question extends Model
     ];
     protected $primaryKey = 'question_id';
     //định nghĩa các quan hệ với các model khác
-    public function LessonPartContents()
+    public function LessonPartContent()
     {
-        return $this->belongsToMany(LessonPartContent::class, 'contents_id');
+        return $this->belongsTo(LessonPartContent::class, 'contents_id');
     }
     public function Answers()
     {

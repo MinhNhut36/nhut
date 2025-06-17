@@ -4,8 +4,8 @@
 <div class="d-flex justify-content-center align-items-center" style="min-height: 60vh;">
   <div class="card shadow p-4 w-100" style="max-width: 700px;">
     <div class="d-flex align-items-center mb-4">
-      <img src="{{ asset('images/' . $student->avatar) }}"
-           class="rounded-circle border border-secondary me-3" width="96" height="96" style="object-fit: cover;">
+      <img src="{{ asset('uploads/avatars/' . $student->avatar) }}"
+           class="rounded-circle border border-secondary me-3" width="96" height="96" style="object-fit: cover;" onerror="this.onerror=null;this.src='{{ asset('uploads/avatars/AvtMacDinh.jpg') }}';" >
       <div>
         <h2 class="h4 text-primary mb-1">{{ $student->fullname }}</h2>
         <p class="mb-0 text-muted small">Mã sinh viên: {{ $student->student_id }}</p>

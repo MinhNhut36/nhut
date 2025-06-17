@@ -20,7 +20,7 @@ class Course extends Model
     //định nghĩa các quan hệ với các model khác
     public function students()
     {
-        return $this->belongsToMany(Student::class, 'course_enrollment', 'assigned_course_id', 'student_id');
+        return $this->belongsToMany(Student::class, 'course_enrollments', 'assigned_course_id', 'student_id');
     }
     public function enrollments()
     {
@@ -50,5 +50,12 @@ class Course extends Model
     public function examResult()
     {
         return $this->hasOne(ExamResult::class, 'course_id');
+    }
+
+    public function classPosts()
+    {
+        return $this->hasMany(ClassPost::class, 'course_id', 'course_id')
+                    ->where('status', 1)
+                    ->orderBy('created_at', 'desc');
     }
 }

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -276,7 +277,7 @@
                                             <span class="password-toggle">
                                                 <i class="bi bi-eye"></i>
                                             </span>
-                                        </div>                                           
+                                        </div>
                                         @if ($errors->has('password'))
                                             @foreach ($errors->get('password') as $error)
                                                 <div class="text-danger mb-2">{{ $error }}</div>
@@ -286,12 +287,12 @@
                                         <button type="submit" class="btn btn-primary">Đăng nhập</button>
                                     </form>
                                     <div id="student-login-message"></div>
-                                    <div class="form-wrapper student-form">                           
+                                    <div class="form-wrapper student-form">
                                     </div>
                                     <div class="switch-role mt-3">
-                                        <a href="{{route('teacher.login')}}">Giảng Viên Đăng Nhập</a>
+                                        <a href="{{ route('teacher.login') }}">Giảng Viên Đăng Nhập</a>
                                     </div>
-                                </div>                              
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -320,19 +321,18 @@
                 }
             });
         });
-    // Chờ DOM tải xong
-    document.addEventListener('DOMContentLoaded', function () {
-        // Chọn tất cả các thông báo lỗi
-        const alerts = document.querySelectorAll('.alert, .text-danger');
-        if (alerts.length > 0) {
-            setTimeout(() => {
-                alerts.forEach(el => {
-                    el.style.display = 'none';
-                });
-            }, 3000); // 3 giây
-        }
-    });
-
+        // Chờ DOM tải xong
+        document.addEventListener('DOMContentLoaded', function() {
+            // Chọn tất cả các thông báo lỗi
+            const alerts = document.querySelectorAll('.alert, .text-danger');
+            if (alerts.length > 0) {
+                setTimeout(() => {
+                    alerts.forEach(el => {
+                        el.style.display = 'none';
+                    });
+                }, 3000); // 3 giây
+            }
+        });
     </script>
 </body>
 

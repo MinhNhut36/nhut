@@ -14,9 +14,8 @@
     <!-- Favicon -->
     <link rel="icon" type="image/png"
         href="https://cdn.haitrieu.com/wp-content/uploads/2023/01/Logo-Truong-Cao-dang-Ky-thuat-Cao-Thang.png">
+    @yield('styles')
     <style>
-        @yield('styles')
-
         body {
             font-family: 'Inter', sans-serif;
             background-color: #f8f9fa;
@@ -58,7 +57,6 @@
                 <a href="{{ route('teacher.home') }}" class="btn nav-button text-dark">Thông tin giáo viên</a>
                 <a href="#" class="btn nav-button text-dark">Khóa học</a>
             </div>
-
             <div>
                 <a href="{{ route('login') }}" class="btn btn-outline-dark d-flex align-items-center gap-2 btn-logout"
                     onclick="clearActiveTabs()">
@@ -67,21 +65,17 @@
             </div>
         </nav>
     </header>
-
     <!-- MAIN CONTENT -->
     <main class="flex-grow-1 py-5">
         <div class="container">
             @yield('content')
         </div>
     </main>
-
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        @yield('js');
         document.addEventListener('DOMContentLoaded', function() {
             const buttons = document.querySelectorAll('#teacher-tabs a');
-
             // Lấy route đã được lưu trước đó từ localStorage
             const activeRoute = localStorage.getItem('activeTeacherTab');
             if (activeRoute) {
@@ -93,7 +87,6 @@
                     }
                 });
             }
-
             // Khi người dùng bấm vào button, lưu lại route và gán class active
             buttons.forEach(btn => {
                 btn.addEventListener('click', function() {
@@ -108,6 +101,7 @@
             localStorage.removeItem('activeDropdownItem'); // Dropdown
         }
     </script>
+    @yield('js');
 </body>
 
 </html>

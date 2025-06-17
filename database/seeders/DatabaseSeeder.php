@@ -23,6 +23,18 @@ class DatabaseSeeder extends Seeder
             CourseSeeder::class,
             LessonPartSeeder::class,
             LessonPartContenttSeeder::class,
+            QuestionSeeder::class,
+            AnswerSeeder::class,
+            CourseEnrollmentSeeder::class,
+            TeacherCourseAssignmentSeeder::class,
+            ClassPostSeeder::class,
+            ClassPostCommentSeeder::class,
+            NotificationSeeder::class,
+            ExamResultSeeder::class,
+            LessonPartScoreSeeder::class,
+            StudentProgressSeeder::class,
+            StudentEvaluationSeeder::class,
+            StudentAnswerSeeder::class,
         ]);
                       
     }

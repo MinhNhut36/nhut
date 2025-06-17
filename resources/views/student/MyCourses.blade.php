@@ -1,50 +1,60 @@
 @extends('layouts.student')
 @section('titile', 'CÁC KHÓA ĐANG HỌC')
 @section('styles')
-    .card-status-studying {
-    background-color: #d1fae5;
-    color: #065f46;
-    padding: 4px 12px;
-    font-weight: 600;
-    font-size: 0.9rem;
-    border-radius: 9999px;
-    }
-    .custom-btn {
-    background-color: #4f46e5;
-    color: white;
-    font-weight: 800;
-    text-transform: uppercase;
-    font-size: 1.1rem;
-    transition: background-color 0.3s;
-    }
-    .custom-btn:hover {
-    background-color: #4338ca;
-    }
-    .filter-btn-group {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 24px;
-    }
-    .filter-btn {
-    padding: 8px 24px;
-    font-weight: 600;
-    border: none;
-    outline: none;
-    cursor: pointer;
-    background: #e5e7eb;
-    color: #374151;
-    transition: background 0.2s, color 0.2s;
-    }
-    .filter-btn.active, .filter-btn:active {
-    background: #1DA9F5;
-    color: #fff;
-    }
-    .filter-btn:first-child {
-    border-radius: 9999px 0 0 9999px;
-    }
-    .filter-btn:last-child {
-    border-radius: 0 9999px 9999px 0;
-    }
+    <style>
+        .card - status - studying {
+            background - color: #d1fae5;
+            color: #065f46;
+            padding: 4px 12px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            border-radius: 9999px;
+        }
+
+        .custom-btn {
+            background-color: # 4 f46e5;
+            color: white;
+            font - weight: 800;
+            text - transform: uppercase;
+            font - size: 1.1 rem;
+            transition: background - color 0.3 s;
+        }
+
+        .custom - btn: hover {
+            background - color: #4338ca;
+        }
+
+        .filter-btn-group {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+
+        .filter-btn {
+            padding: 8px 24px;
+            font-weight: 600;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            background: #e5e7eb;
+            color: #374151;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .filter-btn.active,
+        .filter-btn:active {
+            background: #1DA9F5;
+            color: #fff;
+        }
+
+        .filter-btn:first-child {
+            border-radius: 9999px 0 0 9999px;
+        }
+
+        .filter-btn:last-child {
+            border-radius: 0 9999px 9999px 0;
+        }
+    </style>
 @endsection
 
 @section('content')

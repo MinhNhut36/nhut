@@ -1,25 +1,29 @@
 @extends('layouts.student')
 @section('title', 'Danh sách khóa học')
 @section('styles')
-    .card-status {
-    background-color: #d1fae5;
-    color: #065f46;
-    padding: 4px 12px;
-    font-weight: 600;
-    font-size: 0.9rem;
-    border-radius: 9999px;
-    }
-    .custom-btn {
-    background-color: #4f46e5;
-    color: white;
-    font-weight: 800;
-    text-transform: uppercase;
-    font-size: 1.1rem;
-    transition: background-color 0.3s;
-    }
-    .custom-btn:hover {
-    background-color: #4338ca;
-    }
+    <style>
+        .card-status {
+            background-color: #d1fae5;
+            color: #065f46;
+            padding: 4px 12px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            border-radius: 9999px;
+        }
+
+        .custom-btn {
+            background-color: #4f46e5;
+            color: white;
+            font-weight: 800;
+            text-transform: uppercase;
+            font-size: 1.1rem;
+            transition: background-color 0.3s;
+        }
+
+        .custom-btn:hover {
+            background-color: #4338ca;
+        }
+    </style>
 @endsection
 @section('content')
 
@@ -33,7 +37,7 @@
                             <span class="text-dark fw-bold">Năm học</span>
                             <span class="fw-semibold">{{ \Carbon\Carbon::parse($course->year)->format('Y') }}</span>
                         </div>
-                        
+
                         <div class="d-flex justify-content-between mb-3">
                             <span class="text-dark fw-bold">Trạng thái</span>
                             <span class="card-status">{{ $course->status }}</span>

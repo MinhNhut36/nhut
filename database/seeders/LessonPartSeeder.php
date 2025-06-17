@@ -17,13 +17,18 @@ class LessonPartSeeder extends Seeder
             2 => 'A2',
             3 => 'A3',
             4 => 'A2/6',
+            5 => 'B1',
         ];
 
         $parts = [
             ['title' => 'Vocabulary', 'desc' => 'Từ vựng cơ bản cho trình độ %s'],
             ['title' => 'Grammar', 'desc' => 'Ngữ pháp nền tảng cho trình độ %s'],
             ['title' => 'Listening', 'desc' => 'Luyện nghe tiếng Anh trình độ %s'],
-            ['title' => 'Grammar', 'desc' => 'Luyện ngữ pháp nâng cao tiếng Anh trình độ %s'],
+            ['title' => 'Speaking', 'desc' => 'Luyện nói tiếng Anh trình độ %s'],
+            ['title' => 'Reading', 'desc' => 'Luyện đọc hiểu tiếng Anh trình độ %s'],
+            ['title' => 'Writing', 'desc' => 'Luyện viết tiếng Anh trình độ %s'],
+            ['title' => 'Pronunciation', 'desc' => 'Luyện phát âm tiếng Anh trình độ %s'],
+            ['title' => 'Practice Test', 'desc' => 'Bài kiểm tra thực hành trình độ %s'],
         ];
 
         foreach ($lessons as $lesson_id => $level) {

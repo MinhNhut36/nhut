@@ -38,6 +38,12 @@ class LessonSeeder extends Seeder
                 'description' => 'Dài lắm',
                 'order_index' => 4,
             ],
+            [
+                'level' => 'B1',
+                'title' => 'Anh Văn Trung Cấp B1',
+                'description' => 'Khóa học tiếng Anh trung cấp dành cho người đã có nền tảng',
+                'order_index' => 5,
+            ],
         ];
 
         foreach ($lessons as $lesson) {

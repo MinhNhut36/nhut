@@ -14,9 +14,8 @@
     <!-- Favicon -->
     <link rel="icon" type="image/png"
         href="https://cdn.haitrieu.com/wp-content/uploads/2023/01/Logo-Truong-Cao-dang-Ky-thuat-Cao-Thang.png">
+    @yield('styles')
     <style>
-        @yield('styles')
-
         body {
             font-family: 'Inter', sans-serif;
             background-color: #f8f9fa;
@@ -103,7 +102,7 @@
 
     <!-- Active Dropdown Item Script -->
     <script>
-        @yield('js');
+   
         document.querySelectorAll('.dropdown-item').forEach(item => {
             item.addEventListener('click', function() {
                 document.querySelectorAll('.dropdown-item').forEach(i => i.classList.remove('active'));
@@ -140,6 +139,7 @@
             localStorage.removeItem('activeDropdownItem'); // Dropdown
         }
     </script>
+         @yield('js');
 </body>
 
 </html>

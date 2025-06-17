@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id('student_id');
             $table->longText('avatar'); // Hình đại diện
             $table->string('fullname');
-            $table->string('username');
-            $table->string('password');
+            $table->string('username')->nullable();
+            $table->string('password')->nullable();
             $table->date('date_of_birth');
             $table->integer('gender')->nullable(); // 1: Nam, 2: Nữ, 3: Khác
             $table->string('email');

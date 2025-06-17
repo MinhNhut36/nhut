@@ -33,5 +33,38 @@ class StudentSeeder extends Seeder
             'email' => '0306221455@caothang.edu.vn',
             'is_status' => 1
         ]);
+
+        Student::create([
+            'avatar' => 'avatar3.png',
+            'fullname' => 'Trần Văn An',
+            'username' => 'vanan',
+            'password' => bcrypt('123456'),
+            'date_of_birth' => '2001-12-15',
+            'gender' => 1,
+            'email' => 'vanan@caothang.edu.vn',
+            'is_status' => 1
+        ]);
+
+        Student::create([
+            'avatar' => 'avatar4.png',
+            'fullname' => 'Lê Thị Mai',
+            'username' => 'thimai',
+            'password' => bcrypt('123456'),
+            'date_of_birth' => '2003-03-08',
+            'gender' => 0,
+            'email' => 'thimai@caothang.edu.vn',
+            'is_status' => 1
+        ]);
+
+        Student::create([
+            'avatar' => 'avatar5.png',
+            'fullname' => 'Phạm Hoàng Long',
+            'username' => 'hoanglong',
+            'password' => bcrypt('123456'),
+            'date_of_birth' => '2002-07-22',
+            'gender' => 1,
+            'email' => 'hoanglong@caothang.edu.vn',
+            'is_status' => 1
+        ]);
     }
 }

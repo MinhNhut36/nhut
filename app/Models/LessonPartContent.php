@@ -21,6 +21,6 @@ class LessonPartContent extends Model
     }
     public function questions()
     {
-        return $this->belongsToMany(Question::class, 'contents_id');
+        return $this->hasMany(Question::class, 'contents_id');
     }
 }

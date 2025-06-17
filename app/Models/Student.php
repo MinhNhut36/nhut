@@ -32,7 +32,7 @@ class Student extends Authenticatable
     //định nghĩa các quan hệ với các model khác
     public function courses()
     {
-        return $this->belongsToMany(Course::class, 'course_enrollment', 'student_id', 'assigned_course_id');
+        return $this->belongsToMany(Course::class, 'course_enrollments', 'student_id', 'assigned_course_id');
     }
     public function enrollments()
     {
@@ -43,9 +43,14 @@ class Student extends Authenticatable
     {
         return $this->hasMany(StudentAnswer::class, 'student_id');
     }
+    public function lessonPartScores()
+    {
+        return $this->hasMany(LessonPartScore::class, 'student_id');
+    }
+
     public function studentProgress()
     {
-        return $this->hasMany(StudentProgres::class, 'student_id');
+        return $this->hasManyThrough(StudentProgres::class, LessonPartScore::class, 'student_id', 'score_id', 'student_id', 'score_id');
     }
     public function studentEvaluations()
     {
@@ -54,5 +59,21 @@ class Student extends Authenticatable
     public function examResults()
     {
         return $this->hasMany(ExamResult::class, 'student_id');
+    }
+
+    public function classPosts()
+    {
+        return $this->hasMany(ClassPost::class, 'author_id', 'student_id')
+                    ->where('author_type', 'student')
+                    ->where('status', 1)
+                    ->orderBy('created_at', 'desc');
+    }
+
+    public function classPostComments()
+    {
+        return $this->hasMany(ClassPostComment::class, 'author_id', 'student_id')
+                    ->where('author_type', 'student')
+                    ->where('status', 1)
+                    ->orderBy('created_at', 'desc');
     }
 }

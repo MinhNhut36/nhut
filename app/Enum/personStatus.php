@@ -11,7 +11,7 @@ enum personStatus: int
     {
         return match ($this) {
             self::ACTIVE => 'Hoạt dộng',
-            self::INACTIVE => 'đã khóa',
+            self::INACTIVE => 'Đã khóa',
         };
     }
     public function badgeClass(): string

@@ -1,31 +1,386 @@
 @extends('layouts.student')
-@section('title', 'Thông tin sinh viên')
+@section('title', 'THÔNG TIN SINH VIÊN')
+@section('styles')
+    <style>
+        .profile-card {
+            background: linear-gradient(135deg, rgba(51, 65, 85, 0.8) 0%, rgba(30, 41, 59, 0.9) 100%);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            color: white;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            /* Thêm shadow */
+            transition: transform 0.3s ease;
+            /* Smooth animation */
+        }
+
+        .profile-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .info-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            border: none;
+            transition: transform 0.3s ease;
+        }
+
+        .info-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .score-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin: 2px;
+        }
+
+        .score-excellent {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .score-good {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .score-average {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .score-poor {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .progress-bar-custom {
+            height: 8px;
+            border-radius: 10px;
+        }
+
+        .section-title {
+            color: #495057;
+            font-weight: 600;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 20px;
+            border-radius: 10px;
+            background: #f8f9fa;
+            margin-bottom: 15px;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .avatar-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .status-indicator {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 3px solid white;
+        }
+
+        .status-active {
+            background-color: #28a745;
+        }
+
+        .status-inactive {
+            background-color: #dc3545;
+        }
+        .container-fluid{
+            width: 80%;
+        }
+    </style>
+@endsection
+
 @section('content')
-<div class="d-flex justify-content-center align-items-center" style="min-height: 60vh;">
-  <div class="card shadow p-4 w-100" style="max-width: 700px;">
-    <div class="d-flex align-items-center mb-4">
-      <img src="{{ asset('uploads/avatars/' . $student->avatar) }}"
-           class="rounded-circle border border-secondary me-3" width="96" height="96" style="object-fit: cover;" onerror="this.onerror=null;this.src='{{ asset('uploads/avatars/AvtMacDinh.jpg') }}';" >
-      <div>
-        <h2 class="h4 text-primary mb-1">{{ $student->fullname }}</h2>
-        <p class="mb-0 text-muted small">Mã sinh viên: {{ $student->student_id }}</p>
-      </div>
+    <div class="container-fluid py-4">
+        <!-- Profile Header -->
+        <div class="profile-card">
+            <div class="row align-items-center">
+                <div class="col-md-3 text-center">
+                    <div class="avatar-container">
+                        <img src="{{ asset('uploads/avatars/' . ($student->avatar ?? 'AvtMacDinh.jpg')) }}"
+                            class="rounded-circle border border-light" width="120" height="120" style="object-fit: cover;"
+                            onerror="this.onerror=null;this.src='{{ asset('uploads/avatars/AvtMacDinh.jpg') }}';">
+                        <div
+                            class="status-indicator {{ $student->is_status ?? true ? 'status-active' : 'status-inactive' }}">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-9">
+                    <h2 class="mb-2">{{ $student->fullname ?? 'Nguyễn Văn A' }}</h2>
+                    <p class="mb-1 fs-5">Mã sinh viên: <strong>{{ $student->student_id ?? 'SV001234' }}</strong></p>
+                    <p class="mb-0 opacity-75">
+                        <i class="fas fa-envelope me-2"></i>{{ $student->email ?? 'nguyenvana@student.edu.vn' }}
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Personal Information -->
+            <div class="col-lg-4">
+                <div class="card info-card mb-4">
+                    <div class="card-header bg-transparent">
+                        <h5 class="section-title mb-0">
+                            <i class="fas fa-user me-2 text-primary"></i>Thông tin cá nhân
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <small class="text-muted">Giới tính</small>
+                            <div class="fw-semibold">{{ $student->gender->getLabel() ?? 'Nam' }}</div>
+                        </div>
+                        <div class="mb-3">
+                            <small class="text-muted">Ngày sinh</small>
+                            <div class="fw-semibold">
+                                {{ isset($student->date_of_birth) ? \Carbon\Carbon::parse($student->date_of_birth)->format('d/m/Y') : '15/05/2002' }}
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <small class="text-muted">Trạng thái</small>
+                            <div>
+                                <span class="badge {{ $student->is_status->badgeClass() }}">
+                                    {{ $student->is_status->getStatus() }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <small class="text-muted">Ngày tạo</small>
+                            <div class="fw-semibold">
+                                {{ isset($student->created_at) ? \Carbon\Carbon::parse($student->created_at)->format('d/m/Y H:i') : '01/09/2023 08:00' }}
+                            </div>
+                        </div>
+                        <div class="mb-0">
+                            <small class="text-muted">Cập nhật lần cuối</small>
+                            <div class="fw-semibold">
+                                {{ isset($student->updated_at) ? \Carbon\Carbon::parse($student->updated_at)->format('d/m/Y H:i') : '15/06/2025 14:30' }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Academic Performance -->
+            <div class="col-lg-8">
+                <div class="card info-card mb-4">
+                    <div class="card-header bg-transparent">
+                        <h5 class="section-title mb-0">
+                            <i class="fas fa-chart-line me-2 text-success"></i>Kết quả học tập
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Score Overview -->
+                        <div class="row mb-4">
+                            <div class="col-md-3">
+                                <div class="stat-item">
+                                    <div class="stat-number">8.5</div>
+                                    <small class="text-muted">GPA Tổng</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="stat-item">
+                                    <div class="stat-number">24</div>
+                                    <small class="text-muted">Tín chỉ</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="stat-item">
+                                    <div class="stat-number">12</div>
+                                    <small class="text-muted">Môn học</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="stat-item">
+                                    <div class="stat-number">A2</div>
+                                    <small class="text-muted">Xếp loại</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Detailed Scores by Level -->
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <h6 class="text-muted mb-3">
+                                    <i class="fas fa-star text-warning me-2"></i>Điểm theo cấp độ A1
+                                </h6>
+                                <div class="mb-2">
+                                    <span class="score-badge score-excellent">Toán cao cấp: 9.2</span>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="score-badge score-excellent">Vật lý đại cương: 8.8</span>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="score-badge score-good">Hóa học đại cương: 8.0</span>
+                                </div>
+                                <div class="mt-3">
+                                    <small class="text-muted">Trung bình A1: </small>
+                                    <strong class="text-success">8.67</strong>
+                                    <div class="progress mt-1">
+                                        <div class="progress-bar bg-success progress-bar-custom" style="width: 86.7%"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <h6 class="text-muted mb-3">
+                                    <i class="fas fa-star text-info me-2"></i>Điểm theo cấp độ A2
+                                </h6>
+                                <div class="mb-2">
+                                    <span class="score-badge score-excellent">Lập trình C++: 9.0</span>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="score-badge score-good">Cấu trúc dữ liệu: 8.5</span>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="score-badge score-good">Thuật toán: 8.3</span>
+                                </div>
+                                <div class="mt-3">
+                                    <small class="text-muted">Trung bình A2: </small>
+                                    <strong class="text-success">8.60</strong>
+                                    <div class="progress mt-1">
+                                        <div class="progress-bar bg-info progress-bar-custom" style="width: 86%"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <h6 class="text-muted mb-3">
+                                    <i class="fas fa-star text-primary me-2"></i>Điểm theo cấp độ A3
+                                </h6>
+                                <div class="mb-2">
+                                    <span class="score-badge score-excellent">Cơ sở dữ liệu: 9.1</span>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="score-badge score-good">Mạng máy tính: 8.2</span>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="score-badge score-good">Hệ điều hành: 8.4</span>
+                                </div>
+                                <div class="mt-3">
+                                    <small class="text-muted">Trung bình A3: </small>
+                                    <strong class="text-success">8.57</strong>
+                                    <div class="progress mt-1">
+                                        <div class="progress-bar bg-primary progress-bar-custom" style="width: 85.7%">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <h6 class="text-muted mb-3">
+                                    <i class="fas fa-star text-warning me-2"></i>Điểm theo cấp độ A2/6
+                                </h6>
+                                <div class="mb-2">
+                                    <span class="score-badge score-good">Phân tích thiết kế: 8.1</span>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="score-badge score-average">Kiểm thử phần mềm: 7.8</span>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="score-badge score-good">Quản lý dự án: 8.0</span>
+                                </div>
+                                <div class="mt-3">
+                                    <small class="text-muted">Trung bình A2/6: </small>
+                                    <strong class="text-warning">7.97</strong>
+                                    <div class="progress mt-1">
+                                        <div class="progress-bar bg-warning progress-bar-custom" style="width: 79.7%">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Academic Progress Chart -->
+                        <div class="mt-4">
+                            <h6 class="text-muted mb-3">
+                                <i class="fas fa-chart-area me-2"></i>Tiến độ học tập theo học kỳ
+                            </h6>
+                            <div class="row text-center">
+                                <div class="col-3">
+                                    <div class="bg-light rounded p-3">
+                                        <div class="h5 mb-1 text-primary">8.2</div>
+                                        <small class="text-muted">HK1/2023</small>
+                                    </div>
+                                </div>
+                                <div class="col-3">
+                                    <div class="bg-light rounded p-3">
+                                        <div class="h5 mb-1 text-success">8.6</div>
+                                        <small class="text-muted">HK2/2023</small>
+                                    </div>
+                                </div>
+                                <div class="col-3">
+                                    <div class="bg-light rounded p-3">
+                                        <div class="h5 mb-1 text-info">8.4</div>
+                                        <small class="text-muted">HK1/2024</small>
+                                    </div>
+                                </div>
+                                <div class="col-3">
+                                    <div class="bg-light rounded p-3">
+                                        <div class="h5 mb-1 text-warning">8.7</div>
+                                        <small class="text-muted">HK2/2024</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="row g-3 text-dark small">
-      <div class="col-md-6"><strong>Email:</strong> {{ $student->email}}</div>
-      <div class="col-md-6"><strong>Giới tính:</strong> {{ $student->gender->getLabel()}}</div>
-      <div class="col-md-6"><strong>Ngày sinh:</strong> {{ \Carbon\Carbon::parse($student->date_of_birth)->format('d/m/Y') }}</div>
-      <div class="col-md-6">
-        <strong>Trạng thái:</strong>
-        @if ($student->is_status)
-          <span class="text-success fw-semibold">Đang hoạt động</span>
-        @else
-          <span class="text-danger fw-semibold">Bị khóa</span>
-        @endif
-      </div>
-      <div class="col-md-6"><strong>Ngày tạo:</strong> {{ \Carbon\Carbon::parse($student->created_at)->format('d/m/Y H:i') }}</div>
-      <div class="col-md-6"><strong>Cập nhật:</strong> {{ \Carbon\Carbon::parse($student->updated_at)->format('d/m/Y H:i') }}</div>
-    </div>
-  </div>
-</div>
+@endsection
+
+@section('js')
+    <script>
+        // Add some interactive effects
+        document.addEventListener('DOMContentLoaded', function() {
+            // Animate progress bars
+            const progressBars = document.querySelectorAll('.progress-bar');
+            progressBars.forEach(bar => {
+                const width = bar.style.width;
+                bar.style.width = '0%';
+                setTimeout(() => {
+                    bar.style.transition = 'width 1s ease-in-out';
+                    bar.style.width = width;
+                }, 500);
+            });
+
+            // Add hover effects to score badges
+            const scoreBadges = document.querySelectorAll('.score-badge');
+            scoreBadges.forEach(badge => {
+                badge.addEventListener('mouseenter', function() {
+                    this.style.transform = 'scale(1.05)';
+                    this.style.transition = 'transform 0.2s';
+                });
+
+                badge.addEventListener('mouseleave', function() {
+                    this.style.transform = 'scale(1)';
+                });
+            });
+        });
+    </script>
 @endsection

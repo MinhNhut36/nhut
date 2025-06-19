@@ -23,6 +23,7 @@ Route::get('students', [ApiStudentController::class, 'getAllStudents']);
 Route::put('students/{studentId}', [ApiStudentController::class, 'updateStudent']);
 
 // ==================== COURSE MANAGEMENT ====================
+Route::get('courses/{courseId}/students/count', [CourseController::class, 'getCourseStudentCount']);
 Route::get('courses', [CourseController::class, 'getAllCourses']);
 Route::get('courses/{courseId}', [CourseController::class, 'getCourseById']);
 Route::get('courses/student/{studentId}', [CourseController::class, 'getCoursesByStudentId']);

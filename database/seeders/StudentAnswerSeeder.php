@@ -21,8 +21,9 @@ class StudentAnswerSeeder extends Seeder
         $courses = Course::all();
 
         foreach ($students as $student) {
-            // Mỗi học sinh trả lời 20-30 câu hỏi
-            $randomQuestions = $questions->random(rand(20, 30));
+            // Mỗi học sinh trả lời 10-20 câu hỏi (tối đa là số questions có sẵn)
+            $maxQuestions = min($questions->count(), 20);
+            $randomQuestions = $questions->random(rand(10, $maxQuestions));
             
             foreach ($randomQuestions as $question) {
                 $course = $courses->random();

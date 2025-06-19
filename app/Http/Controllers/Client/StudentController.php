@@ -45,7 +45,7 @@ class StudentController extends Controller
     }
 
     // Hiển thị danh sách khóa học
-    public function ShowListCourses()
+    public function ShowListCourses()   
     {
         $courses = Course::where('status', 'Đang mở lớp')->get();
         $uniqueCourses = $courses->unique('course_name')->values();
@@ -56,7 +56,12 @@ class StudentController extends Controller
     // Hiển thị chi tiết khóa học
     public function ShowDetailCourses(string $Coursename)
     {
-        $course = Course::with('lesson')->where('course_name', $Coursename)->orderBy('level')->get();
+        $course = Course::with('lesson')
+            ->where('course_name', $Coursename)
+            ->join('lessons', 'courses.level', '=', 'lessons.level')
+            ->orderBy('lessons.order_index')
+            ->select('courses.*')
+            ->get();
         $Coursename = Course::with('lesson')->where('course_name', $Coursename)->first();
         return view('student.CourseDetail')
             ->with('course', $course)
@@ -95,8 +100,9 @@ class StudentController extends Controller
         return view('student.MyCoursesCompleted')->with('enrollment', $MyCourses);
     }
     //Học sinh vào khóa học và xem danh sách các unit
-    public function ShowListLesson(string $level) {
-        $lesson = LessonPart::with('contents')->where('level',$level)->get();
-        return view('student.Studying')->with('lesson',$lesson);
+    public function ShowListLesson(string $level)
+    {
+        $lesson = LessonPart::with('contents')->where('level', $level)->get();
+        return view('student.Studying')->with('lesson', $lesson);
     }
 }

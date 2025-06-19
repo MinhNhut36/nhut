@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'QUẢN LÝ SINH VIÊN')
+@section('title', 'QUẢN LÝ GIÁO VIÊN')
 
 @section('styles')
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -466,19 +466,18 @@
 
 @section('content')
     <meta name="csrf-token" content="{{ csrf_token() }}">
-
     <div class="container-fluid">
         <div class="main-container">
             <!-- Header -->
             <div class="header">
-                <h1><i class="fas fa-graduation-cap"></i> Quản lý Sinh viên</h1>
+                <h1><i class="fas fa-graduation-cap"></i> Quản lý Giáo viên</h1>
             </div>
 
             <!-- Statistics -->
             <div class="stats">
                 <div class="stat-card">
                     <div class="stat-number">{{ $total }}</div>
-                    <div class="stat-label">Tổng số sinh viên</div>
+                    <div class="stat-label">Tổng số giáo viên</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-number">{{ $active }}</div>
@@ -492,7 +491,7 @@
 
             <!-- Controls -->
             <div class="controls">
-                <form method="GET" action="{{ route('admin.studentlist') }}" id="studentFilterForm">
+                <form method="GET" action="{{ route('admin.teacherlist') }}" id="studentFilterForm">
                     <div class="controls-row">
                         <div class="search-box">
                             <i class="fas fa-search"></i>
@@ -514,7 +513,7 @@
                                 <option value="0" {{ request('gender') === '0' ? 'selected' : '' }}>Nữ</option>
                             </select>
 
-                            <a href="{{ route('admin.studentlist') }}" class="btn btn-reset">
+                            <a href="{{ route('admin.teacherlist') }}" class="btn btn-reset">
                                 <i class="fas fa-undo"></i> Đặt lại
                             </a>
                         </div>
@@ -525,7 +524,7 @@
                         <div class="filter-group">
                             <button type="button" class="btn btn-success" data-bs-toggle="modal"
                                 data-bs-target="#addStudentModal">
-                                <i class="fas fa-plus"></i> Thêm sinh viên
+                                <i class="fas fa-plus"></i> Thêm giáo viên
                             </button>
                             <button type="button" class="btn btn-outline-secondary">
                                 <i class="fas fa-download"></i> Xuất Excel
@@ -543,7 +542,7 @@
                             <th>
                                 <input type="checkbox" class="form-check-input" id="selectAll">
                             </th>
-                            <th>Thông tin sinh viên</th>
+                            <th>Thông tin giáo viên</th>
                             <th>Tên đăng nhập</th>
                             <th>Email</th>
                             <th>Ngày sinh</th>
@@ -552,37 +551,37 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($students as $student)
+                        @foreach ($teachers as $teacher)
                             <tr>
                                 <td>
                                     <input type="checkbox" class="form-check-input student-checkbox"
-                                        value="{{ $student->student_id }}">
+                                        value="{{ $teacher->student_id }}">
                                 </td>
                                 <td>
                                     <div class="student-info">
-                                        <img src="{{ asset('uploads/avatars/' . $student->avatar) }}" alt="Avatar"
+                                        <img src="{{ asset('uploads/avatars/' . $teacher->avatar) }}" alt="Avatar"
                                             class="student-avatar me-3"
                                             onerror="this.onerror=null;this.src='{{ asset('uploads/avatars/AvtMacDinh.jpg') }}';">
                                         <div>
                                             <div class="student-details">
-                                                <div class="student-name">{{ $student->fullname }}</div>
-                                                <div class="student-id">MSSV: {{ $student->student_id }}</div>
+                                                <div class="student-name">{{ $teacher->fullname }}</div>
+                                                <div class="student-id">MSGV: {{ $teacher->teacher_id }}</div>
                                             </div>
                                         </div>
                                 </td>
-                                <td><strong style="color: #4f46e5;">{{ $student->username }}</strong></td>
-                                <td>{{ $student->email }}</td>
-                                <td>{{ \Carbon\Carbon::parse($student->date_of_birth)->format('d/m/Y') }}</td>
+                                <td><strong style="color: #4f46e5;">{{ $teacher->username }}</strong></td>
+                                <td>{{ $teacher->email }}</td>
+                                <td>{{ \Carbon\Carbon::parse($teacher->date_of_birth)->format('d/m/Y') }}</td>
                                 <td>
-                                    <span class="gender-badge {{ $student->gender->GetBadge() }}">
-                                        <strong>{{ $student->gender->getLabel() }}</strong>
+                                    <span class="gender-badge {{ $teacher->gender->GetBadge() }}">
+                                        <strong>{{ $teacher->gender->getLabel() }}</strong>
                                     </span>
                                 </td>
                                 <td>
-                                    <span class="status-badge {{ $student->is_status->badgeClass() }}"
-                                        id="status-badge-{{ $student->student_id }}"
-                                        onclick="prepareConfirmAction({{ $student->student_id }})">
-                                        {{ $student->is_status->getStatus() }}
+                                    <span class="status-badge {{ $teacher->is_status->badgeClass() }}"
+                                        id="status-badge-{{ $teacher->teacher_id }}"
+                                        onclick="prepareConfirmAction({{ $teacher->teacher_id }})">
+                                        {{ $teacher->is_status->getStatus() }}
                                     </span>
                                 </td>
                             </tr>
@@ -593,23 +592,23 @@
 
             <!-- Pagination -->
             <div style="padding: 0 30px 30px;">
-                {{ $students->links('pagination::bootstrap-5') }}
+                {{ $teachers->links('pagination::bootstrap-5') }}
             </div>
         </div>
     </div>
 
-    <!-- Add Student Modal -->
+    <!-- Add teacher Modal -->
     <div class="modal fade" id="addStudentModal" tabindex="-1">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">
-                        <i class="fas fa-user-plus me-2"></i>Thêm sinh viên mới
+                        <i class="fas fa-user-plus me-2"></i>Thêm giáo viên mới
                     </h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <form method="POST" action="{{ route('admin.students.add') }}" enctype="multipart/form-data">
+                    <form method="POST" action="{{ route('admin.teachers.add') }}" enctype="multipart/form-data">
                         @csrf
                         <div class="row">
                             <!-- Họ tên -->
@@ -651,7 +650,6 @@
                                     <small class="text-danger">{{ $message }}</small>
                                 @enderror
                             </div>
-
                             <!-- Trạng thái -->
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Trạng thái *</label>
@@ -662,7 +660,7 @@
                                     <option value="1" {{ old('is_status') === '1' ? 'selected' : '' }}>Hoạt động
                                     </option>
                                 </select>
-                                @error('status')
+                                @error('is_status')
                                     <small class="text-danger">{{ $message }}</small>
                                 @enderror
                             </div>
@@ -784,12 +782,12 @@
             modal.hide();
         }
 
-        function prepareConfirmAction(studentId) {
+        function prepareConfirmAction(teacher_id) {
             const confirmModal = new bootstrap.Modal(document.getElementById('confirmModal'));
             confirmModal.show();
 
             pendingAction = () => {
-                fetch(`/admin/students/${studentId}/toggle-status`, {
+                fetch(`/admin/teachers/${teacher_id}/toggle-status`, {
                         method: 'POST',
                         headers: {
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
@@ -802,7 +800,7 @@
                     .then(res => res.json())
                     .then(data => {
                         if (data.success) {
-                            const badge = document.getElementById(`status-badge-${studentId}`);
+                            const badge = document.getElementById(`status-badge-${teacher_id}`);
                             badge.textContent = data.new_status_text;
                             badge.className = `status-badge ${data.badge_class}`;
                             showToast('Trạng thái đã được thay đổi thành công!', 'success');

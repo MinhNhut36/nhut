@@ -6,22 +6,24 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 use App\Enum\gender;
-
+use App\Enum\personStatus;
 class Teacher extends Authenticatable
 {
     use Notifiable;
     protected $fillable = [
         'teacher_id',
         'avatar',
-        'username',
-        'name',
-        'email',
-        'gender',
+        'fullname',
+        'username', 
         'password',
+        'date_of_birth',
+        'gender',
+        'email',
         'is_status',
     ];
     protected $casts = [
         'gender' => gender::class,
+        'is_status' => personStatus::class,
     ];
     protected $primaryKey = 'teacher_id';
     //định nghĩa các quan hệ với các model khác

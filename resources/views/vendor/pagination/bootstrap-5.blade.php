@@ -1,77 +1,58 @@
 @if ($paginator->hasPages())
-    <nav class="d-flex justify-items-center justify-content-between">
-        <div class="d-flex justify-content-between flex-fill d-sm-none">
-            <ul class="pagination">
-                {{-- Previous Page Link --}}
-                @if ($paginator->onFirstPage())
-                    <li class="page-item disabled" aria-disabled="true">
-                        <span class="page-link">@lang('pagination.previous')</span>
-                    </li>
-                @else
-                    <li class="page-item">
-                        <a class="page-link" href="{{ $paginator->previousPageUrl() }}" rel="prev">@lang('pagination.previous')</a>
-                    </li>
-                @endif
+    <ul class="pagination justify-content-center">
+        {{-- Nút "Trang trước" --}}
+        @if ($paginator->onFirstPage())
+            <li class="page-item disabled" aria-disabled="true">
+                <span class="page-link">&laquo;</span>
+            </li>
+        @else
+            <li class="page-item">
+                <a class="page-link" href="{{ $paginator->previousPageUrl() }}" rel="prev">&laquo;</a>
+            </li>
+        @endif
 
-                {{-- Next Page Link --}}
-                @if ($paginator->hasMorePages())
-                    <li class="page-item">
-                        <a class="page-link" href="{{ $paginator->nextPageUrl() }}" rel="next">@lang('pagination.next')</a>
-                    </li>
-                @else
-                    <li class="page-item disabled" aria-disabled="true">
-                        <span class="page-link">@lang('pagination.next')</span>
-                    </li>
-                @endif
-            </ul>
-        </div>
+        {{-- Phân trang kiểu Google --}}
+        @php
+            $total = $paginator->lastPage();
+            $current = $paginator->currentPage();
+            $start = max(1, $current - 2);
+            $end = min($total, $current + 2);
+        @endphp
 
-        <div class="d-none flex-sm-fill d-sm-flex align-items-sm-center justify-content-sm-between">
+        {{-- Trang đầu --}}
+        @if ($start > 1)
+            <li class="page-item"><a class="page-link" href="{{ $paginator->url(1) }}">1</a></li>
+            @if ($start > 2)
+                <li class="page-item disabled"><span class="page-link">...</span></li>
+            @endif
+        @endif
 
-            <div>
-                <ul class="pagination">
-                    {{-- Previous Page Link --}}
-                    @if ($paginator->onFirstPage())
-                        <li class="page-item disabled" aria-disabled="true" aria-label="@lang('pagination.previous')">
-                            <span class="page-link" aria-hidden="true">&lsaquo;</span>
-                        </li>
-                    @else
-                        <li class="page-item">
-                            <a class="page-link" href="{{ $paginator->previousPageUrl() }}" rel="prev" aria-label="@lang('pagination.previous')">&lsaquo;</a>
-                        </li>
-                    @endif
+        {{-- Các trang ở giữa --}}
+        @for ($i = $start; $i <= $end; $i++)
+            @if ($i == $current)
+                <li class="page-item active" aria-current="page"><span class="page-link">{{ $i }}</span></li>
+            @else
+                <li class="page-item"><a class="page-link" href="{{ $paginator->url($i) }}">{{ $i }}</a></li>
+            @endif
+        @endfor
 
-                    {{-- Pagination Elements --}}
-                    @foreach ($elements as $element)
-                        {{-- "Three Dots" Separator --}}
-                        @if (is_string($element))
-                            <li class="page-item disabled" aria-disabled="true"><span class="page-link">{{ $element }}</span></li>
-                        @endif
+        {{-- Trang cuối --}}
+        @if ($end < $total)
+            @if ($end < $total - 1)
+                <li class="page-item disabled"><span class="page-link">...</span></li>
+            @endif
+            <li class="page-item"><a class="page-link" href="{{ $paginator->url($total) }}">{{ $total }}</a></li>
+        @endif
 
-                        {{-- Array Of Links --}}
-                        @if (is_array($element))
-                            @foreach ($element as $page => $url)
-                                @if ($page == $paginator->currentPage())
-                                    <li class="page-item active" aria-current="page"><span class="page-link">{{ $page }}</span></li>
-                                @else
-                                    <li class="page-item"><a class="page-link" href="{{ $url }}">{{ $page }}</a></li>
-                                @endif
-                            @endforeach
-                        @endif
-                    @endforeach
-
-                    {{-- Next Page Link --}}
-                    @if ($paginator->hasMorePages())
-                        <li class="page-item">
-                            <a class="page-link" href="{{ $paginator->nextPageUrl() }}" rel="next" aria-label="@lang('pagination.next')">&rsaquo;</a>
-                        </li>
-                    @else
-                        <li class="page-item disabled" aria-disabled="true" aria-label="@lang('pagination.next')">
-                            <span class="page-link" aria-hidden="true">&rsaquo;</span>
-                        </li>
-                    @endif
-                </ul>
-            </div>
-        </div>
-    </nav>
+        {{-- Nút "Trang sau" --}}
+        @if ($paginator->hasMorePages())
+            <li class="page-item">
+                <a class="page-link" href="{{ $paginator->nextPageUrl() }}" rel="next">&raquo;</a>
+            </li>
+        @else
+            <li class="page-item disabled" aria-disabled="true">
+                <span class="page-link">&raquo;</span>
+            </li>
+        @endif
+    </ul>
 @endif

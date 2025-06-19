@@ -14,7 +14,7 @@ enum gender :int
             self::FEMALE => 'Nữ', 
         };
     }
-     public function getLabelStyles(): string
+     public function GetBadge(): string
     {
         return match ($this) {
             self::MALE => 'gender-male', 

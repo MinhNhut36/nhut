@@ -4,12 +4,20 @@ use App\Http\Controllers\Admin\AdminController;
 
 Route::middleware(['web', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/home','App\Http\Controllers\Client\TeacherController@AdminHome')->name('home');
-    
-    Route::get('/students/search', [AdminController::class, 'SearchStudents'])->name('students.search');
-
-    Route::post('/students/add', [AdminController::class, 'AddStudents'])->name('students.add');
-
+    //Route dành cho quản lý sinh viên
     Route::get('/studentlist',[AdminController::class,'GetStudentList'])->name('studentlist');
 
+    Route::post('/students/add', [AdminController::class, 'AddStudents'])->name('students.add');
+    
     Route::post('/students/{id}/toggle-status', [AdminController::class, 'AjaxToggleStatus']);
+
+    //Route dành cho quản lý giáo viên
+    Route::get('/Teacherlist',[AdminController::class,'GetTeacherList'])->name('teacherlist');
+
+    Route::post('/teachers/{id}/toggle-status', [AdminController::class, 'AjaxToggleStatusTeacher']);
+
+    Route::post('/teachers/add', [AdminController::class, 'Addteachers'])->name('teachers.add');
+
+    //Route dành cho quản lý khóa học
+    Route::get('/Courses',[AdminController::class,'GetCourseList'])->name('courses');
 });

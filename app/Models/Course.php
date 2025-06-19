@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-
+use App\Enum\courseStatus;
 class Course extends Model
 {
     protected $fillable = [
@@ -16,7 +16,9 @@ class Course extends Model
         'status',
     ];
     protected $primaryKey = 'course_id';
-
+     protected $casts = [
+        'status' => courseStatus::class,
+    ];
     //định nghĩa các quan hệ với các model khác
     public function students()
     {

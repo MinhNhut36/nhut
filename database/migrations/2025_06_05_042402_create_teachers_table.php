@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('teachers', function (Blueprint $table) {
             $table->bigIncrements('teacher_id');
+            $table->longText('avatar')->nullable();
             $table->string('fullname');
             $table->string('username');
             $table->string('password');

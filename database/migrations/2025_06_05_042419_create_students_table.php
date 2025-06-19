@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('students', function (Blueprint $table) {
             $table->id('student_id');
-            $table->longText('avatar'); // Hình đại diện
+            $table->longText('avatar')->nullable(); // Hình đại diện
             $table->string('fullname');
             $table->string('username')->nullable();
             $table->string('password')->nullable();

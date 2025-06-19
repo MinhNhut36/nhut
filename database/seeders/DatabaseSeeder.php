@@ -23,8 +23,7 @@ class DatabaseSeeder extends Seeder
             CourseSeeder::class,
             LessonPartSeeder::class,
             LessonPartContenttSeeder::class,
-            QuestionSeeder::class,
-            AnswerSeeder::class,
+            EnhancedQuestionsSeeder::class, // Seeder mới với nhiều dữ liệu và student answers
             CourseEnrollmentSeeder::class,
             TeacherCourseAssignmentSeeder::class,
             ClassPostSeeder::class,

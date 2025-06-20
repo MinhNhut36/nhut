@@ -226,7 +226,6 @@
         .table-custom th {
             background: #f8fafc;
             border: none;
-            padding: 1rem;
             font-weight: 600;
             color: var(--text-dark);
             border-bottom: 2px solid var(--border-color);
@@ -595,6 +594,7 @@
 @endsection
 
 @section('content')
+    @include('partials.alerts')
     <div class="course-management">
         <div class="content-container">
             <!-- Header Section -->
@@ -603,46 +603,6 @@
                     <h2 class="mb-1">Quản lý khóa học</h2>
                 </div>
             </div>
-            <!-- Statistics Cards -->
-            <div class="row mb-4">
-                <div class="col-lg-3 col-md-6 mb-3">
-                    <div class="stats-card">
-                        <div class="stats-icon primary">
-                            <i class="fas fa-book-open"></i>
-                        </div>
-                        <div class="stats-number">24</div>
-                        <div class="stats-label">Tổng khóa học</div>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-6 mb-3">
-                    <div class="stats-card">
-                        <div class="stats-icon success">
-                            <i class="fas fa-play-circle"></i>
-                        </div>
-                        <div class="stats-number">18</div>
-                        <div class="stats-label">Đang mở lớp</div>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-6 mb-3">
-                    <div class="stats-card">
-                        <div class="stats-icon warning">
-                            <i class="fas fa-pause-circle"></i>
-                        </div>
-                        <div class="stats-number">3</div>
-                        <div class="stats-label">Tạm dừng</div>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-6 mb-3">
-                    <div class="stats-card">
-                        <div class="stats-icon info">
-                            <i class="fas fa-check-circle"></i>
-                        </div>
-                        <div class="stats-number">3</div>
-                        <div class="stats-label">Đã hoàn thành</div>
-                    </div>
-                </div>
-            </div>
-
             <!-- Quick Actions -->
             <div class="row mb-4">
                 <div class="col-lg-4 col-md-6 mb-3">
@@ -660,9 +620,9 @@
                         <div class="action-icon">
                             <i class="fas fa-users"></i>
                         </div>
-                        <div class="action-title">Quản lý giảng viên</div>
+                        <div class="action-title">Phân công giảng dạy</div>
                         <div class="action-description">Phân công giảng viên cho khóa học</div>
-                        <a href="#" class="btn-action">Quản lý</a>
+                        <a href="#" class="btn-action">Phân công</a>
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-6 mb-3">
@@ -775,22 +735,36 @@
                                     <td>{{ \Carbon\Carbon::parse($course->starts_date)->format('d/m/Y') }}</td>
                                     <td>
                                         <div class="instructor-list">
-                                            @foreach ($course->teachers as $teacher)
-                                                <span class="instructor-badge">{{ $teacher->fullname }}</span>
-                                            @endforeach
+                                            @if ($course->teachers->isEmpty())
+                                                <span class="text-muted fst-italic">Chưa phân công</span>
+                                            @else
+                                                @foreach ($course->teachers as $teacher)
+                                                    <span class="instructor-badge">{{ $teacher->fullname }}</span>
+                                                @endforeach
+                                            @endif
                                         </div>
                                     </td>
                                     <td>
                                         <div class="action-buttons">
-                                            <button class="btn-sm-action btn-view" title="Xem chi tiết">
-                                                <i class="fas fa-eye"></i>
-                                            </button>
-                                            <button class="btn-sm-action btn-edit" title="Chỉnh sửa">
+                                            <a href="javascript:void(0);" class="btn-sm-action btn-edit" title="Chỉnh sửa"
+                                                onclick="openEditModal(this)" data-id="{{ $course->course_id }}"
+                                                data-name="{{ $course->course_name }}" data-level="{{ $course->level }}"
+                                                data-year="{{ $course->year }}" data-desc="{{ $course->description }}"
+                                                data-start="{{ $course->starts_date }}"
+                                                data-status="{{ $course->status }}">
                                                 <i class="fas fa-edit"></i>
-                                            </button>
-                                            <button class="btn-sm-action btn-delete" title="Xóa">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
+                                            </a>
+                                            @if ($course->status == \App\Enum\courseStatus::verifying)
+                                                <form action="{{ route('admin.course.delete', $course->course_id) }}"
+                                                    method="POST" style="display:inline;">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn-sm-action btn-delete" title="Xóa"
+                                                        onclick="return confirm('Bạn có chắc chắn muốn xóa khóa học này không?')">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </form>
+                                            @endif
                                         </div>
                                     </td>
                                 </tr>
@@ -798,7 +772,7 @@
                         </tbody>
                     </table>
                 </div>
-                <!-- Modal Popup -->
+                <!-- Modal Create Popup -->
                 <div class="modal-overlay" id="courseModal">
                     <div class="modal-content">
                         <div class="modal-header">
@@ -812,21 +786,28 @@
                         </div>
 
                         <div class="modal-body">
-                            <form id="courseForm" action="" method="POST">
+                            <form id="courseForm" action="{{ route('admin.courses.create') }}" method="POST">
                                 @csrf
+                                <input type="hidden" id="formMode" name="form_mode" value="create">
+                                <input type="hidden" id="editCourseId" name="id" value="{{ old('id') }}">
+                                <!-- Tên khóa học -->
                                 <div class="form-group">
                                     <label class="form-label">
                                         Tên khóa học <span class="required">*</span>
                                     </label>
-                                    <input type="text" class="form-control" id="courseName"
-                                        placeholder="Nhập tên khóa học" required>
+                                    <input type="text" class="form-control" id="courseName" name="course_name"
+                                        placeholder="Nhập tên khóa học" value="{{ old('course_name') }}">
+                                    @error('course_name')
+                                        <small class="text-danger auto-hide-error">{{ $message }}</small>
+                                    @enderror
                                 </div>
 
+                                <!-- Cấp độ -->
                                 <div class="form-group">
                                     <label class="form-label">
                                         Cấp độ <span class="required">*</span>
                                     </label>
-                                    <select class="form-select" id="courseLevel" name="level" required>
+                                    <select class="form-select" id="courseLevel" name="level">
                                         <option value="">Chọn cấp độ</option>
                                         @foreach ($levels as $level)
                                             <option value="{{ $level }}"
@@ -835,42 +816,71 @@
                                             </option>
                                         @endforeach
                                     </select>
+                                    @error('level')
+                                        <small class="text-danger auto-hide-error">{{ $message }}</small>
+                                    @enderror
                                 </div>
 
+                                <!-- Năm -->
                                 <div class="form-group">
                                     <label class="form-label">
                                         Năm <span class="required">*</span>
                                     </label>
                                     <input type="number" class="form-control" id="courseYear" name="year"
-                                        inputmode="numeric" min="2020">
+                                        inputmode="numeric" min="2020" value="{{ old('year') }}">
+                                    @error('year')
+                                        <small class="text-danger auto-hide-error">{{ $message }}</small>
+                                    @enderror
                                 </div>
-
+                                <!-- Trạng thái (chỉ hiển thị khi chỉnh sửa) -->
+                                <div class="form-group d-none" id="statusGroup">
+                                    <label class="form-label">Trạng thái</label>
+                                    <select class="form-select" id="courseStatus" name="status">
+                                        @foreach (\App\Enum\courseStatus::cases() as $status)
+                                            <option value="{{ $status->value }}">{{ $status->value }}</option>
+                                        @endforeach
+                                    </select>
+                                    @error('status')
+                                        <small class="text-danger auto-hide-error">{{ $message }}</small>
+                                    @enderror
+                                </div>
+                                <!-- Mô tả -->
                                 <div class="form-group">
                                     <label class="form-label">
                                         Mô tả
                                     </label>
-                                    <textarea class="form-control" id="courseDescription" placeholder="Nhập mô tả về khóa học"></textarea>
+                                    <textarea class="form-control" id="courseDescription" placeholder="Nhập mô tả về khóa học" name="description">{{ old('description') }}</textarea>
+                                    @error('description')
+                                        <small class="text-danger auto-hide-error">{{ $message }}</small>
+                                    @enderror
                                 </div>
 
+                                <!-- Ngày bắt đầu -->
                                 <div class="form-group">
                                     <label class="form-label">
                                         Ngày bắt đầu <span class="required">*</span>
                                     </label>
-                                    <input type="date" class="form-control" id="startDate" required>
+                                    <input type="date" class="form-control" id="startDate" name="starts_date"
+                                        value="{{ old('starts_date') }}">
+                                    @error('starts_date')
+                                        <small class="text-danger auto-hide-error">{{ $message }}</small>
+                                    @enderror
+                                </div>
+
+                                <!-- Footer -->
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" onclick="closeModal()">
+                                        <i class="fas fa-times me-2"></i>Hủy
+                                    </button>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save me-2"></i>Lưu khóa học
+                                    </button>
                                 </div>
                             </form>
                         </div>
-
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" onclick="closeModal()">
-                                <i class="fas fa-times me-2"></i>Hủy
-                            </button>
-                            <button type="button" class="btn btn-primary" onclick="saveCourse()">
-                                <i class="fas fa-save me-2"></i>Lưu khóa học
-                            </button>
-                        </div>
                     </div>
                 </div>
+
 
                 <!-- Pagination -->
                 <div class="pagination-wrapper">
@@ -885,6 +895,7 @@
 
 @section('js')
     <script>
+        //chức năng tìm kiếm
         document.addEventListener('DOMContentLoaded', function() {
             const form = document.getElementById('courseFilterForm');
             const searchInput = document.getElementById('searchInput');
@@ -908,22 +919,96 @@
                 clearTimeout(typingTimer);
             });
         });
+        //popup thêm khóa học
+        @if ($errors->any())
+            document.addEventListener("DOMContentLoaded", function() {
+                const mode = @json(old('form_mode'));
+                const form = document.getElementById('courseForm');
 
+                if (mode === 'edit') {
+                    // Gán lại dữ liệu cũ khi sửa
+                    document.getElementById('courseName').value = @json(old('course_name'));
+                    document.getElementById('courseLevel').value = @json(old('level'));
+                    document.getElementById('courseYear').value = @json(old('year'));
+                    document.getElementById('courseDescription').value = @json(old('description'));
+                    document.getElementById('startDate').value = @json(old('starts_date'));
+                    document.getElementById('courseStatus').value = @json(old('status'));
+
+                    // Hiện status
+                    document.getElementById('statusGroup').classList.remove('d-none');
+
+                    // Form sửa
+                    const courseId = @json(old('id'));
+                    form.action = `/admin/courses/${courseId}/update`;
+                    document.getElementById('formMode').value = 'edit';
+                    document.getElementById('editCourseId').value = courseId;
+
+                    document.querySelector('.modal-title').innerHTML =
+                        '<i class="fas fa-edit me-2"></i> Chỉnh sửa khóa học';
+                    document.querySelector('#courseForm .btn-primary').innerHTML =
+                        '<i class="fas fa-save me-2"></i> Cập nhật';
+                } else {
+                    // Form thêm
+                    form.action = "{{ route('admin.courses.create') }}";
+                    document.getElementById('formMode').value = 'create';
+                    document.getElementById('editCourseId').value = '';
+                    document.getElementById('statusGroup').classList.add('d-none');
+                    document.querySelector('.modal-title').innerHTML =
+                        '<i class="fas fa-graduation-cap me-2"></i> Tạo khóa học mới';
+                    document.querySelector('#courseForm .btn-primary').innerHTML =
+                        '<i class="fas fa-save me-2"></i> Lưu khóa học';
+                }
+
+                // Mở modal
+                const modal = document.getElementById('courseModal');
+                modal.style.display = 'flex';
+                setTimeout(() => {
+                    modal.classList.add('show');
+                }, 10);
+            });
+        @endif
         // Set default date to today
         document.getElementById('startDate').value = new Date().toISOString().split('T')[0];
 
         function openModal() {
             const modal = document.getElementById('courseModal');
+            const form = document.getElementById('courseForm');
+
+            // Hiển thị modal
             modal.style.display = 'flex';
             setTimeout(() => {
                 modal.classList.add('show');
             }, 10);
-            
-            // Luôn gán năm hiện tại mỗi lần mở
-            const yearInput = document.getElementById('courseYear');
-            const currentYear = new Date().getFullYear();
-            yearInput.value = currentYear;
+
+            // Reset form
+            form.reset();
+
+            // Reset action
+            form.action = "{{ route('admin.courses.create') }}";
+
+            // Reset các input ẩn
+            document.getElementById('formMode').value = 'create';
+            const hiddenId = document.getElementById('editCourseId');
+            if (hiddenId) hiddenId.value = '';
+
+            // Đặt lại tiêu đề và nút
+            document.querySelector('.modal-title').innerHTML =
+                '<i class="fas fa-graduation-cap me-2"></i> Tạo khóa học mới';
+            document.querySelector('#courseForm .btn-primary').innerHTML =
+                '<i class="fas fa-save me-2"></i> Lưu khóa học';
+
+            // Ẩn dropdown trạng thái
+            document.getElementById('statusGroup').classList.add('d-none');
+
+            // Reset lại giá trị các input
+            document.getElementById('courseName').value = '';
+            document.getElementById('courseLevel').value = '';
+            document.getElementById('courseYear').value = new Date().getFullYear();
+            document.getElementById('courseDescription').value = '';
+            document.getElementById('startDate').value = new Date().toISOString().split('T')[0];
+            document.getElementById('courseStatus').value = ''; // reset trạng thái nếu có
         }
+
 
         function closeModal() {
             const modal = document.getElementById('courseModal');
@@ -951,6 +1036,58 @@
                 closeModal();
             }
         });
+        // mở modal edit
+        function openEditModal(button) {
+            const id = button.getAttribute('data-id');
+            const name = button.getAttribute('data-name');
+            const level = button.getAttribute('data-level');
+            const year = button.getAttribute('data-year');
+            const desc = button.getAttribute('data-desc');
+            const start = button.getAttribute('data-start');
+            const status = button.getAttribute('data-status');
 
+            // Gán dữ liệu vào form
+            document.getElementById('courseName').value = name;
+            document.getElementById('courseLevel').value = level;
+            document.getElementById('courseYear').value = year;
+            document.getElementById('courseDescription').value = desc;
+            document.getElementById('startDate').value = start;
+
+            // Hiển thị và gán status
+            document.getElementById('statusGroup').classList.remove('d-none');
+            document.getElementById('courseStatus').value = status;
+
+            // Thay đổi action
+            const form = document.getElementById('courseForm');
+            form.action = `/admin/courses/${id}/update`;
+
+            // Gán hidden input mode & id
+            document.getElementById('formMode').value = 'edit';
+            document.getElementById('editCourseId').value = id;
+            // Đổi tiêu đề và nút
+            document.querySelector('.modal-title').innerHTML = '<i class="fas fa-edit me-2"></i> Chỉnh sửa khóa học';
+            document.querySelector('#courseForm .btn-primary').innerHTML = '<i class="fas fa-save me-2"></i> Cập nhật';
+
+            // Mở modal
+            const modal = document.getElementById('courseModal');
+            modal.style.display = 'flex';
+            setTimeout(() => {
+                modal.classList.add('show');
+            }, 10);
+        }
+
+        // Tự động ẩn thông báo lỗi sau 5 giây
+        document.addEventListener('DOMContentLoaded', function() {
+            const errors = document.querySelectorAll('.auto-hide-error');
+            errors.forEach(function(err) {
+                setTimeout(() => {
+                    err.style.transition = 'opacity 0.5s ease';
+                    err.style.opacity = '0';
+                    setTimeout(() => err.remove(), 500); // Xóa khỏi DOM sau khi ẩn
+                }, 5000); // 5 giây
+            });
+        });
+
+        
     </script>
 @endsection

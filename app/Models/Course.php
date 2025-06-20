@@ -14,6 +14,7 @@ class Course extends Model
         'year',
         'description',
         'status',
+        'starts_date',
     ];
     protected $primaryKey = 'course_id';
      protected $casts = [

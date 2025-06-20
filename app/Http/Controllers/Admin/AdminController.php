@@ -8,9 +8,11 @@ use App\Models\Student;
 use Illuminate\Http\Request;
 use App\Http\Requests\AddStudentRequest;
 use App\Enum\personStatus;
+use App\Http\Requests\AddCourseRequest;
 use App\Models\Teacher;
 use App\Http\Requests\AddTeacherRequest;
 use App\Models\Course;
+use App\Http\Requests\EditCourseResquest;
 
 class AdminController extends Controller
 {
@@ -50,7 +52,7 @@ class AdminController extends Controller
             ->with('inactive', $inactive)
             ->with('students', $students);
     }
-    
+
     //Thêm sinh viên
     public function AddStudents(AddStudentRequest $request)
     {
@@ -213,5 +215,35 @@ class AdminController extends Controller
     }
 
 
-    //
+    // Tạo khóa học mới
+    public function CreateCourse(AddCourseRequest $request)
+    {
+        Course::create([
+            'course_name' => $request->course_name,
+            'level' => $request->level,
+            'year' => $request->year,
+            'description' => $request->description,
+            'starts_date' => $request->starts_date,
+            'status' => 'Chờ xác thực',
+        ]);
+        return redirect()->back()->with('success', 'Khóa học đã được tạo thành công!');
+    }
+    // cập nhật thông tin khóa học
+    public function CourseUpdate(EditCourseResquest $request, $id)
+    {
+        $course = Course::findOrFail($id);
+
+        $course->update($request->validated());
+
+        return redirect()->back()->with('success', 'Cập nhật khóa học thành công!');
+    }
+    // xóa khóa học 
+    public function CourseDelete($id)
+    {
+        $course = Course::findOrFail($id);
+        
+        $course->delete();
+
+        return redirect()->back()->with('success', 'Xóa khóa học thành công!');
+    }
 }

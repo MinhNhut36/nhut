@@ -5,7 +5,7 @@ namespace App\Enum;
 enum courseStatus: string
 {
     // chờ xác thực: 0 , đang học: 1, đạt:2, không đạt:3
-    case verifying = 'Chờ phê duyệt';
+    case verifying = 'Chờ xác thực';
     case IsOpening = 'Đang mở lớp';
     case Complete = 'Đã hoàn thành';
 

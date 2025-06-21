@@ -622,7 +622,7 @@
                         </div>
                         <div class="action-title">Phân công giảng dạy</div>
                         <div class="action-description">Phân công giảng viên cho khóa học</div>
-                        <a href="#" class="btn-action">Phân công</a>
+                        <a href="{{route('admin.assign.index')}}" class="btn-action">Phân công</a>
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-6 mb-3">
@@ -1088,6 +1088,6 @@
             });
         });
 
-        
+
     </script>
 @endsection

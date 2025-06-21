@@ -13,6 +13,8 @@ use App\Models\Teacher;
 use App\Http\Requests\AddTeacherRequest;
 use App\Models\Course;
 use App\Http\Requests\EditCourseResquest;
+use App\Models\TeacherCourseAssignment;
+use App\Enum\courseStatus;
 
 class AdminController extends Controller
 {
@@ -241,9 +243,89 @@ class AdminController extends Controller
     public function CourseDelete($id)
     {
         $course = Course::findOrFail($id);
-        
+
         $course->delete();
 
         return redirect()->back()->with('success', 'Xóa khóa học thành công!');
+    }
+    // Phân công giảng dạy
+    public function showUnassignedCourses()
+    {
+        // Lấy các khóa học có trạng thái là "Chờ xác thực" hoặc "Đang mở lớp"
+        $courses = Course::whereIn('status', [
+            courseStatus::verifying->value,
+            courseStatus::IsOpening->value,
+        ])
+            ->orderByRaw("
+        CASE 
+            WHEN status = ? THEN 1 
+            WHEN status = ? THEN 2 
+            ELSE 3 
+        END
+    ", [
+                courseStatus::verifying->value,
+                courseStatus::IsOpening->value,
+            ])
+            ->get();
+
+        // Lấy tất cả giáo viên đang hoạt động
+        $teachers = Teacher::where('is_status', 1)->get();
+
+        // Lấy danh sách giáo viên đã được phân công cho các khóa học này
+        $assignments = TeacherCourseAssignment::with('teacher')
+            ->whereIn('course_id', $courses->pluck('course_id'))
+            ->get();
+
+        // Gom theo course_id để hiển thị trong view
+        $courseAssignments = [];
+        foreach ($assignments as $assignment) {
+            $courseAssignments[$assignment->course_id][] = [
+                'teacher' => $assignment->teacher,
+                'position' => $assignment->role, // 'Main Teacher' hoặc 'Assistant Teacher'
+            ];
+        }
+        return view('admin.TeachingAssignments', [
+            'unassignedCourses' => $courses,
+            'teachers' => $teachers,
+            'courseAssignments' => $courseAssignments,
+        ]);
+    }
+    // Thêm sinh viên 
+    public function assignTeacher(Request $request)
+    {
+        $request->validate([
+            'course_id' => 'required|exists:courses,course_id',
+            'teacher_id' => 'required|exists:teachers,teacher_id',
+            'role' => 'required|in:Main Teacher,Assistant Teacher',
+        ]);
+
+        // Kiểm tra nếu giáo viên đã được phân công vào khóa học này
+        $exists = TeacherCourseAssignment::where('course_id', $request->course_id)
+            ->where('teacher_id', $request->teacher_id)
+            ->exists();
+
+        if ($exists) {
+            return back()->with('error', 'Giáo viên này đã được phân công cho khóa học.');
+        }
+
+        TeacherCourseAssignment::create([
+            'course_id' => $request->course_id,
+            'teacher_id' => $request->teacher_id,
+            'role' => $request->role,
+            'assigned_at' => now(),
+        ]);
+
+        return back()->with('success', 'Phân công giáo viên thành công.');
+    }
+
+    //Xóa phân công 
+    public function removeTeacher(Request $request)
+    {
+        $courseId = $request->input('course_id');
+        $teacherId = $request->input('teacher_id');
+        TeacherCourseAssignment::where('course_id', $courseId)
+            ->where('teacher_id', $teacherId)
+            ->delete();
+        return back()->with('success', 'Đã xoá giáo viên khỏi khóa học.');
     }
 }

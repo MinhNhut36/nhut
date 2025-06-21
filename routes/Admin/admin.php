@@ -12,6 +12,8 @@ Route::middleware(['web', 'admin'])->prefix('admin')->name('admin.')->group(func
 
     Route::post('/students/{id}/toggle-status', [AdminController::class, 'AjaxToggleStatus']);
 
+
+
     //Route dành cho quản lý giáo viên
     Route::get('/Teacherlist', [AdminController::class, 'GetTeacherList'])->name('teacherlist');
 
@@ -19,15 +21,23 @@ Route::middleware(['web', 'admin'])->prefix('admin')->name('admin.')->group(func
 
     Route::post('/teachers/add', [AdminController::class, 'Addteachers'])->name('teachers.add');
 
+
+
     //Route dành cho quản lý khóa học
     Route::get('/Courses', [AdminController::class, 'GetCourseList'])->name('courses');
 
     Route::post('/Courses/create', [AdminController::class, 'CreateCourse'])->name('courses.create');
 
     Route::get('/courses/{id}/edit', [AdminController::class, 'CourseEdit'])->name('course.edit');
-    
+
     Route::post('/courses/{id}/update', [AdminController::class, 'CourseUpdate'])->name('course.update');
 
     Route::delete('/courses/{id}/delete', [AdminController::class, 'CourseDelete'])->name('course.delete');
 
+    Route::get('/AssignTeachers', [AdminController::class, 'showUnassignedCourses'])->name('assign.index');
+
+    Route::post('/assign-teacher', [AdminController::class, 'assignTeacher'])->name('course.assign-teacher');
+
+    Route::delete('/course/remove-teacher', [AdminController::class, 'removeTeacher'])->name('course.remove-teacher');
+        
 });

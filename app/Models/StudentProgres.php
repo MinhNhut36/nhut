@@ -16,15 +16,22 @@ class StudentProgres extends Model
     ];
     protected $primaryKey = 'progress_id';
     //định nghĩa các quan hệ với các model khác
-    public function score()
+    public function lessonPartScore()
     {
-        return $this->belongsTo(LessonPartScore::class, 'score_id');
+        return $this->belongsTo(LessonPartScore::class, 'score_id', 'score_id');
     }
 
-    // Truy cập student thông qua score
+    // Truy cập student thông qua lesson_part_score
     public function student()
     {
-        return $this->hasOneThrough(Student::class, LessonPartScore::class, 'score_id', 'student_id', 'score_id', 'student_id');
+        return $this->hasOneThrough(
+            Student::class,
+            LessonPartScore::class,
+            'score_id',      // Foreign key on lesson_part_scores table
+            'student_id',    // Foreign key on students table
+            'score_id',      // Local key on student_progress table
+            'student_id'     // Local key on lesson_part_scores table
+        );
     }
 
     public function evaluation()

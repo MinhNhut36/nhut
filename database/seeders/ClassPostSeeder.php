@@ -6,7 +6,6 @@ use Illuminate\Database\Seeder;
 use App\Models\ClassPost;
 use App\Models\Course;
 use App\Models\Teacher;
-use App\Models\Student;
 use Carbon\Carbon;
 
 class ClassPostSeeder extends Seeder
@@ -16,10 +15,8 @@ class ClassPostSeeder extends Seeder
      */
     public function run(): void
     {
-        $courses = Course::all();
-        $teachers = Teacher::all();
-        $students = Student::all();
-        
+        $teacherAssignments = \App\Models\TeacherCourseAssignment::with(['teacher', 'course'])->get();
+
         $postTitles = [
             'Welcome to English Class!',
             'Today\'s Lesson: Present Tense',
@@ -30,9 +27,19 @@ class ClassPostSeeder extends Seeder
             'Reading Comprehension Tips',
             'Pronunciation Workshop',
             'Class Discussion: Daily Routines',
-            'Exam Preparation Guidelines'
+            'Exam Preparation Guidelines',
+            'New Vocabulary Words',
+            'Listening Exercise Available',
+            'Group Project Assignment',
+            'Cultural Exchange Discussion',
+            'English Movie Recommendation',
+            'Grammar Review Session',
+            'Writing Tips and Tricks',
+            'Conversation Practice',
+            'Study Group Formation',
+            'Progress Update'
         ];
-        
+
         $postContents = [
             'Welcome everyone! I\'m excited to start this English journey with you. Please introduce yourselves in the comments.',
             'Today we learned about present tense verbs. Remember to practice the examples we discussed in class.',
@@ -43,34 +50,38 @@ class ClassPostSeeder extends Seeder
             'Here are some tips to improve your reading comprehension skills. Practice daily for best results.',
             'Our pronunciation workshop was great! Keep practicing the sounds we learned today.',
             'Let\'s discuss our daily routines in English. Share what you do every morning!',
-            'Exam is coming up! Here\'s what you need to know and how to prepare effectively.'
+            'Exam is coming up! Here\'s what you need to know and how to prepare effectively.',
+            'This week we\'re learning 20 new vocabulary words. Please review them before next class.',
+            'I\'ve uploaded a new listening exercise. Complete it by Wednesday for extra practice.',
+            'Time for our group project! Form teams of 3-4 students and choose your topic.',
+            'Let\'s talk about different cultures and traditions. Share something interesting from your country!',
+            'I recommend watching "The Pursuit of Happyness" with English subtitles this weekend.',
+            'We\'ll have a grammar review session tomorrow. Bring your questions!',
+            'Here are some writing tips to help you improve your essays and compositions.',
+            'Practice conversations with your classmates. Use the phrases we learned today.',
+            'Anyone interested in forming a study group? Let me know in the comments.',
+            'Great progress everyone! Keep up the excellent work in your English studies.'
         ];
 
-        foreach ($courses as $course) {
-            // Mỗi khóa học có 5-8 bài viết
-            for ($i = 0; $i < rand(5, 8); $i++) {
-                // 70% bài viết từ giáo viên, 30% từ học sinh
-                $isTeacher = rand(1, 10) <= 7;
-                
-                if ($isTeacher) {
-                    $author = $teachers->random();
-                    $authorType = 'teacher';
-                    $authorId = $author->teacher_id;
-                } else {
-                    $author = $students->random();
-                    $authorType = 'student';
-                    $authorId = $author->student_id;
-                }
-                
+        foreach ($teacherAssignments as $assignment) {
+            // Mỗi teacher-course assignment có 3-6 bài viết
+            $numPosts = rand(3, 6);
+
+            for ($i = 0; $i < $numPosts; $i++) {
+                $titleIndex = rand(0, count($postTitles) - 1);
+                $contentIndex = rand(0, count($postContents) - 1);
+
+                $createdAt = Carbon::now()->subDays(rand(1, 45));
+                $updatedAt = $createdAt->copy()->addDays(rand(0, 3));
+
                 ClassPost::create([
-                    'course_id' => $course->course_id,
-                    'author_id' => $authorId,
-                    'author_type' => $authorType,
-                    'title' => $postTitles[$i % count($postTitles)],
-                    'content' => $postContents[$i % count($postContents)],
-                    'status' => 1,
-                    'created_at' => Carbon::now()->subDays(rand(1, 30)),
-                    'updated_at' => Carbon::now()->subDays(rand(0, 5)),
+                    'course_id' => $assignment->course_id,
+                    'teacher_id' => $assignment->teacher_id,
+                    'title' => $postTitles[$titleIndex],
+                    'content' => $postContents[$contentIndex],
+                    'status' => rand(0, 1) ? 1 : 0, // 80% active, 20% inactive
+                    'created_at' => $createdAt,
+                    'updated_at' => $updatedAt,
                 ]);
             }
         }

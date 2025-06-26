@@ -281,12 +281,12 @@
 
     <div class="content-wrapper">
         <!-- Course Cards -->
-        @foreach ($course as $courseItem)
+        @foreach ($courses as $course)
             <div class="course-card">
                 <div class="course-header">
                     <div class="status-badge">
-                        <i class="fas fa-{{ $courseItem->status === 'Đang mở lớp' ? 'check-circle' : 'clock' }}"></i>
-                        {{ $courseItem->status }}
+                        <i class="fas fa-{{ $course->status === 'Đang mở lớp' ? 'check-circle' : 'clock' }}"></i>
+                        {{ $course->status }}
                     </div>
                 </div>
 
@@ -294,24 +294,24 @@
                     <div class="info-item">
                         <i class="fas fa-layer-group info-icon"></i>
                         <span class="info-label">Trình độ:</span>
-                        <span class="info-value">{{ $courseItem->lesson->level ?? 'N/A' }}</span>
+                        <span class="info-value">{{ $course->lesson->level ?? 'N/A' }}</span>
                     </div>
                     
                     <div class="info-item">
                         <i class="fas fa-calendar-alt info-icon"></i>
                         <span class="info-label">Khai giảng:</span>
-                        <span class="info-value">{{ \Carbon\Carbon::parse($courseItem->starts_date)->format('d/m/Y') }}</span>
+                        <span class="info-value">{{ \Carbon\Carbon::parse($course->starts_date)->format('d/m/Y') }}</span>
                     </div>
                 </div>
 
-                @if ($courseItem->description)
+                @if ($course->description)
                     <div class="description">
-                        <strong>Buổi học:</strong> {{ $courseItem->description }}
+                        <strong>Buổi học:</strong> {{ $course->description }}
                     </div>
                 @endif
 
                 <div class="course-footer">
-                    <a href="{{ route('student.CourseRegister', ['id' => $courseItem->course_id]) }}" 
+                    <a href="{{ route('student.CourseRegister', ['id' => $course->course_id]) }}" 
                        class="btn-register">
                         <i class="fas fa-pen-nib"></i>
                         Đăng ký

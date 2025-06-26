@@ -5,8 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Lesson;
 use App\Models\LessonPart;
-use App\Models\LessonPartContent;
-use Illuminate\Http\Request;
+
 
 class LessonController extends Controller
 {
@@ -19,7 +18,7 @@ class LessonController extends Controller
         try {
             // Lấy lessons thông qua course level
             $lessons = Lesson::whereHas('courses', function($query) use ($courseId) {
-                $query->where('course_id', $courseId);
+                $query->where('courses.course_id', $courseId);
             })->with('lessonParts')->get();
             
             return response()->json($lessons, 200);
@@ -96,7 +95,7 @@ class LessonController extends Controller
             }
             
             $lessonParts = LessonPart::where('level', $lesson->level)
-                                   ->with('contents')
+                                   ->with('questions')
                                    ->orderBy('order_index')
                                    ->get();
             
@@ -117,7 +116,7 @@ class LessonController extends Controller
     public function getLessonPartById($lessonPartId)
     {
         try {
-            $lessonPart = LessonPart::with(['contents', 'lesson'])->find($lessonPartId);
+            $lessonPart = LessonPart::with(['questions', 'lesson'])->find($lessonPartId);
             
             if (!$lessonPart) {
                 return response()->json([
@@ -136,16 +135,19 @@ class LessonController extends Controller
     }
     
     /**
-     * Lấy nội dung lesson part
-     * GET /api/lesson-part-contents/{lessonPartId}
+     * Lấy câu hỏi của lesson part (thay thế cho lesson part contents)
+     * GET /api/lesson-part-questions/{lessonPartId}
      */
-    public function getLessonPartContents($lessonPartId)
+    public function getLessonPartQuestions($lessonPartId)
     {
         try {
-            $contents = LessonPartContent::where('lesson_part_id', $lessonPartId)->get();
-            
-            return response()->json($contents, 200);
-            
+            $questions = \App\Models\Question::where('lesson_part_id', $lessonPartId)
+                ->with('answers')
+                ->orderBy('order_index')
+                ->get();
+
+            return response()->json($questions, 200);
+
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'Lỗi server',

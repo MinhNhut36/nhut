@@ -18,6 +18,7 @@ class CourseEnrollment extends Model
     protected $casts = [
         'status' => enrollment::class,
     ];
+    
     //định nghĩa các quan hệ với các model khác
     public function student()
     {

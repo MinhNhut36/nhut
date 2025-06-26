@@ -18,16 +18,27 @@ class ClassPostController extends Controller
         try {
             $posts = ClassPost::where('course_id', $courseId)
                              ->where('status', 1)
-                             ->with(['course', 'comments'])
+                             ->with(['course', 'teacher', 'comments.student', 'comments.teacher'])
                              ->orderBy('created_at', 'desc')
                              ->get();
-            
-            // Thêm thông tin tác giả
+
+            // Thêm thông tin tác giả cho posts và comments
             foreach ($posts as $post) {
-                if ($post->author_type === 'student') {
-                    $post->author = $post->belongsTo(\App\Models\Student::class, 'author_id', 'student_id')->first();
-                } else {
-                    $post->author = $post->belongsTo(\App\Models\Teacher::class, 'author_id', 'teacher_id')->first();
+                $post->author = $post->teacher;
+                $post->author_type = 'teacher';
+                $post->author_name = $post->teacher ? $post->teacher->fullname : 'Unknown';
+
+                // Thêm thông tin tác giả cho comments
+                foreach ($post->comments as $comment) {
+                    if ($comment->student_id) {
+                        $comment->author = $comment->student;
+                        $comment->author_type = 'student';
+                        $comment->author_name = $comment->student ? $comment->student->fullname : 'Unknown';
+                    } else {
+                        $comment->author = $comment->teacher;
+                        $comment->author_type = 'teacher';
+                        $comment->author_name = $comment->teacher ? $comment->teacher->fullname : 'Unknown';
+                    }
                 }
             }
             
@@ -48,19 +59,30 @@ class ClassPostController extends Controller
     public function getClassPostById($postId)
     {
         try {
-            $post = ClassPost::with(['course', 'comments'])->find($postId);
-            
+            $post = ClassPost::with(['course', 'teacher', 'comments.student', 'comments.teacher'])->find($postId);
+
             if (!$post) {
                 return response()->json([
                     'error' => 'Không tìm thấy bài viết'
                 ], 404);
             }
-            
+
             // Thêm thông tin tác giả
-            if ($post->author_type === 'student') {
-                $post->author = $post->belongsTo(\App\Models\Student::class, 'author_id', 'student_id')->first();
-            } else {
-                $post->author = $post->belongsTo(\App\Models\Teacher::class, 'author_id', 'teacher_id')->first();
+            $post->author = $post->teacher;
+            $post->author_type = 'teacher';
+            $post->author_name = $post->teacher ? $post->teacher->fullname : 'Unknown';
+
+            // Thêm thông tin tác giả cho comments
+            foreach ($post->comments as $comment) {
+                if ($comment->student_id) {
+                    $comment->author = $comment->student;
+                    $comment->author_type = 'student';
+                    $comment->author_name = $comment->student ? $comment->student->fullname : 'Unknown';
+                } else {
+                    $comment->author = $comment->teacher;
+                    $comment->author_type = 'teacher';
+                    $comment->author_name = $comment->teacher ? $comment->teacher->fullname : 'Unknown';
+                }
             }
             
             return response()->json($post, 200);
@@ -74,18 +96,43 @@ class ClassPostController extends Controller
     }
     
     /**
-     * Tạo bài viết mới
+     * Tạo bài viết mới (chỉ teacher)
      * POST /api/class-posts
      */
     public function createClassPost(Request $request)
     {
         try {
-            $post = ClassPost::create($request->all());
-            
-            return response()->json($post, 201);
-            
+            // Validate input
+            $request->validate([
+                'course_id' => 'required|exists:courses,course_id',
+                'teacher_id' => 'required|exists:teachers,teacher_id',
+                'title' => 'required|string|max:255',
+                'content' => 'required|string',
+            ]);
+
+            $post = ClassPost::create([
+                'course_id' => $request->course_id,
+                'teacher_id' => $request->teacher_id,
+                'title' => $request->title,
+                'content' => $request->content,
+                'status' => 1,
+            ]);
+
+            // Load relationships
+            $post->load(['course', 'teacher']);
+            $post->author = $post->teacher;
+            $post->author_type = 'teacher';
+            $post->author_name = $post->teacher ? $post->teacher->fullname : 'Unknown';
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Tạo bài viết thành công',
+                'data' => $post
+            ], 201);
+
         } catch (\Exception $e) {
             return response()->json([
+                'success' => false,
                 'error' => 'Lỗi server',
                 'message' => $e->getMessage()
             ], 500);
@@ -101,22 +148,31 @@ class ClassPostController extends Controller
         try {
             $comments = ClassPostComment::where('post_id', $postId)
                                       ->where('status', 1)
+                                      ->with(['student', 'teacher', 'post'])
                                       ->orderBy('created_at', 'asc')
                                       ->get();
-            
+
             // Thêm thông tin tác giả cho mỗi comment
             foreach ($comments as $comment) {
-                if ($comment->author_type === 'student') {
-                    $comment->author = $comment->belongsTo(\App\Models\Student::class, 'author_id', 'student_id')->first();
+                if ($comment->student_id) {
+                    $comment->author = $comment->student;
+                    $comment->author_type = 'student';
+                    $comment->author_name = $comment->student ? $comment->student->fullname : 'Unknown';
                 } else {
-                    $comment->author = $comment->belongsTo(\App\Models\Teacher::class, 'author_id', 'teacher_id')->first();
+                    $comment->author = $comment->teacher;
+                    $comment->author_type = 'teacher';
+                    $comment->author_name = $comment->teacher ? $comment->teacher->fullname : 'Unknown';
                 }
             }
-            
-            return response()->json($comments, 200);
-            
+
+            return response()->json([
+                'success' => true,
+                'data' => $comments
+            ], 200);
+
         } catch (\Exception $e) {
             return response()->json([
+                'success' => false,
                 'error' => 'Lỗi server',
                 'message' => $e->getMessage()
             ], 500);
@@ -130,12 +186,262 @@ class ClassPostController extends Controller
     public function createClassPostReply(Request $request)
     {
         try {
-            $comment = ClassPostComment::create($request->all());
-            
-            return response()->json($comment, 201);
-            
+            // Validate input
+            $request->validate([
+                'post_id' => 'required|exists:class_posts,post_id',
+                'content' => 'required|string',
+            ]);
+
+            // Validate that either student_id or teacher_id is provided (but not both)
+            if ((!$request->student_id && !$request->teacher_id) ||
+                ($request->student_id && $request->teacher_id)) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Phải cung cấp student_id hoặc teacher_id (không được cả hai)'
+                ], 400);
+            }
+
+            // Validate student_id or teacher_id exists
+            if ($request->student_id) {
+                $request->validate(['student_id' => 'exists:students,student_id']);
+            }
+            if ($request->teacher_id) {
+                $request->validate(['teacher_id' => 'exists:teachers,teacher_id']);
+            }
+
+            $comment = ClassPostComment::create([
+                'post_id' => $request->post_id,
+                'student_id' => $request->student_id,
+                'teacher_id' => $request->teacher_id,
+                'content' => $request->content,
+                'status' => 1,
+            ]);
+
+            // Load relationships
+            $comment->load(['student', 'teacher', 'post']);
+            if ($comment->student_id) {
+                $comment->author = $comment->student;
+                $comment->author_type = 'student';
+                $comment->author_name = $comment->student ? $comment->student->fullname : 'Unknown';
+            } else {
+                $comment->author = $comment->teacher;
+                $comment->author_type = 'teacher';
+                $comment->author_name = $comment->teacher ? $comment->teacher->fullname : 'Unknown';
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Tạo bình luận thành công',
+                'data' => $comment
+            ], 201);
+
         } catch (\Exception $e) {
             return response()->json([
+                'success' => false,
+                'error' => 'Lỗi server',
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Lấy tất cả comments trong một khóa học
+     * GET /api/class-posts/course/{courseId}/comments
+     */
+    public function getClassPostCommentsByCourse($courseId)
+    {
+        try {
+            $comments = ClassPostComment::whereHas('post', function($query) use ($courseId) {
+                                $query->where('course_id', $courseId);
+                            })
+                            ->where('status', 1)
+                            ->with(['student', 'teacher', 'post'])
+                            ->orderBy('created_at', 'desc')
+                            ->get();
+
+            // Thêm thông tin tác giả cho mỗi comment
+            foreach ($comments as $comment) {
+                if ($comment->student_id) {
+                    $comment->author = $comment->student;
+                    $comment->author_type = 'student';
+                    $comment->author_name = $comment->student ? $comment->student->fullname : 'Unknown';
+                } else {
+                    $comment->author = $comment->teacher;
+                    $comment->author_type = 'teacher';
+                    $comment->author_name = $comment->teacher ? $comment->teacher->fullname : 'Unknown';
+                }
+                $comment->post_title = $comment->post->title;
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => $comments
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Lỗi server',
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Cập nhật bài viết (chỉ teacher)
+     * PUT /api/class-posts/{postId}
+     */
+    public function updateClassPost(Request $request, $postId)
+    {
+        try {
+            $post = ClassPost::find($postId);
+
+            if (!$post) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Không tìm thấy bài viết'
+                ], 404);
+            }
+
+            // Validate input
+            $request->validate([
+                'title' => 'sometimes|string|max:255',
+                'content' => 'sometimes|string',
+                'status' => 'sometimes|integer|in:0,1',
+            ]);
+
+            $post->update($request->only(['title', 'content', 'status']));
+
+            // Load relationships
+            $post->load(['course', 'teacher']);
+            $post->author = $post->teacher;
+            $post->author_type = 'teacher';
+            $post->author_name = $post->teacher ? $post->teacher->fullname : 'Unknown';
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Cập nhật bài viết thành công',
+                'data' => $post
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Lỗi server',
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Xóa bài viết (chỉ teacher)
+     * DELETE /api/class-posts/{postId}
+     */
+    public function deleteClassPost($postId)
+    {
+        try {
+            $post = ClassPost::find($postId);
+
+            if (!$post) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Không tìm thấy bài viết'
+                ], 404);
+            }
+
+            $post->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Xóa bài viết thành công'
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Lỗi server',
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Cập nhật comment
+     * PUT /api/class-post-replies/{commentId}
+     */
+    public function updateClassPostReply(Request $request, $commentId)
+    {
+        try {
+            $comment = ClassPostComment::find($commentId);
+
+            if (!$comment) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Không tìm thấy bình luận'
+                ], 404);
+            }
+
+            // Validate input
+            $request->validate([
+                'content' => 'sometimes|string',
+                'status' => 'sometimes|integer|in:0,1',
+            ]);
+
+            $comment->update($request->only(['content', 'status']));
+
+            // Load relationships
+            $comment->load(['student', 'teacher', 'post']);
+            if ($comment->student_id) {
+                $comment->author = $comment->student;
+                $comment->author_type = 'student';
+                $comment->author_name = $comment->student ? $comment->student->fullname : 'Unknown';
+            } else {
+                $comment->author = $comment->teacher;
+                $comment->author_type = 'teacher';
+                $comment->author_name = $comment->teacher ? $comment->teacher->fullname : 'Unknown';
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Cập nhật bình luận thành công',
+                'data' => $comment
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Lỗi server',
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Xóa comment
+     * DELETE /api/class-post-replies/{commentId}
+     */
+    public function deleteClassPostReply($commentId)
+    {
+        try {
+            $comment = ClassPostComment::find($commentId);
+
+            if (!$comment) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Không tìm thấy bình luận'
+                ], 404);
+            }
+
+            $comment->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Xóa bình luận thành công'
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
                 'error' => 'Lỗi server',
                 'message' => $e->getMessage()
             ], 500);

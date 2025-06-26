@@ -17,27 +17,55 @@ class CourseEnrollmentSeeder extends Seeder
     {
         $students = Student::all();
         $courses = Course::all();
-        
-        // Đăng ký học sinh vào các khóa học
+
         foreach ($students as $student) {
-            // Mỗi học sinh có thể đăng ký 2-4 khóa học
-            $randomCourses = $courses->random(rand(2, 4));
+            // Mỗi student chỉ có 2-3 enrollments
+            $numEnrollments = rand(2, 3);
 
-            foreach ($randomCourses as $course) {
-                // Random status từ 1-3, nhưng chỉ tạo record nếu status >= 1
-                $status = rand(1, 3);
+            for ($i = 0; $i < $numEnrollments; $i++) {
+                $course = $courses->random();
 
-                // Chỉ tạo record nếu status >= 1 (đã có đăng ký)
-                if ($status >= 1) {
-                    CourseEnrollment::create([
-                        'student_id' => $student->student_id,
-                        'assigned_course_id' => $course->course_id,
-                        'registration_date' => Carbon::now()->subDays(rand(1, 30)),
-                        'status' => $status, // 1: chờ xác nhận, 2: đang học, 3: hoàn thành
-                    ]);
+                // Tránh duplicate enrollments
+                $existingEnrollment = CourseEnrollment::where('student_id', $student->student_id)
+                    ->where('assigned_course_id', $course->course_id)
+                    ->first();
+
+                if ($existingEnrollment) {
+                    continue; // Skip nếu đã có enrollment này
                 }
-                // Status 0 (chưa đăng ký) = không tạo record
+
+                $status = $this->getRandomStatus();
+                $registrationDate = $this->getRegistrationDate($status);
+
+                CourseEnrollment::create([
+                    'student_id' => $student->student_id,
+                    'assigned_course_id' => $course->course_id,
+                    'status' => $status,
+                    'registration_date' => $registrationDate,
+                ]);
             }
+        }
+    }
+
+    private function getRandomStatus()
+    {
+        $statuses = [0, 1, 1, 1, 2, 2, 3]; // 1=pending, 2=studying, 3=passed, 4=failed
+        return $statuses[array_rand($statuses)];
+    }
+
+    private function getRegistrationDate($status)
+    {
+        switch ($status) {
+            case 1: // Pending
+                return Carbon::now()->subDays(rand(1, 14));
+            case 2: // Studying
+                return Carbon::now()->subDays(rand(15, 60));
+            case 3: // Passed
+                return Carbon::now()->subDays(rand(61, 180));
+            case 4: // Failed
+                return Carbon::now()->subDays(rand(61, 120));
+            default:
+                return Carbon::now()->subDays(rand(1, 90));
         }
     }
 }

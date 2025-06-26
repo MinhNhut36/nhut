@@ -165,4 +165,51 @@ class CourseController extends Controller
             ], 500);
         }
     }
+
+
+
+    /**
+     * Get student count for a course
+     * GET /api/courses/{courseId}/students/count
+     */
+    public function getCourseStudentCount($courseId)
+    {
+        try {
+            $course = Course::find($courseId);
+            if (!$course) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Course not found'
+                ], 404);
+            }
+
+            // Get enrollment counts by status
+            $enrollments = CourseEnrollment::where('assigned_course_id', $courseId)->get();
+
+            $totalStudents = $enrollments->count();
+            $activeStudents = $enrollments->where('status', 2)->count(); // status 2 = đang học
+            $completedStudents = $enrollments->where('status', 3)->count(); // status 3 = đạt
+            $pendingStudents = $enrollments->where('status', 1)->count(); // status 1 = chờ xác nhận
+            $failedStudents = $enrollments->where('status', 4)->count(); // status 4 = không đạt
+
+            $response = [
+                'course_id' => (int)$courseId,
+                'course_name' => $course->course_name,
+                'total_students' => $totalStudents,
+                'active_students' => $activeStudents,
+                'completed_students' => $completedStudents,
+                'pending_students' => $pendingStudents,
+                'failed_students' => $failedStudents,
+                'completion_rate' => $totalStudents > 0 ? round(($completedStudents / $totalStudents) * 100, 2) : 0
+            ];
+
+            return response()->json($response, 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Server error: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }

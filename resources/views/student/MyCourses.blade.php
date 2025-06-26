@@ -68,7 +68,7 @@
 
         .course-card:hover {
             transform: translateY(-4px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15) !important;
         }
 
         .course-title {
@@ -120,7 +120,7 @@
             .filter-btn-group {
                 margin-bottom: 16px;
             }
-            
+
             .filter-btn {
                 padding: 6px 16px;
                 font-size: 0.9rem;
@@ -140,103 +140,103 @@
     <div class="container" style="max-width: 80%;">
         <div class="filter-btn-group">
             <a href="{{ route('student.myCourses') }}"
-                class="filter-btn {{ request()->routeIs('student.myCourses') ? 'active' : '' }}"
-                id="btn-studying">Đang học</a>
+                class="filter-btn {{ request()->routeIs('student.myCourses') ? 'active' : '' }}" id="btn-studying">Đang
+                học</a>
             <a href="{{ route('student.MyCoursesCompleted') }}"
                 class="filter-btn {{ request()->routeIs('student.MyCoursesCompleted') ? 'active' : '' }}"
                 id="btn-completed">Đã hoàn thành</a>
         </div>
 
         <div class="row g-4">
-        @forelse ($enrollment as $MyCourse)
-            <div class="col-md-3 col-sm-6 mb-4">
-                <div class="card course-card h-100 border-0 shadow rounded-4">
-                    <div class="card-body">
-                        <h5 class="card-title course-title text-primary fw-bold mb-3">
-                            {{ $MyCourse->course->course_name }}
-                        </h5>
-                        <ul class="list-unstyled small text-dark">
-                            <li class="mb-2 d-flex justify-content-between">
-                                <span class="fw-semibold">
-                                    <i class="fas fa-calendar-alt me-1"></i>Ngày bắt đầu:
+            @forelse ($enrollment as $MyCourse)
+                <div class="col-md-3 col-sm-6 mb-4">
+                    <div class="card course-card h-100 border-0 shadow rounded-4">
+                        <div class="card-body">
+                            <h5 class="card-title course-title text-primary fw-bold mb-3">
+                                {{ $MyCourse->course->course_name }}
+                            </h5>
+                            <ul class="list-unstyled small text-dark">
+                                <li class="mb-2 d-flex justify-content-between">
+                                    <span class="fw-semibold">
+                                        <i class="fas fa-calendar-alt me-1"></i>Ngày bắt đầu:
+                                    </span>
+                                    <span class="fw-semibold">
+                                        {{ \Carbon\Carbon::parse($MyCourse->registration_date)->format('d/m/Y') }}
+                                    </span>
+                                </li>
+                                <li class="mb-2 d-flex justify-content-between">
+                                    <span class="fw-semibold">
+                                        <i class="fas fa-clock me-1"></i>Buổi học:
+                                    </span>
+                                    <span class="fw-semibold text-dark">{{ $MyCourse->course->description }}</span>
+                                </li>
+                                <li class="mb-2 d-flex justify-content-between">
+                                    <span class="fw-semibold">
+                                        <i class="fas fa-layer-group me-1"></i>Trình độ:
+                                    </span>
+                                    <span class="fw-semibold text-dark">{{ $MyCourse->course->level }}</span>
+                                </li>
+                                <li class="d-flex justify-content-between">
+                                    <span class="fw-semibold">
+                                        <i class="fas fa-info-circle me-1"></i>Trạng thái:
+                                    </span>
+                                    <span class="{{ $MyCourse->status->getStatus() }}">
+                                        {{ $MyCourse->status->getEnrollment() }}
+                                    </span>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="card-footer bg-transparent border-top-0">
+                            <a href="{{ route('student.lesson', $MyCourse->course->level) }}"
+                                class="btn course-btn w-100 text-white d-flex justify-content-between align-items-center">
+                                <span>
+                                    @if (request()->routeIs('student.myCourses'))
+                                        <i class="fas fa-play me-2"></i>Xem bài học
+                                    @else
+                                        <i class="fas fa-eye me-2"></i>Xem lại bài học
+                                    @endif
                                 </span>
-                                <span class="fw-semibold">
-                                    {{ \Carbon\Carbon::parse($MyCourse->registration_date)->format('d/m/Y') }}
-                                </span>
-                            </li>
-                            <li class="mb-2 d-flex justify-content-between">
-                                <span class="fw-semibold">
-                                    <i class="fas fa-clock me-1"></i>Buổi học:
-                                </span>
-                                <span class="fw-semibold text-dark">{{ $MyCourse->course->description }}</span>
-                            </li>
-                            <li class="mb-2 d-flex justify-content-between">
-                                <span class="fw-semibold">
-                                    <i class="fas fa-layer-group me-1"></i>Trình độ:
-                                </span>
-                                <span class="fw-semibold text-dark">{{ $MyCourse->course->level }}</span>
-                            </li>
-                            <li class="d-flex justify-content-between">
-                                <span class="fw-semibold">
-                                    <i class="fas fa-info-circle me-1"></i>Trạng thái:
-                                </span>
-                                <span class="{{ $MyCourse->status->getStatus() }}">
-                                    {{ $MyCourse->status->getEnrollment() }}
-                                </span>
-                            </li>
-                        </ul>
-                    </div>
-                    <div class="card-footer bg-transparent border-top-0">
-                        <a href="{{ route('student.lesson', $MyCourse->course->level) }}"
-                            class="btn course-btn w-100 text-white d-flex justify-content-between align-items-center">
-                            <span>
-                                @if(request()->routeIs('student.myCourses'))
-                                    <i class="fas fa-play me-2"></i>Xem bài học
-                                @else
-                                    <i class="fas fa-eye me-2"></i>Xem lại bài học
-                                @endif
-                            </span>
-                            <i class="fas fa-arrow-right"></i>
-                        </a>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
                     </div>
                 </div>
-            </div>
-        @empty
-            <div class="col-12">
-                <div class="empty-state">
-                    <div class="empty-state-icon">
-                        @if(request()->routeIs('student.myCourses'))
-                            <i class="fas fa-book-open"></i>
-                        @else
-                            <i class="fas fa-graduation-cap"></i>
+            @empty
+                <div class="col-12">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">
+                            @if (request()->routeIs('student.myCourses'))
+                                <i class="fas fa-book-open"></i>
+                            @else
+                                <i class="fas fa-graduation-cap"></i>
+                            @endif
+                        </div>
+                        <h3 class="empty-state-title">
+                            @if (request()->routeIs('student.myCourses'))
+                                Chưa có khóa học đang học
+                            @else
+                                Chưa có khóa học đã hoàn thành
+                            @endif
+                        </h3>
+                        <p class="empty-state-description">
+                            @if (request()->routeIs('student.myCourses'))
+                                Hãy đăng ký một khóa học mới để bắt đầu hành trình học tập của bạn.
+                            @else
+                                Hoàn thành các khóa học đang học để xem chúng xuất hiện ở đây.
+                            @endif
+                        </p>
+                        @if (request()->routeIs('student.myCourses'))
+                            <a href="{{ route('student.courses') }}" class="btn btn-primary">
+                                <i class="fas fa-plus me-2"></i>Khám phá khóa học
+                            </a>
                         @endif
                     </div>
-                    <h3 class="empty-state-title">
-                        @if(request()->routeIs('student.myCourses'))
-                            Chưa có khóa học đang học
-                        @else
-                            Chưa có khóa học đã hoàn thành
-                        @endif
-                    </h3>
-                    <p class="empty-state-description">
-                        @if(request()->routeIs('student.myCourses'))
-                            Hãy đăng ký một khóa học mới để bắt đầu hành trình học tập của bạn.
-                        @else
-                            Hoàn thành các khóa học đang học để xem chúng xuất hiện ở đây.
-                        @endif
-                    </p>
-                    @if(request()->routeIs('student.myCourses'))
-                        <a href="{{ route('student.courses') }}" class="btn btn-primary">
-                            <i class="fas fa-plus me-2"></i>Khám phá khóa học
-                        </a>
-                    @endif
                 </div>
-            </div>
-        @endforelse
+            @endforelse
         </div>
 
         <!-- Pagination if needed -->
-        @if(method_exists($enrollment, 'links'))
+        @if (method_exists($enrollment, 'links'))
             <div class="row mt-4">
                 <div class="col-12 d-flex justify-content-center">
                     {{ $enrollment->links() }}
@@ -247,36 +247,36 @@
 @endsection
 
 @section('js')
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Add hover effects to cards
-        const courseCards = document.querySelectorAll('.course-card');
-        courseCards.forEach(card => {
-            card.addEventListener('mouseenter', function() {
-                this.style.transform = 'translateY(-4px)';
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add hover effects to cards
+            const courseCards = document.querySelectorAll('.course-card');
+            courseCards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-4px)';
+                });
+
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                });
             });
-            
-            card.addEventListener('mouseleave', function() {
-                this.style.transform = 'translateY(0)';
+
+            // Add click animation to buttons
+            const courseBtns = document.querySelectorAll('.course-btn');
+            courseBtns.forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    this.style.transform = 'scale(0.98)';
+                    setTimeout(() => {
+                        this.style.transform = 'scale(1)';
+                    }, 150);
+                });
             });
         });
 
-        // Add click animation to buttons
-        const courseBtns = document.querySelectorAll('.course-btn');
-        courseBtns.forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                this.style.transform = 'scale(0.98)';
-                setTimeout(() => {
-                    this.style.transform = 'scale(1)';
-                }, 150);
-            });
-        });
-    });
-
-    // Show success message if available
-    @if(session('success'))
-        // Create and show toast notification
-        const toastHTML = `
+        // Show success message if available
+        @if (session('success'))
+            // Create and show toast notification
+            const toastHTML = `
             <div class="toast position-fixed top-0 end-0 m-3" role="alert" style="z-index: 9999;">
                 <div class="toast-header bg-success text-white">
                     <i class="fas fa-check-circle me-2"></i>
@@ -288,15 +288,15 @@
                 </div>
             </div>
         `;
-        
-        document.body.insertAdjacentHTML('beforeend', toastHTML);
-        const toast = document.querySelector('.toast:last-child');
-        const bsToast = new bootstrap.Toast(toast);
-        bsToast.show();
-        
-        toast.addEventListener('hidden.bs.toast', function() {
-            this.remove();
-        });
-    @endif
-</script>
+
+            document.body.insertAdjacentHTML('beforeend', toastHTML);
+            const toast = document.querySelector('.toast:last-child');
+            const bsToast = new bootstrap.Toast(toast);
+            bsToast.show();
+
+            toast.addEventListener('hidden.bs.toast', function() {
+                this.remove();
+            });
+        @endif
+    </script>
 @endsection

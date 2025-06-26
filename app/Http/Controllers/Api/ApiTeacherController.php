@@ -4,8 +4,6 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Teacher;
-use App\Models\TeacherCourseAssignment;
-use Illuminate\Http\Request;
 
 class ApiTeacherController extends Controller
 {
@@ -60,7 +58,7 @@ class ApiTeacherController extends Controller
     {
         try {
             $teachers = Teacher::whereHas('courses', function($query) use ($courseId) {
-                $query->where('course_id', $courseId);
+                $query->where('courses.course_id', $courseId);
             })->with('courses')->get();
 
             return response()->json($teachers, 200);

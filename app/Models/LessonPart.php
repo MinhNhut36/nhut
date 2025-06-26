@@ -21,11 +21,17 @@ class LessonPart extends Model
     }
     public function contents()
     {
-        return $this->hasMany(LessonPartContent::class, 'lesson_part_id','lesson_part_id');
+        return $this->hasMany(LessonPartContent::class, 'lesson_part_id', 'lesson_part_id');
     }
     public function scores()
     {
         return $this->hasMany(LessonPartScore::class, 'lesson_part_id');
     }
 
+    public function myScore()
+    {
+        return $this->hasOne(LessonPartScore::class, 'lesson_part_id', 'lesson_part_id')
+            ->where('student_id', auth('student')->id())
+            ->orderByDesc('attempt_no');
+    }
 }

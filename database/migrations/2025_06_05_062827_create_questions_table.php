@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('questions', function (Blueprint $table) {
             $table->id('questions_id');
-            $table->foreignId('contents_id')
-                ->constrained('lesson_part_contents', 'contents_id')
+            $table->foreignId('lesson_part_id')
+                ->constrained('lesson_parts', 'lesson_part_id')
                 ->onDelete('cascade');
             $table->enum('question_type', [
                 'single_choice',      // Dạng 1: Trắc nghiệm 4 đáp án (1 đáp án đúng)

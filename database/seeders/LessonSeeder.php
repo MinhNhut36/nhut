@@ -16,33 +16,27 @@ class LessonSeeder extends Seeder
         $lessons = [
             [
                 'level' => 'A1',
-                'title' => 'Anh Văn 1',
-                'description' => 'Dài lắm',
+                'title' => 'English Beginner A1',
+                'description' => 'Khóa học tiếng Anh cơ bản dành cho người mới bắt đầu. Học từ vựng, ngữ pháp và giao tiếp cơ bản.',
                 'order_index' => 1,
             ],
             [
                 'level' => 'A2',
-                'title' => 'Anh Văn 2',
-                'description' => 'Dài lắm',
+                'title' => 'English Elementary A2',
+                'description' => 'Khóa học tiếng Anh sơ cấp, phát triển kỹ năng giao tiếp và hiểu biết ngữ pháp nâng cao.',
                 'order_index' => 2,
             ],
             [
                 'level' => 'A3',
-                'title' => 'Anh Văn 3',
-                'description' => 'Dài lắm',
+                'title' => 'English Pre-Intermediate A3',
+                'description' => 'Khóa học tiếng Anh trước trung cấp, tập trung vào kỹ năng đọc hiểu và viết.',
                 'order_index' => 3,
             ],
             [
-                'level' => 'A2/6',
-                'title' => 'Anh Văn 2/6',
-                'description' => 'Dài lắm',
+                'level' => 'TA 2/6',
+                'title' => 'English Intensive TA 2/6',
+                'description' => 'Khóa học tiếng Anh chuyên sâu, phát triển toàn diện 4 kỹ năng nghe-nói-đọc-viết.',
                 'order_index' => 4,
-            ],
-            [
-                'level' => 'B1',
-                'title' => 'Anh Văn Trung Cấp B1',
-                'description' => 'Khóa học tiếng Anh trung cấp dành cho người đã có nền tảng',
-                'order_index' => 5,
             ],
         ];
 

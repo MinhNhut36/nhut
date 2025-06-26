@@ -292,7 +292,7 @@ class EnhancedQuestionsSeeder extends Seeder
             // Tạo question
             $question = new Question();
             $question->questions_id = $questionId;
-            $question->contents_id = (($questionId - 1) % 8) + 1;
+            $question->lesson_part_id = (($questionId - 1) % 8) + 1;
             $question->question_type = $questionData['question_type'] ?? $defaultType;
             $question->question_text = $questionData['question_text'];
             $question->media_url = $questionData['media_url'] ?? null;

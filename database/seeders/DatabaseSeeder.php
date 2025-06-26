@@ -2,10 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\Lesson;
-use App\Models\LessonPartContent;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 
 class DatabaseSeeder extends Seeder
 {
@@ -22,18 +19,18 @@ class DatabaseSeeder extends Seeder
             LessonSeeder::class,
             CourseSeeder::class,
             LessonPartSeeder::class,
-            LessonPartContenttSeeder::class,
-            EnhancedQuestionsSeeder::class, // Seeder mới với nhiều dữ liệu và student answers
+
+            ComprehensiveQuestionsSeeder::class, // Seeder mới với 10 câu hỏi mỗi lesson part, đã tối ưu
             CourseEnrollmentSeeder::class,
             TeacherCourseAssignmentSeeder::class,
-            ClassPostSeeder::class,
-            ClassPostCommentSeeder::class,
-            NotificationSeeder::class,
-            ExamResultSeeder::class,
-            LessonPartScoreSeeder::class,
-            StudentProgressSeeder::class,
-            StudentEvaluationSeeder::class,
-            StudentAnswerSeeder::class,
+            RealisticStudentAnswerSeeder::class, // Tạo student answers realistic
+            ExamResultSeeder::class, // Updated để tạo exam results realistic
+            LessonPartScoreSeeder::class, // Updated để tạo scores dựa trên enrollments
+            StudentProgressSeeder::class, // Updated để tạo progress dựa trên scores
+            StudentEvaluationSeeder::class, // Updated để tạo evaluations dựa trên exam results
+            ClassPostSeeder::class, // Updated để tạo posts dựa trên teacher assignments
+            ClassPostCommentSeeder::class, // Updated để tạo comments realistic
+            NotificationSeeder::class, // Updated để tạo notifications dựa trên enrollments
         ]);
                       
     }

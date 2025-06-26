@@ -18,17 +18,15 @@ class TeacherCourseAssignmentSeeder extends Seeder
         $teachers = Teacher::all();
         $courses = Course::all();
         
-        $roles = ['Main Teacher', 'Assistant Teacher', 'Substitute Teacher'];
-        
         foreach ($courses as $course) {
-            // Mỗi khóa học có 1-2 giáo viên
-            $randomTeachers = $teachers->random(rand(1, 2));
-            
+            // Mỗi khóa học có đúng 2 giáo viên
+            $randomTeachers = $teachers->random(2);
+
             foreach ($randomTeachers as $index => $teacher) {
                 TeacherCourseAssignment::create([
                     'teacher_id' => $teacher->teacher_id,
                     'course_id' => $course->course_id,
-                    'role' => $roles[$index % count($roles)],
+                    'role' => $index == 0 ? 'Main Teacher' : 'Assistant Teacher',
                     'assigned_at' => Carbon::now()->subDays(rand(1, 60)),
                 ]);
             }

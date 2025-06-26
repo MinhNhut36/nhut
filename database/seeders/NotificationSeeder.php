@@ -17,74 +17,151 @@ class NotificationSeeder extends Seeder
     {
         $admin = User::first();
         $students = Student::all();
-        
-        $notifications = [
+        $enrollments = \App\Models\CourseEnrollment::with(['student', 'course'])->get();
+
+        // Thông báo chung cho tất cả học sinh
+        $generalNotifications = [
             [
                 'title' => 'Welcome to English Learning Center',
                 'message' => 'Welcome to our English learning platform! We\'re excited to have you join us on this learning journey.',
-                'target' => 0, // Tất cả học sinh
             ],
             [
                 'title' => 'New Course Available',
                 'message' => 'A new English course has been added to the platform. Check it out in the courses section!',
-                'target' => 0, // Tất cả học sinh
             ],
             [
                 'title' => 'System Maintenance Notice',
                 'message' => 'The system will undergo maintenance this weekend from 2 AM to 6 AM. Please plan accordingly.',
-                'target' => 0, // Tất cả học sinh
             ],
             [
-                'title' => 'Assignment Reminder',
-                'message' => 'Don\'t forget to submit your homework assignment before the deadline.',
-                'target' => 0, // Tất cả học sinh
+                'title' => 'Holiday Schedule Update',
+                'message' => 'Please note the updated class schedule for the upcoming holidays. Check your course calendar.',
             ],
             [
-                'title' => 'Exam Schedule Released',
-                'message' => 'The exam schedule for this semester has been released. Please check your course page for details.',
-                'target' => 0, // Tất cả học sinh
+                'title' => 'New Learning Resources',
+                'message' => 'We\'ve added new learning materials and practice exercises to help improve your English skills.',
             ],
         ];
 
-        // Tạo thông báo chung
-        foreach ($notifications as $notification) {
+        // Tạo thông báo chung (target = 0)
+        foreach ($generalNotifications as $notification) {
             Notification::create([
                 'admin' => $admin->admin_id,
-                'target' => $notification['target'],
+                'target' => 0, // Tất cả học sinh
                 'title' => $notification['title'],
                 'message' => $notification['message'],
-                'notification_date' => Carbon::now()->subDays(rand(1, 10)),
-                'status' => rand(0, 1), // 0: chưa gửi, 1: đã gửi
+                'notification_date' => Carbon::now()->subDays(rand(1, 30)),
+                'status' => 1, // Đã gửi
             ]);
         }
 
-        // Tạo thông báo cá nhân cho từng học sinh
-        foreach ($students as $student) {
-            $personalNotifications = [
-                [
-                    'title' => 'Course Enrollment Confirmation',
-                    'message' => 'Your enrollment in the English course has been confirmed. Welcome aboard!',
-                ],
-                [
-                    'title' => 'Progress Update',
-                    'message' => 'Great job! You\'ve completed 50% of your current course. Keep up the good work!',
-                ],
-                [
-                    'title' => 'Quiz Results Available',
-                    'message' => 'Your quiz results are now available. Check your progress in the dashboard.',
-                ],
-            ];
+        // Tạo thông báo dựa trên enrollment status
+        foreach ($enrollments as $enrollment) {
+            $this->createEnrollmentNotifications($admin, $enrollment);
+        }
 
-            foreach ($personalNotifications as $notification) {
+        // Tạo thông báo ngẫu nhiên cho học sinh
+        foreach ($students as $student) {
+            $this->createRandomNotifications($admin, $student);
+        }
+    }
+
+    private function createEnrollmentNotifications($admin, $enrollment)
+    {
+        $statusValue = $enrollment->status->value;
+        $courseName = $enrollment->course->course_name;
+
+        switch ($statusValue) {
+            case 1: // Pending
                 Notification::create([
                     'admin' => $admin->admin_id,
-                    'target' => $student->student_id,
-                    'title' => $notification['title'],
-                    'message' => $notification['message'],
-                    'notification_date' => Carbon::now()->subDays(rand(1, 15)),
-                    'status' => rand(0, 1),
+                    'target' => $enrollment->student_id,
+                    'title' => 'Enrollment Pending',
+                    'message' => "Your enrollment in {$courseName} is pending approval. We'll notify you once it's confirmed.",
+                    'notification_date' => Carbon::parse($enrollment->registration_date)->addHours(1),
+                    'status' => 1,
                 ]);
-            }
+                break;
+
+            case 2: // Studying
+                Notification::create([
+                    'admin' => $admin->admin_id,
+                    'target' => $enrollment->student_id,
+                    'title' => 'Course Started',
+                    'message' => "Welcome to {$courseName}! Your course has started. Good luck with your studies!",
+                    'notification_date' => Carbon::parse($enrollment->registration_date)->addDays(1),
+                    'status' => 1,
+                ]);
+                break;
+
+            case 3: // Passed
+                Notification::create([
+                    'admin' => $admin->admin_id,
+                    'target' => $enrollment->student_id,
+                    'title' => 'Congratulations!',
+                    'message' => "Congratulations! You have successfully completed {$courseName}. Well done!",
+                    'notification_date' => Carbon::parse($enrollment->registration_date)->addDays(rand(30, 60)),
+                    'status' => 1,
+                ]);
+                break;
+
+            case 4: // Failed
+                Notification::create([
+                    'admin' => $admin->admin_id,
+                    'target' => $enrollment->student_id,
+                    'title' => 'Course Completion',
+                    'message' => "Your {$courseName} course has ended. Please contact your teacher for feedback and next steps.",
+                    'notification_date' => Carbon::parse($enrollment->registration_date)->addDays(rand(30, 60)),
+                    'status' => 1,
+                ]);
+                break;
+        }
+    }
+
+    private function createRandomNotifications($admin, $student)
+    {
+        $randomNotifications = [
+            [
+                'title' => 'Assignment Reminder',
+                'message' => 'Don\'t forget to submit your homework assignment before the deadline.',
+            ],
+            [
+                'title' => 'Quiz Available',
+                'message' => 'A new quiz is available for your course. Complete it to test your knowledge!',
+            ],
+            [
+                'title' => 'Progress Update',
+                'message' => 'Great progress! Keep up the excellent work in your English studies.',
+            ],
+            [
+                'title' => 'Study Tips',
+                'message' => 'Remember to practice speaking English daily for better fluency improvement.',
+            ],
+            [
+                'title' => 'Class Schedule',
+                'message' => 'Please check your class schedule for any updates or changes.',
+            ],
+        ];
+
+        // Mỗi học sinh có 1-3 thông báo ngẫu nhiên
+        $numNotifications = rand(1, 3);
+        $selectedNotifications = array_rand($randomNotifications, $numNotifications);
+
+        if (!is_array($selectedNotifications)) {
+            $selectedNotifications = [$selectedNotifications];
+        }
+
+        foreach ($selectedNotifications as $index) {
+            $notification = $randomNotifications[$index];
+
+            Notification::create([
+                'admin' => $admin->admin_id,
+                'target' => $student->student_id,
+                'title' => $notification['title'],
+                'message' => $notification['message'],
+                'notification_date' => Carbon::now()->subDays(rand(1, 20)),
+                'status' => rand(0, 1), // 50% đã gửi, 50% chưa gửi
+            ]);
         }
     }
 }

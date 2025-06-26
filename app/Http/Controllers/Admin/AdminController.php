@@ -15,6 +15,9 @@ use App\Models\Course;
 use App\Http\Requests\EditCourseResquest;
 use App\Models\TeacherCourseAssignment;
 use App\Enum\courseStatus;
+use App\Models\Lesson;
+use App\Http\Requests\AddLevelRequest;
+use App\Models\LessonPart;
 
 class AdminController extends Controller
 {
@@ -327,5 +330,35 @@ class AdminController extends Controller
             ->where('teacher_id', $teacherId)
             ->delete();
         return back()->with('success', 'Đã xoá giáo viên khỏi khóa học.');
+    }
+    //Danh sách các trình độ
+    public function ShowListLesson()
+    {
+        $lessons = Lesson::orderBy('order_index')->get();
+        return view('admin.showlesson', compact('lessons'));
+    }
+    // thêm trình độ mới 
+    public function store(AddLevelRequest $request)
+    {
+        Lesson::create($request->validated());
+
+        return redirect()->back()->with('success', 'Thêm trình độ thành công!');
+    }
+    //danh sách tên trình độ
+    public function showLessonsWithLevels()
+    {
+        // Lấy danh sách các level duy nhất từ lessons
+        $levels = Lesson::select('level')->distinct()->orderBy('level')->pluck('level');
+
+        // Truyền xuống view
+        return view('admin.AddQuestion', compact('levels'));
+    }
+    //Danh sách các bài học
+    public function getLessonsByLevel($level)
+    {
+        $lessonPart = LessonPart::where('level', $level)
+            ->get();
+
+        return response()->json($lessonPart);
     }
 }

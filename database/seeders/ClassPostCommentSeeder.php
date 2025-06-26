@@ -19,8 +19,8 @@ class ClassPostCommentSeeder extends Seeder
         $posts = ClassPost::all();
         $teachers = Teacher::all();
         $students = Student::all();
-        
-        $comments = [
+
+        $studentComments = [
             'Thank you for the explanation!',
             'This is very helpful.',
             'I have a question about this topic.',
@@ -30,40 +30,80 @@ class ClassPostCommentSeeder extends Seeder
             'When is the deadline for this assignment?',
             'This exercise is challenging but fun.',
             'I need more practice with this.',
-            'Excellent teaching method!',
             'Can we have more examples?',
             'I\'m looking forward to the next lesson.',
             'This topic is interesting.',
-            'I agree with this approach.',
-            'Thanks for your patience with us.'
+            'Thanks for your patience with us.',
+            'I\'m confused about this part.',
+            'Could you explain this again?',
+            'This helps me a lot!',
+            'I will practice more at home.',
+            'When is our next test?',
+            'Can I ask a question in class?',
+            'I love learning English!'
+        ];
+
+        $teacherComments = [
+            'Great question! Let me explain...',
+            'Excellent work everyone!',
+            'Remember to practice daily.',
+            'I\'m proud of your progress.',
+            'Don\'t hesitate to ask questions.',
+            'Keep up the good work!',
+            'This is exactly right!',
+            'Let\'s review this together.',
+            'You\'re making great progress.',
+            'Practice makes perfect!',
+            'I\'ll provide more examples next class.',
+            'Well done on the assignment!',
+            'Your participation is excellent.',
+            'Let\'s work on this together.',
+            'I\'m here to help you succeed.'
         ];
 
         foreach ($posts as $post) {
-            // Mỗi bài viết có 2-6 bình luận
-            $numComments = rand(2, 6);
-            
+            // Chỉ tạo comments cho posts của courses có enrollments
+            $courseEnrollments = \App\Models\CourseEnrollment::where('assigned_course_id', $post->course_id)->get();
+
+            if ($courseEnrollments->isEmpty()) {
+                continue;
+            }
+
+            // Mỗi bài viết có 1-5 bình luận
+            $numComments = rand(1, 5);
+
             for ($i = 0; $i < $numComments; $i++) {
-                // 60% bình luận từ học sinh, 40% từ giáo viên
-                $isStudent = rand(1, 10) <= 6;
-                
-                if ($isStudent) {
-                    $author = $students->random();
-                    $authorType = 'student';
-                    $authorId = $author->student_id;
+                // 70% bình luận từ học sinh enrolled, 30% từ giáo viên
+                $isStudent = rand(1, 10) <= 7;
+
+                $studentId = null;
+                $teacherId = null;
+
+                if ($isStudent && $courseEnrollments->isNotEmpty()) {
+                    // Chọn student từ enrollments của course này
+                    $enrollment = $courseEnrollments->random();
+                    $studentId = $enrollment->student_id;
+                    $commentContent = $studentComments[array_rand($studentComments)];
                 } else {
-                    $author = $teachers->random();
-                    $authorType = 'teacher';
-                    $authorId = $author->teacher_id;
+                    // Chọn teacher (ưu tiên teacher của post này)
+                    if (rand(1, 10) <= 7) {
+                        $teacherId = $post->teacher_id; // Teacher của post
+                    } else {
+                        $teacherId = $teachers->random()->teacher_id; // Teacher khác
+                    }
+                    $commentContent = $teacherComments[array_rand($teacherComments)];
                 }
-                
+
+                $createdAt = Carbon::parse($post->created_at)->addHours(rand(1, 72));
+
                 ClassPostComment::create([
                     'post_id' => $post->post_id,
-                    'author_id' => $authorId,
-                    'author_type' => $authorType,
-                    'content' => $comments[array_rand($comments)],
-                    'status' => 1,
-                    'created_at' => Carbon::parse($post->created_at)->addHours(rand(1, 48)),
-                    'updated_at' => Carbon::now(),
+                    'student_id' => $studentId,
+                    'teacher_id' => $teacherId,
+                    'content' => $commentContent,
+                    'status' => rand(0, 1) ? 1 : 0, // 90% active, 10% inactive
+                    'created_at' => $createdAt,
+                    'updated_at' => $createdAt->copy()->addMinutes(rand(0, 30)),
                 ]);
             }
         }

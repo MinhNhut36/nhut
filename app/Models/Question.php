@@ -3,29 +3,42 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Enum\QuestionType;
 
 class Question extends Model
 {
     protected $fillable = [
-        'question_id',
+        'questions_id',
         'contents_id',
         'question_text',
         'question_type',
         'media_url',
         'order_index',
     ];
-    protected $primaryKey = 'question_id';
+    protected $primaryKey = 'questions_id';
+
+    protected $casts = [
+        'question_type' => QuestionType::class,
+    ];
     //định nghĩa các quan hệ với các model khác
-    public function LessonPartContent()
+
+
+    public function content()
     {
         return $this->belongsTo(LessonPartContent::class, 'contents_id');
     }
-    public function Answers()
+    public function answers()
     {
-        return $this->hasMany(Answer::class, 'question_id');
+        return $this->hasMany(Answer::class, 'questions_id');
     }
-    public function StudentAnswers()
+
+    public function correctAnswer()
     {
-        return $this->hasMany(StudentAnswer::class, 'question_id');
+        return $this->hasOne(Answer::class, 'questions_id', 'questions_id')->where('is_correct', true);
+    }
+
+    public function studentAnswers()
+    {
+        return $this->hasMany(StudentAnswer::class, 'questions_id');
     }
 }

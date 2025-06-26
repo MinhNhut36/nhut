@@ -16,16 +16,18 @@ return new class extends Migration
             $table->foreignId('course_id')
                   ->constrained('courses', 'course_id')
                   ->onDelete('cascade');
-            $table->unsignedBigInteger('author_id'); // ID của tác giả (student hoặc teacher)
-            $table->enum('author_type', ['student', 'teacher']); // Loại tác giả
+            $table->unsignedBigInteger('teacher_id'); // ID của teacher (chỉ teacher mới tạo được post)
             $table->string('title'); // Tiêu đề bài viết
             $table->longText('content'); // Nội dung bài viết
             $table->integer('status')->default(1); // 1: hoạt động, 0: ẩn
             $table->timestamps();
 
+            // Foreign key constraint
+            $table->foreign('teacher_id')->references('teacher_id')->on('teachers')->onDelete('cascade');
+
             // Index cho hiệu suất truy vấn
             $table->index(['course_id', 'created_at']);
-            $table->index(['author_id', 'author_type']);
+            $table->index(['teacher_id']);
         });
     }
 

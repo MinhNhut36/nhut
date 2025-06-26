@@ -16,9 +16,8 @@ class StudentEvaluationSeeder extends Seeder
      */
     public function run(): void
     {
-        $students = Student::all();
         $examResults = ExamResult::all();
-        
+
         $remarks = [
             'Excellent progress! Keep up the good work.',
             'Good improvement in speaking skills.',
@@ -29,35 +28,61 @@ class StudentEvaluationSeeder extends Seeder
             'Needs to focus more on listening skills.',
             'Very good participation in class activities.',
             'Homework completion is excellent.',
-            'Recommended for advanced level course.'
+            'Recommended for advanced level course.',
+            'Strong vocabulary development.',
+            'Needs improvement in pronunciation.',
+            'Great participation in group activities.',
+            'Consistent attendance and effort.',
+            'Ready for next level challenges.'
         ];
 
-        foreach ($students as $student) {
-            // Mỗi học sinh có 1-2 đánh giá
-            $numEvaluations = rand(1, 2);
+        foreach ($examResults as $examResult) {
+            // Tìm progress records của student này thông qua lesson_part_scores
+            $studentProgresses = StudentProgres::whereHas('lessonPartScore', function($query) use ($examResult) {
+                $query->where('student_id', $examResult->student_id);
+            })->get();
 
-            for ($i = 0; $i < $numEvaluations; $i++) {
-                // Lấy exam result của học sinh này
-                $studentExamResult = $examResults->where('student_id', $student->student_id)->first();
+            if ($studentProgresses->isNotEmpty()) {
+                // Tạo evaluation cho student này
+                $randomProgress = $studentProgresses->random();
 
-                // Lấy progress thông qua lesson_part_scores của học sinh
-                $studentScore = \App\Models\LessonPartScore::where('student_id', $student->student_id)->first();
-                $studentProgress = null;
-                if ($studentScore) {
-                    $studentProgress = StudentProgres::where('score_id', $studentScore->score_id)->first();
-                }
+                // Final status dựa trên exam result
+                $finalStatus = $this->determineFinalStatus($examResult);
 
-                if ($studentExamResult && $studentProgress) {
-                    StudentEvaluation::create([
-                        'student_id' => $student->student_id,
-                        'progress_id' => $studentProgress->progress_id,
-                        'exam_result_id' => $studentExamResult->exam_result_id,
-                        'evaluation_date' => Carbon::now()->subDays(rand(1, 30)),
-                        'final_status' => rand(0, 1), // 0: chưa hoàn thành, 1: đã hoàn thành
-                        'remark' => $remarks[array_rand($remarks)],
-                    ]);
-                }
+                StudentEvaluation::create([
+                    'student_id' => $examResult->student_id,
+                    'progress_id' => $randomProgress->progress_id,
+                    'exam_result_id' => $examResult->exam_result_id,
+                    'evaluation_date' => Carbon::parse($examResult->exam_date)->addDays(rand(1, 7)),
+                    'final_status' => $finalStatus,
+                    'remark' => $this->getRemarkBasedOnPerformance($examResult, $remarks),
+                ]);
             }
+        }
+    }
+
+    private function determineFinalStatus($examResult)
+    {
+        $averageScore = ($examResult->listening_score + $examResult->speaking_score +
+                        $examResult->reading_score + $examResult->writing_score) / 4;
+
+        return $averageScore >= 6.0 ? 1 : 0; // 1: passed, 0: failed
+    }
+
+    private function getRemarkBasedOnPerformance($examResult, $remarks)
+    {
+        $averageScore = ($examResult->listening_score + $examResult->speaking_score +
+                        $examResult->reading_score + $examResult->writing_score) / 4;
+
+        if ($averageScore >= 8.0) {
+            $goodRemarks = array_slice($remarks, 0, 5); // Excellent remarks
+            return $goodRemarks[array_rand($goodRemarks)];
+        } elseif ($averageScore >= 6.0) {
+            $averageRemarks = array_slice($remarks, 5, 5); // Average remarks
+            return $averageRemarks[array_rand($averageRemarks)];
+        } else {
+            $improvementRemarks = array_slice($remarks, 10, 5); // Need improvement remarks
+            return $improvementRemarks[array_rand($improvementRemarks)];
         }
     }
 }

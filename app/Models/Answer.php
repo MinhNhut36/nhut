@@ -8,7 +8,7 @@ class Answer extends Model
 {
     protected $fillable = [
         'answers_id',
-        'question_id',
+        'questions_id',
         'match_key',
         'answer_text',
         'is_correct',
@@ -20,6 +20,6 @@ class Answer extends Model
     //định nghĩa các quan hệ với các model khác
     public function question()
     {
-        return $this->belongsTo(Question::class, 'question_id');
+        return $this->belongsTo(Question::class, 'questions_id');
     }
 }

@@ -65,7 +65,8 @@
         }
 
         .admin-nav {
-            padding: 1rem 2rem; /* Thay đổi từ container sang padding trực tiếp */
+            padding: 1rem 2rem;
+            /* Thay đổi từ container sang padding trực tiếp */
             width: 100%;
         }
 
@@ -225,7 +226,7 @@
             border-radius: var(--border-radius);
             box-shadow: var(--shadow-sm);
             padding: 2rem;
-            width: 100%; 
+            width: 100%;
         }
 
         /* Responsive Design */
@@ -244,7 +245,8 @@
             .admin-nav {
                 flex-direction: column;
                 gap: 1rem;
-                padding: 1rem; /* Giảm padding trên mobile */
+                padding: 1rem;
+                /* Giảm padding trên mobile */
             }
 
             .content-container {
@@ -254,7 +256,8 @@
             }
 
             .main-content {
-                padding: 1rem; /* Giảm padding trên mobile */
+                padding: 1rem;
+                /* Giảm padding trên mobile */
             }
         }
 
@@ -279,8 +282,13 @@
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
         /* Admin Badge */
@@ -320,7 +328,7 @@
                     <img src="https://cdn.haitrieu.com/wp-content/uploads/2023/01/Logo-Truong-Cao-dang-Ky-thuat-Cao-Thang.png"
                         alt="Cao Thắng College Logo" class="logo-img">
                     <div class="brand-text">Admin Panel</div>
-                    <span class="admin-badge">chào, {{Auth::user()->fullname;}}</span>
+                    <span class="admin-badge">chào, {{ Auth::user()->fullname }}</span>
                 </div>
 
                 <!-- Navigation Controls -->
@@ -337,13 +345,13 @@
                         </button>
                         <ul class="dropdown-menu" aria-labelledby="dropdownThongTin">
                             <li>
-                                <a class="dropdown-item" href="{{route('admin.studentlist')}}" data-id="sv">
+                                <a class="dropdown-item" href="{{ route('admin.studentlist') }}" data-id="sv">
                                     <i class="fas fa-user-graduate"></i>
                                     Quản lý sinh viên
                                 </a>
                             </li>
                             <li>
-                                <a class="dropdown-item" href="{{route('admin.teacherlist')}}" data-id="gv">
+                                <a class="dropdown-item" href="{{ route('admin.teacherlist') }}" data-id="gv">
                                     <i class="fas fa-chalkboard-teacher"></i>
                                     Quản lý giảng viên
                                 </a>
@@ -363,13 +371,13 @@
                         </button>
                         <ul class="dropdown-menu" aria-labelledby="dropdownKhoaHoc">
                             <li>
-                                <a class="dropdown-item" href="#" data-id="list-kh">
+                                <a class="dropdown-item" href="{{route('admin.level.lessons')}}" data-id="list-kh">
                                     <i class="fas fa-list"></i>
-                                    Danh sách các trình độ
+                                    Danh sách các câu hỏi
                                 </a>
                             </li>
                             <li>
-                                <a class="dropdown-item" href="{{route('admin.courses')}}" data-id="add-kh">
+                                <a class="dropdown-item" href="{{ route('admin.courses') }}" data-id="add-kh">
                                     <i class="fas fa-plus-circle"></i>
                                     Thêm khóa học
                                 </a>
@@ -388,8 +396,8 @@
     </header>
 
     <!-- MAIN CONTENT -->
-    <main class="main-content">         
-            @yield('content')
+    <main class="main-content">
+        @yield('content')
     </main>
 
     <!-- Bootstrap JS -->
@@ -430,11 +438,11 @@
 
                     // Save active state
                     localStorage.setItem('activeDropdownItem', this.dataset.id);
-                    
+
                     // Update active states
                     dropdownItems.forEach(i => i.classList.remove('active'));
                     navButtons.forEach(btn => btn.classList.remove('active'));
-                    
+
                     this.classList.add('active');
                     if (parentButton) {
                         parentButton.classList.add('active');
@@ -473,7 +481,7 @@
             }
         });
     </script>
-    
+
     @yield('js')
 </body>
 

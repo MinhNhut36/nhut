@@ -9,16 +9,16 @@ class StudentAnswer extends Model
     protected $fillable = [
         'student_answer_id',
         'student_id',
-        'question_id',
+        'questions_id',
         'answer_text',
         'course_id',
         'answered_at',
     ];
     protected $primaryKey = 'student_answer_id';
     //định nghĩa các quan hệ với các model khác
-    public function Question()
+    public function question()
     {
-        return $this->belongsTo(Question::class, 'question_id');
+        return $this->belongsTo(Question::class, 'questions_id');
     }
     public function Course()
     {

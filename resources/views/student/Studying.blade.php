@@ -1,312 +1,301 @@
 @extends('layouts.student')
-@section('titile', 'HỌC BÀI')
+@section('title', 'HỌC BÀI')
+
 @section('styles')
     <style>
-        :root {
-            --primary-color: #4f46e5;
-            --secondary-color: #e0e7ff;
-            --text-color: #374151;
-            --border-color: #d1d5db;
-            --hover-color: #f3f4f6;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f8fafc;
-        }
-
-        .sidebar {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 0;
-            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+        .lesson-main {
+            padding: 2rem 0;
+            min-height: calc(100vh - 100px);
         }
 
         .lesson-header {
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            padding: 20px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
-        }
-
-        .lesson-header:hover {
-            background: rgba(255, 255, 255, 0.15);
-        }
-
-        .lesson-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin: 0;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .collapse-icon {
-            transition: transform 0.3s ease;
-            font-size: 0.9rem;
-        }
-
-        .collapse-icon.collapsed {
-            transform: rotate(-90deg);
-        }
-
-        .lesson-content {
-            padding: 0;
-        }
-
-        .lesson-item {
+            text-align: center;
+            margin-bottom: 3rem;
             background: rgba(255, 255, 255, 0.95);
-            border: none;
-            color: var(--text-color);
-            padding: 15px 25px;
-            text-decoration: none;
-            display: block;
-            transition: all 0.3s ease;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            backdrop-filter: blur(20px);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .lesson-header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .lesson-header p {
+            font-size: 1.1rem;
+            color: var(--text-light);
+            margin: 0;
+        }
+
+        .lessons-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .lesson-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-md);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: var(--transition);
             position: relative;
+            overflow: hidden;
         }
 
-        .lesson-item:hover {
-            background: rgba(255, 255, 255, 1);
-            color: var(--primary-color);
-            transform: translateX(5px);
-            padding-left: 30px;
-        }
-
-        .lesson-item:before {
+        .lesson-card::before {
             content: '';
             position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: 4px;
-            background: var(--primary-color);
-            transform: scaleY(0);
-            transition: transform 0.3s ease;
-        }
-
-        .lesson-item:hover:before {
-            transform: scaleY(1);
-        }
-
-        .lesson-item.active {
-            background: rgba(255, 255, 255, 1);
-            color: var(--primary-color);
-            font-weight: 600;
-        }
-
-        .lesson-item.active:before {
-            transform: scaleY(1);
-        }
-
-        .main-content {
-            padding: 30px;
-            background: white;
-            margin: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-        }
-
-        .content-header {
-            border-bottom: 2px solid #e5e7eb;
-            padding-bottom: 20px;
-            margin-bottom: 30px;
-        }
-
-        .content-title {
-            color: var(--primary-color);
-            font-size: 2rem;
-            font-weight: 700;
-            margin-bottom: 10px;
-        }
-
-        .content-subtitle {
-            color: #6b7280;
-            font-size: 1.1rem;
-        }
-
-        .lesson-number {
-            background: var(--primary-color);
-            color: white;
-            font-size: 0.8rem;
-            padding: 4px 8px;
-            border-radius: 12px;
-            margin-right: 10px;
-            font-weight: 600;
-        }
-
-
-
-        @media (max-width: 768px) {
-            .sidebar {
-                position: fixed;
-                top: 0;
-                left: -100%;
-                width: 80%;
-                z-index: 1000;
-                transition: left 0.3s ease;
-            }
-
-            .sidebar.show {
-                left: 0;
-            }
-
-            .main-content {
-                margin: 10px;
-                padding: 20px;
-            }
-
-            .mobile-toggle {
-                display: block !important;
-            }
-        }
-
-        .mobile-toggle {
-            display: none;
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            z-index: 1001;
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 10px 12px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-        }
-
-        .overlay {
-            display: none;
-            position: fixed;
             top: 0;
             left: 0;
             right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 999;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color), var(--primary-light));
+            background-size: 200% 200%;
+            animation: gradientMove 3s ease infinite;
         }
 
-        .fade-in {
-            animation: fadeIn 0.5s ease-in;
+        @keyframes gradientMove {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
         }
 
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
+        .lesson-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .lesson-type-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .lesson-content {
+            color: var(--text-dark);
+            line-height: 1.6;
+            font-size: 0.95rem;
+            margin-bottom: 1.5rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .lesson-actions {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+        }
+
+        .btn-study {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+            color: white;
+            border: none;
+            padding: 0.75rem 1.25rem;
+            border-radius: 20px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .btn-study:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(14, 165, 233, 0.4);
+            color: white;
+            text-decoration: none;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-md);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            color: var(--text-light);
+            margin-bottom: 1rem;
+        }
+
+        .empty-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-description {
+            color: var(--text-light);
+            font-size: 1rem;
+        }
+
+        .progress {
+            width: 100%;
+            height: 8px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 0.5rem 0;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+            border-radius: 4px;
+            transition: width 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            color: white;
+            font-weight: 600;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .lesson-header h1 {
+                font-size: 2rem;
             }
 
-            to {
-                opacity: 1;
-                transform: translateY(0);
+            .lessons-grid {
+                grid-template-columns: 1fr;
             }
+
+            .lesson-actions {
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .lesson-actions {
+                flex-direction: column;
+            }
+
+            .btn-study {
+                justify-content: center;
+            }
+        }
+
+        .score {
+            margin: 0;
+            padding: 0.25rem 0.75rem;
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
     </style>
 @endsection
 
 @section('content')
-    <button class="mobile-toggle" onclick="toggleSidebar()">
-        <i class="fas fa-bars"></i>
-    </button>
-
-    <div class="overlay" onclick="toggleSidebar()"></div>
-
-    <div class="container-fluid">
-        <div class="row">
-            <!-- Sidebar -->
-            <div class="col-md-3 col-lg-2 px-0 sidebar" id="sidebar">
-                @foreach ($lesson as $lessonPart)
-                    <div class="lesson-header" data-bs-toggle="collapse" data-bs-target="#lesson1Content"
-                        aria-expanded="true">
-                        <h5 class="lesson-title">
-                            {{ $lessonPart->content }}
-                            <i class="fas fa-chevron-down collapse-icon"></i>
-                        </h5>
-                    </div>
-                    <div class="collapse show lesson-content" id="lesson1Content">
-                        @foreach ($lessonPart->contents as $content)
-                            <a href="#" class="lesson-item">
-                                <span class="lesson-number">{{ $content->content_data }}</span>
-                            </a>
-                        @endforeach
-                    </div>
-                @endforeach
+    <div class="lesson-main">
+        <div class="content-container">
+            <!-- Header Section -->
+            <div class="lesson-header">
+                <h1><i class="fas fa-book-open"></i> Danh Sách Bài Học</h1>
+                <p>Khám phá và học tập các bài học thú vị để nâng cao kiến thức của bạn</p>
             </div>
 
-            <!-- Main Content -->
-            <div class="col-md-9 col-lg-10">
-                <div class="main-content fade-in" id="mainContent">
+            <!-- Lessons Grid -->
+            @if (count($lessonParts) > 0)
+                <div class="lessons-grid">
+                    @foreach ($lessonParts as $lesson)
+                        @php
+                            $score = $lesson->myScore->score ?? null;
+                            $total = $lesson->myScore->total_questions ?? null;
+                            $correct = $lesson->myScore->correct_answers ?? 0;
+                            $percent = $total > 0 ? round(($correct / $total) * 100) : 0;
+                        @endphp
 
+                        <div class="lesson-card">
+
+                            <!-- Lesson Type Badge -->
+                            <div class="lesson-type-badge">
+                                <i class="fas fa-book"></i> {{ $lesson->part_type ?? 'Bài Học' }}
+                            </div>
+
+                            <!-- Lesson Content -->
+                            <div class="lesson-content">
+                                {{ $lesson->content ?? 'Đây là một bài học thú vị giúp bạn nâng cao kiến thức và kỹ năng. Hãy bắt đầu học ngay để khám phá những điều mới mẻ và phát triển bản thân!' }}
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="lesson-actions">
+                                <div style="width: 100%; margin-bottom: 1rem;">
+                                    <p><strong>Tiến độ:</strong> {{ $correct }} / {{ $total }} câu đúng</p>
+                                    <p class="score">
+                                        <i class="fas fa-star" style="margin-right: 0.25rem;"></i>{{ $score }} điểm
+                                    </p>
+                                    @if ($total > 0)
+                                        <div class="progress">
+                                            <div class="progress-bar" role="progressbar"
+                                                style="width: {{ $percent }}%;" aria-valuenow="{{ $correct }}"
+                                                aria-valuemin="0" aria-valuemax="{{ $total }}">
+                                                {{ $percent }}%
+                                            </div>
+                                        </div>
+                                    @endif
+                                </div>
+                                <a href="{{ route('student.quiz.start', ['lessonPartId' => $lesson->lesson_part_id]) }}"
+                                    class="btn-study">
+                                    <i class="fas fa-play"></i> Bắt đầu học
+                                </a>
+                            </div>
+                        </div>
+                    @endforeach
                 </div>
-            </div>
+            @else
+                <!-- Empty State -->
+                <div class="empty-state">
+                    <div class="empty-icon">
+                        <i class="fas fa-book-open"></i>
+                    </div>
+                    <h3 class="empty-title">Chưa có bài học nào</h3>
+                    <p class="empty-description">
+                        Hiện tại chưa có bài học nào được thêm vào. Vui lòng quay lại sau hoặc liên hệ với giáo viên!
+                    </p>
+                </div>
+            @endif
         </div>
     </div>
-
-@endsection
-
-@section('js')
-    <script>
-        function loadContent(contentKey) {
-            const content = contentData[contentKey];
-            if (!content) return;
-
-            // Update active state
-            document.querySelectorAll('.lesson-item').forEach(item => {
-                item.classList.remove('active');
-            });
-            event.target.classList.add('active');
-
-            // Update content
-            document.querySelector('.content-title').textContent = content.title;
-            document.querySelector('.content-subtitle').textContent = content.subtitle;
-            document.getElementById('contentArea').innerHTML = content.content;
-
-            // Add fade animation
-            const mainContent = document.getElementById('mainContent');
-            mainContent.classList.remove('fade-in');
-            setTimeout(() => {
-                mainContent.classList.add('fade-in');
-            }, 50);
-
-            // Close sidebar on mobile
-            if (window.innerWidth <= 768) {
-                toggleSidebar();
-            }
-        }
-
-        function toggleSidebar() {
-            const
-                sidebar = document.getElementById('sidebar');
-            const overlay = document.querySelector('.overlay');
-            if (sidebar.classList.contains('show')) {
-                sidebar.classList.remove('show');
-                overlay.style.display = 'none';
-            } else {
-                sidebar.classList.add('show');
-                overlay.style.display = 'block';
-            }
-        } // Handle collapse icon rotation
-        document.addEventListener('DOMContentLoaded', function() {
-            const
-                collapseElements = document.querySelectorAll('[data-bs-toggle=" collapse" ]');
-            collapseElements.forEach(element => {
-                element.addEventListener('click', function() {
-                    const icon = this.querySelector('.collapse-icon');
-                    icon.classList.toggle('collapsed');
-                });
-            });
-        });
-
-        // Handle window resize
-        window.addEventListener('resize', function() {
-            if (window.innerWidth > 768) {
-                document.getElementById('sidebar').classList.remove('show');
-                document.querySelector('.overlay').style.display = 'none';
-            }
-        });
-    </script>
 @endsection

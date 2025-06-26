@@ -110,7 +110,8 @@
         .status-inactive {
             background-color: #dc3545;
         }
-        .container-fluid{
+
+        .container-fluid {
             width: 80%;
         }
     </style>
@@ -194,159 +195,7 @@
                         </h5>
                     </div>
                     <div class="card-body">
-                        <!-- Score Overview -->
-                        <div class="row mb-4">
-                            <div class="col-md-3">
-                                <div class="stat-item">
-                                    <div class="stat-number">8.5</div>
-                                    <small class="text-muted">GPA Tổng</small>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="stat-item">
-                                    <div class="stat-number">24</div>
-                                    <small class="text-muted">Tín chỉ</small>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="stat-item">
-                                    <div class="stat-number">12</div>
-                                    <small class="text-muted">Môn học</small>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="stat-item">
-                                    <div class="stat-number">A2</div>
-                                    <small class="text-muted">Xếp loại</small>
-                                </div>
-                            </div>
-                        </div>
 
-                        <!-- Detailed Scores by Level -->
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <h6 class="text-muted mb-3">
-                                    <i class="fas fa-star text-warning me-2"></i>Điểm theo cấp độ A1
-                                </h6>
-                                <div class="mb-2">
-                                    <span class="score-badge score-excellent">Toán cao cấp: 9.2</span>
-                                </div>
-                                <div class="mb-2">
-                                    <span class="score-badge score-excellent">Vật lý đại cương: 8.8</span>
-                                </div>
-                                <div class="mb-2">
-                                    <span class="score-badge score-good">Hóa học đại cương: 8.0</span>
-                                </div>
-                                <div class="mt-3">
-                                    <small class="text-muted">Trung bình A1: </small>
-                                    <strong class="text-success">8.67</strong>
-                                    <div class="progress mt-1">
-                                        <div class="progress-bar bg-success progress-bar-custom" style="width: 86.7%"></div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="col-md-6 mb-3">
-                                <h6 class="text-muted mb-3">
-                                    <i class="fas fa-star text-info me-2"></i>Điểm theo cấp độ A2
-                                </h6>
-                                <div class="mb-2">
-                                    <span class="score-badge score-excellent">Lập trình C++: 9.0</span>
-                                </div>
-                                <div class="mb-2">
-                                    <span class="score-badge score-good">Cấu trúc dữ liệu: 8.5</span>
-                                </div>
-                                <div class="mb-2">
-                                    <span class="score-badge score-good">Thuật toán: 8.3</span>
-                                </div>
-                                <div class="mt-3">
-                                    <small class="text-muted">Trung bình A2: </small>
-                                    <strong class="text-success">8.60</strong>
-                                    <div class="progress mt-1">
-                                        <div class="progress-bar bg-info progress-bar-custom" style="width: 86%"></div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="col-md-6 mb-3">
-                                <h6 class="text-muted mb-3">
-                                    <i class="fas fa-star text-primary me-2"></i>Điểm theo cấp độ A3
-                                </h6>
-                                <div class="mb-2">
-                                    <span class="score-badge score-excellent">Cơ sở dữ liệu: 9.1</span>
-                                </div>
-                                <div class="mb-2">
-                                    <span class="score-badge score-good">Mạng máy tính: 8.2</span>
-                                </div>
-                                <div class="mb-2">
-                                    <span class="score-badge score-good">Hệ điều hành: 8.4</span>
-                                </div>
-                                <div class="mt-3">
-                                    <small class="text-muted">Trung bình A3: </small>
-                                    <strong class="text-success">8.57</strong>
-                                    <div class="progress mt-1">
-                                        <div class="progress-bar bg-primary progress-bar-custom" style="width: 85.7%">
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="col-md-6 mb-3">
-                                <h6 class="text-muted mb-3">
-                                    <i class="fas fa-star text-warning me-2"></i>Điểm theo cấp độ A2/6
-                                </h6>
-                                <div class="mb-2">
-                                    <span class="score-badge score-good">Phân tích thiết kế: 8.1</span>
-                                </div>
-                                <div class="mb-2">
-                                    <span class="score-badge score-average">Kiểm thử phần mềm: 7.8</span>
-                                </div>
-                                <div class="mb-2">
-                                    <span class="score-badge score-good">Quản lý dự án: 8.0</span>
-                                </div>
-                                <div class="mt-3">
-                                    <small class="text-muted">Trung bình A2/6: </small>
-                                    <strong class="text-warning">7.97</strong>
-                                    <div class="progress mt-1">
-                                        <div class="progress-bar bg-warning progress-bar-custom" style="width: 79.7%">
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Academic Progress Chart -->
-                        <div class="mt-4">
-                            <h6 class="text-muted mb-3">
-                                <i class="fas fa-chart-area me-2"></i>Tiến độ học tập theo học kỳ
-                            </h6>
-                            <div class="row text-center">
-                                <div class="col-3">
-                                    <div class="bg-light rounded p-3">
-                                        <div class="h5 mb-1 text-primary">8.2</div>
-                                        <small class="text-muted">HK1/2023</small>
-                                    </div>
-                                </div>
-                                <div class="col-3">
-                                    <div class="bg-light rounded p-3">
-                                        <div class="h5 mb-1 text-success">8.6</div>
-                                        <small class="text-muted">HK2/2023</small>
-                                    </div>
-                                </div>
-                                <div class="col-3">
-                                    <div class="bg-light rounded p-3">
-                                        <div class="h5 mb-1 text-info">8.4</div>
-                                        <small class="text-muted">HK1/2024</small>
-                                    </div>
-                                </div>
-                                <div class="col-3">
-                                    <div class="bg-light rounded p-3">
-                                        <div class="h5 mb-1 text-warning">8.7</div>
-                                        <small class="text-muted">HK2/2024</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>

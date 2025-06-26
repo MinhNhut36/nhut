@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Course;
 use App\Models\Question;
 use App\Models\Answer;
 use App\Models\StudentAnswer;
@@ -17,10 +18,50 @@ class AssignmentController extends Controller
     public function getAssignmentsByCourseId($courseId)
     {
         try {
-            // Trong database hiện tại, assignments được quản lý thông qua questions
-            // Tạm thời trả về empty array
-            return response()->json([], 200);
-            
+            // Lấy course và level của nó
+            $course = Course::find($courseId);
+
+            if (!$course) {
+                return response()->json([
+                    'error' => 'Không tìm thấy khóa học'
+                ], 404);
+            }
+
+            // Lấy tất cả questions thuộc course này thông qua lesson parts
+            $questions = Question::join('lesson_parts', 'questions.lesson_part_id', '=', 'lesson_parts.lesson_part_id')
+                                ->where('lesson_parts.level', $course->level)
+                                ->select('questions.*', 'lesson_parts.part_type', 'lesson_parts.lesson_part_id')
+                                ->with('Answers')
+                                ->orderBy('lesson_parts.order_index')
+                                ->orderBy('questions.order_index')
+                                ->get();
+
+            // Group questions by lesson part for better organization
+            $assignments = [];
+            foreach ($questions as $question) {
+                $partType = $question->part_type;
+
+                if (!isset($assignments[$partType])) {
+                    $assignments[$partType] = [
+                        'lesson_part_id' => $question->lesson_part_id,
+                        'part_type' => $partType,
+                        'level' => $course->level,
+                        'questions' => []
+                    ];
+                }
+
+                $assignments[$partType]['questions'][] = [
+                    'question_id' => $question->questions_id,
+                    'question_text' => $question->question_text,
+                    'question_type' => $question->question_type,
+                    'media_url' => $question->media_url,
+                    'order_index' => $question->order_index,
+                    'answers' => $question->Answers
+                ];
+            }
+
+            return response()->json(array_values($assignments), 200);
+
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'Lỗi server',
@@ -36,9 +77,42 @@ class AssignmentController extends Controller
     public function getAssignmentById($assignmentId)
     {
         try {
-            // Tạm thời trả về empty object
-            return response()->json(null, 404);
-            
+            // Trong hệ thống này, assignment ID = lesson_part_id
+            $lessonPart = \App\Models\LessonPart::find($assignmentId);
+
+            if (!$lessonPart) {
+                return response()->json([
+                    'error' => 'Không tìm thấy bài tập'
+                ], 404);
+            }
+
+            // Lấy tất cả questions thuộc lesson part này
+            $questions = Question::where('lesson_part_id', $assignmentId)
+                                ->with('Answers')
+                                ->orderBy('order_index')
+                                ->get();
+
+            $assignment = [
+                'assignment_id' => $lessonPart->lesson_part_id,
+                'title' => $lessonPart->part_type,
+                'level' => $lessonPart->level,
+                'content' => $lessonPart->content,
+                'order_index' => $lessonPart->order_index,
+                'total_questions' => $questions->count(),
+                'questions' => $questions->map(function($question) {
+                    return [
+                        'question_id' => $question->questions_id,
+                        'question_text' => $question->question_text,
+                        'question_type' => $question->question_type,
+                        'media_url' => $question->media_url,
+                        'order_index' => $question->order_index,
+                        'answers' => $question->Answers
+                    ];
+                })
+            ];
+
+            return response()->json($assignment, 200);
+
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'Lỗi server',
@@ -54,9 +128,35 @@ class AssignmentController extends Controller
     public function getQuestionsByAssignmentId($assignmentId)
     {
         try {
-            // Tạm thời trả về empty array
-            return response()->json([], 200);
-            
+            // Kiểm tra assignment (lesson part) có tồn tại không
+            $lessonPart = \App\Models\LessonPart::find($assignmentId);
+
+            if (!$lessonPart) {
+                return response()->json([
+                    'error' => 'Không tìm thấy bài tập'
+                ], 404);
+            }
+
+            // Lấy tất cả questions thuộc assignment này (updated for new structure)
+            $questions = Question::where('lesson_part_id', $assignmentId)
+                                ->with('Answers')
+                                ->orderBy('order_index')
+                                ->get();
+
+            // Format response
+            $formattedQuestions = $questions->map(function($question) {
+                return [
+                    'question_id' => $question->questions_id,
+                    'question_text' => $question->question_text,
+                    'question_type' => $question->question_type,
+                    'media_url' => $question->media_url,
+                    'order_index' => $question->order_index,
+                    'answers' => $question->Answers
+                ];
+            });
+
+            return response()->json($formattedQuestions, 200);
+
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'Lỗi server',
@@ -97,10 +197,23 @@ class AssignmentController extends Controller
     public function submitAnswer(Request $request)
     {
         try {
-            $answer = StudentAnswer::create($request->all());
-            
+            $validated = $request->validate([
+                'student_id' => 'required|integer',
+                'questions_id' => 'required|integer',
+                'course_id' => 'required|integer',
+                'answer_text' => 'required|string'
+            ]);
+
+            $answer = StudentAnswer::create([
+                'student_id' => $validated['student_id'],
+                'questions_id' => $validated['questions_id'],
+                'course_id' => $validated['course_id'],
+                'answer_text' => $validated['answer_text'],
+                'answered_at' => now()
+            ]);
+
             return response()->json($answer, 201);
-            
+
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'Lỗi server',

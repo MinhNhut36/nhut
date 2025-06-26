@@ -632,7 +632,7 @@
                         </div>
                         <div class="action-title">Quản lý trình độ</div>
                         <div class="action-description">Xem và quản lý các trình độ</div>
-                        <a href="#" class="btn-action">Xem tất cả</a>
+                        <a href="{{route('admin.lesson')}}" class="btn-action">Xem tất cả</a>
                     </div>
                 </div>
             </div>

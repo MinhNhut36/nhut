@@ -16,6 +16,9 @@ return new class extends Migration
             $table->foreignId('lesson_part_id')
                 ->constrained('lesson_parts', 'lesson_part_id')
                 ->onDelete('cascade');
+            $table->foreignId('student_id')
+                ->constrained('students', 'student_id')
+                ->onDelete('cascade');
             $table->foreignId('course_id')
                 ->constrained('courses', 'course_id')
                 ->onDelete('cascade');
@@ -23,7 +26,7 @@ return new class extends Migration
             $table->double('score'); // Điểm số của học sinh cho phần học
             $table->integer('total_questions'); // Tổng số câu hỏi trong phần học
             $table->integer('correct_answers'); // Số câu trả lời đúng của học sinh
-            $table->datetime('submit_time'); // Ngày nộp bài của
+            $table->datetime('submit_time')->nullable(); // Ngày nộp bài của
             $table->timestamps();
         });
     }

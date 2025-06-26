@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\StudentProgres;
-use App\Models\Student;
 use App\Models\LessonPartScore;
 use Carbon\Carbon;
 
@@ -17,12 +16,15 @@ class StudentProgressSeeder extends Seeder
     {
         $scores = LessonPartScore::all();
 
-        // Tạo progress cho mỗi score (50% scores sẽ có progress)
-        foreach ($scores->random($scores->count() * 0.5) as $score) {
+        // Tạo progress cho mỗi score dựa trên logic thực tế
+        foreach ($scores as $score) {
+            // Completion status dựa trên điểm số (>= 7.0 là hoàn thành)
+            $completionStatus = $score->score >= 7.0 ? 1 : 0;
+
             StudentProgres::create([
                 'score_id' => $score->score_id,
-                'completion_status' => rand(0, 1), // 0: chưa hoàn thành, 1: đã hoàn thành
-                'last_updated' => Carbon::now()->subDays(rand(1, 20)),
+                'completion_status' => $completionStatus,
+                'last_updated' => Carbon::parse($score->submit_time)->addMinutes(rand(1, 30)),
             ]);
         }
     }

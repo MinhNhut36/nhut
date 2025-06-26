@@ -13,9 +13,6 @@ return new class extends Migration
     {
         Schema::create('student_progress', function (Blueprint $table) {
             $table->id('progress_id');
-            $table->foreignId('student_id')
-                ->constrained('students', 'student_id')
-                ->onDelete('cascade');
             $table->foreignId('score_id')
                 ->constrained('lesson_part_scores', 'score_id')
                 ->onDelete('cascade');

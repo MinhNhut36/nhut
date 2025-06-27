@@ -275,8 +275,8 @@
 
     <!-- Page Header -->
     <div class="page-header">
-        <h1 class="page-title">{{ $CourseName->course_name }}</h1>
-        <p class="page-subtitle">Thông tin chi tiết khóa học</p>
+        <h1 class="page-title">{{ $level }}</h1>
+        <p class="page-subtitle">Các lớp đang mở</p>
     </div>
 
     <div class="content-wrapper">

@@ -47,6 +47,8 @@ class AdminController extends Controller
         if ($students->currentPage() > $students->lastPage()) {
             return redirect()->route('admin.studentlist', ['page' => $students->lastPage()]);
         }
+
+
         $total = Student::count();
         $active = Student::where('is_status', 1)->count();
         $inactive = Student::where('is_status', 0)->count();
@@ -293,7 +295,7 @@ class AdminController extends Controller
             'courseAssignments' => $courseAssignments,
         ]);
     }
-    // Thêm sinh viên 
+    // Phân công giáo viên
     public function assignTeacher(Request $request)
     {
         $request->validate([
@@ -334,7 +336,7 @@ class AdminController extends Controller
     //Danh sách các trình độ
     public function ShowListLesson()
     {
-        $lessons = Lesson::orderBy('order_index')->get();
+        $lessons = Lesson::with('lessonParts')->orderBy('order_index')->get();
         return view('admin.showlesson', compact('lessons'));
     }
     // thêm trình độ mới 

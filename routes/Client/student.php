@@ -8,7 +8,7 @@ Route::prefix('student')->name('student.')->middleware(['web', 'student'])->grou
 
         Route::get('/courses', [StudentController::class, 'ShowListCourses'])->name('courses');
 
-        Route::get('/coursesDetail/{Coursename}', [StudentController::class, 'ShowDetailCourses'])->name('DetailCourse');
+        Route::get('/coursesDetail/{level}', [StudentController::class, 'ShowDetailCourses'])->where('level', '.*')->name('DetailCourse');
 
         Route::get('/coursesRegister/{id}', [StudentController::class, 'CourseRegister'])->name('CourseRegister');
 
@@ -22,13 +22,13 @@ Route::prefix('student')->name('student.')->middleware(['web', 'student'])->grou
         // Học sinh vào làm bài tập 
         
         // Bắt đầu bài tập
-        Route::get('/exercise/{lessonPartId}/single-choice/start', [StudentController::class, 'startExercise'])->name('quiz.start');
+        Route::get('/exercise/{lessonPartId}/start', [StudentController::class, 'startExercise'])->name('exercise.start');
 
         // Nộp đáp án
-        Route::post('/exercise/{lessonPartId}/single-choice/answer', [StudentController::class, 'submitAnswer'])->name('quiz.submit');
+        Route::post('/exercise/{lessonPartId}/submit', [StudentController::class, 'submitAnswer'])->name('exercise.submit');
 
         // Kết thúc bài
-        Route::get('/exercise/{scoreId}/complete', [StudentController::class, 'completeExercise'])->name('quiz.complete');
+        Route::get('/exercise/{scoreId}/complete', [StudentController::class, 'completeExercise'])->name('exercise.complete');
 });
 
 Route::POST('/StudentAuthLogin', [StudentController::class, 'Studentlogin'])->name('student.authlogin');

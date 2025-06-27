@@ -23,13 +23,13 @@ class Question extends Model
     //định nghĩa các quan hệ với các model khác
 
 
-    public function content()
+    public function lessonPart()
     {
-        return $this->belongsTo(LessonPartContent::class, 'contents_id');
+        return $this->belongsTo(LessonPart::class, 'contents_id');
     }
     public function answers()
     {
-        return $this->hasMany(Answer::class, 'questions_id');
+        return $this->hasMany(Answer::class, 'questions_id','questions_id');
     }
 
     public function correctAnswer()

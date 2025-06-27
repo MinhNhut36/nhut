@@ -276,7 +276,7 @@
                                         </div>
                                     @endif
                                 </div>
-                                <a href="{{ route('student.quiz.start', ['lessonPartId' => $lesson->lesson_part_id]) }}"
+                                <a href="{{ route('student.exercise.start', ['lessonPartId' => $lesson->lesson_part_id]) }}"
                                     class="btn-study">
                                     <i class="fas fa-play"></i> Bắt đầu học
                                 </a>

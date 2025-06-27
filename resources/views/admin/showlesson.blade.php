@@ -159,6 +159,30 @@
             margin-bottom: 0;
         }
 
+        /* Chevron Animation */
+        .chevron-icon {
+            transition: transform 0.3s ease;
+            cursor: pointer;
+        }
+
+        .chevron-icon.rotated {
+            transform: rotate(180deg);
+        }
+
+        /* Accordion Row Styles */
+        .accordion-toggle {
+            cursor: pointer;
+        }
+
+        .collapse-row {
+            background-color: #f8fafc !important;
+        }
+
+        .collapse-row td {
+            border-top: none !important;
+            padding-top: 0 !important;
+        }
+
         /* Modal Styles */
         #addLevelModal .modal-content {
             border: none !important;
@@ -334,38 +358,78 @@
                     <table class="table mb-0">
                         <thead>
                             <tr>
-                                <th style="width: 10%">trình độ</th>
+                                <th style="width: 5%">Thứ tự</th>
+                                <th style="width: 5%">trình độ</th>
                                 <th style="width: 10%">Tiêu đề</th>
                                 <th style="width: 40%">Mô tả</th>
                                 <th style="width: 10%">Thao tác</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody id="lessonTableAccordion">
                             @forelse ($lessons as $lesson)
-                                <tr>
+                                <tr class="accordion-toggle" data-lesson-order="{{ $lesson->order_index }}">
                                     <td>
-                                        <span class="level-badge "> {{ $lesson->level }}</span>
+                                        <span class="level-badge">
+                                            <i class="fas fa-chevron-down me-2 text-primary chevron-icon"
+                                                id="chevron-{{ $lesson->order_index }}"></i>
+                                            {{ $lesson->order_index }}
+                                        </span>
                                     </td>
                                     <td>
-                                        <div class="lesson-title">{{ $lesson->title }}</div>
+                                        <span class="level-badge">{{ $lesson->level }}</span>
+                                    </td>
+                                    <td>
+                                        <div class="lesson-title">
+                                            {{ $lesson->title }}
+                                        </div>
                                     </td>
                                     <td>
                                         <div class="lesson-description">
                                             {{ Str::limit(strip_tags($lesson->description), 100) }}
-
                                         </div>
                                     </td>
                                     <td>
                                         <div class="action-buttons">
-                                            <a href="#" class="btn-action btn-edit" title="Chỉnh sửa">
+                                            <a href="#" class="btn-action btn-edit" title="Chỉnh sửa"
+                                                onclick="event.stopPropagation();">
                                                 <i class="fas fa-edit"></i>
                                             </a>
                                         </div>
                                     </td>
                                 </tr>
+
+                                {{-- Dòng con: danh sách lessonParts --}}
+                                <tr class="collapse-row" id="parts-{{ $lesson->order_index }}" style="display: none;">
+                                    <td colspan="5" style="padding-left: 3rem;">
+                                        @if ($lesson->lessonParts->count())
+                                            <ul class="list-group">
+                                                @foreach ($lesson->lessonParts as $part)
+                                                    <li
+                                                        class="list-group-item d-flex justify-content-between align-items-center">
+                                                        <div>
+                                                            <strong>{{ $part->part_type }}</strong>
+                                                            <small class="text-muted ms-2">({{ $part->content }})</small>
+                                                        </div>
+                                                        <div class="">
+                                                            <span class="badge bg-secondary">Bài:
+                                                                {{ $part->order_index }}</span>
+                                                            <a href="#"
+                                                                onclick="openEditPartModal({{ $part->id }})"
+                                                                title="Chỉnh sửa phần này">
+                                                                <i class="fas fa-edit"></i>
+                                                            </a>
+                                                        </div>
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                        @else
+                                            <div class="text-muted">Không có phần nào cho trình độ này.</div>
+                                        @endif
+                                    </td>
+                                </tr>
                             @empty
                                 <tr>
-                                    <td colspan="4">
+                                    <td colspan="5">
                                         <div class="empty-state">
                                             <i class="fas fa-book-open"></i>
                                             <h4>Chưa có bài học nào</h4>
@@ -393,6 +457,8 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"><i
                             class="fa-solid fa-xmark"></i></button>
                 </div>
+
+                {{-- form thêm trình độ --}}
                 <div class="modal-body">
                     <form id="addLevelForm" method="POST" action="{{ route('admin.lesson.create') }}">
                         @csrf
@@ -445,7 +511,8 @@
                                     Thứ tự hiển thị
                                 </label>
                                 <input type="number" class="form-control @error('order_index') is-invalid @enderror"
-                                    name="order_index" id="lessonOrder" min="1" value="{{ old('order_index', 1) }}">
+                                    name="order_index" id="lessonOrder" min="1"
+                                    value="{{ old('order_index', 1) }}">
                                 @error('order_index')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -479,11 +546,80 @@
         CKEDITOR.replace('lessonDescription');
     </script>
     <script>
-        // Tooltips
-        document.querySelectorAll('[title]').forEach(function(element) {
-            if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
-                new bootstrap.Tooltip(element);
+        // Custom accordion toggle function sử dụng order_index
+        function toggleAccordion(orderIndex) {
+            console.log('Toggle accordion for order_index:', orderIndex);
+
+            const partsRow = document.getElementById('parts-' + orderIndex);
+            const chevronIcon = document.getElementById('chevron-' + orderIndex);
+
+            console.log('Parts row:', partsRow);
+            console.log('Chevron icon:', chevronIcon);
+
+            // Check if elements exist
+            if (!partsRow || !chevronIcon) {
+                console.error('Elements not found for order_index:', orderIndex);
+                return;
             }
+
+            // Get computed style to check current display state
+            const currentDisplay = window.getComputedStyle(partsRow).display;
+            console.log('Current display:', currentDisplay);
+
+            if (currentDisplay === 'none') {
+                // Show the parts
+                partsRow.style.display = 'table-row';
+                chevronIcon.classList.add('rotated');
+                console.log('Expanded order_index:', orderIndex);
+            } else {
+                // Hide the parts
+                partsRow.style.display = 'none';
+                chevronIcon.classList.remove('rotated');
+                console.log('Collapsed order_index:', orderIndex);
+            }
+        }
+
+        // Initialize after DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, initializing accordion...');
+
+            // Tooltips
+            document.querySelectorAll('[title]').forEach(function(element) {
+                if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
+                    new bootstrap.Tooltip(element);
+                }
+            });
+
+            // Add event listeners for accordion toggle
+            const accordionRows = document.querySelectorAll('.accordion-toggle');
+            console.log('Found accordion rows:', accordionRows.length);
+
+            accordionRows.forEach(function(row, index) {
+                console.log('Adding listener to row:', index, row);
+
+                row.addEventListener('click', function(e) {
+                    console.log('Row clicked:', e.target);
+
+                    // Don't trigger if clicking on action buttons
+                    if (e.target.closest('.action-buttons')) {
+                        console.log('Clicked on action button, ignoring...');
+                        return;
+                    }
+
+                    // Lấy order_index từ data attribute
+                    const orderIndex = this.getAttribute('data-lesson-order');
+                    console.log('Order Index from attribute:', orderIndex);
+
+                    if (orderIndex) {
+                        toggleAccordion(orderIndex);
+                    } else {
+                        console.error('No order index found on row');
+                    }
+                });
+
+                // Also add cursor pointer style
+                row.style.cursor = 'pointer';
+            });
         });
     </script>
 @endsection

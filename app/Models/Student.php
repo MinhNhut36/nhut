@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 use App\Enum\gender;
 use App\Enum\personStatus;
@@ -13,9 +12,8 @@ class Student extends Authenticatable
     protected $fillable = [
         'student_id',
         'avatar',
-        'fullname',
         'username',
-        'name',
+        'fullname',
         'email',
         'password',
         'date_of_birth',
@@ -62,18 +60,9 @@ class Student extends Authenticatable
         return $this->hasMany(ExamResult::class, 'student_id');
     }
 
-    public function classPosts()
-    {
-        return $this->hasMany(ClassPost::class, 'author_id', 'student_id')
-                    ->where('author_type', 'student')
-                    ->where('status', 1)
-                    ->orderBy('created_at', 'desc');
-    }
-
     public function classPostComments()
     {
-        return $this->hasMany(ClassPostComment::class, 'author_id', 'student_id')
-                    ->where('author_type', 'student')
+        return $this->hasMany(ClassPostComment::class, 'student_id', 'student_id')
                     ->where('status', 1)
                     ->orderBy('created_at', 'desc');
     }

@@ -20,6 +20,6 @@ class Answer extends Model
     //định nghĩa các quan hệ với các model khác
     public function question()
     {
-        return $this->belongsTo(Question::class, 'questions_id');
+        return $this->belongsTo(Question::class, 'questions_id','questions_id');
     }
 }

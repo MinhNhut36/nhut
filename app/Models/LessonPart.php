@@ -19,10 +19,12 @@ class LessonPart extends Model
     {
         return $this->belongsTo(Lesson::class, 'level');
     }
-    public function contents()
+
+    public function questions()
     {
-        return $this->hasMany(LessonPartContent::class, 'lesson_part_id', 'lesson_part_id');
+        return $this->hasMany(Question::class, 'lesson_part_id', 'lesson_part_id');
     }
+    
     public function scores()
     {
         return $this->hasMany(LessonPartScore::class, 'lesson_part_id');

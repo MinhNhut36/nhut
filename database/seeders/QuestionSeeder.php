@@ -4,7 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\Question;
-use App\Models\LessonPartContent;
+use App\Models\LessonPart;
 
 class QuestionSeeder extends Seeder
 {
@@ -14,7 +14,7 @@ class QuestionSeeder extends Seeder
     public function run(): void
     {
         // Lấy tất cả lesson part contents
-        $contents = LessonPartContent::all();
+        $contents = LessonPart::all();
         
         $questionTypes = ['single_choice', 'multiple_choice', 'true_false', 'short_answer'];
         

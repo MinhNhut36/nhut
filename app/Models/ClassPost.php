@@ -3,14 +3,14 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Teacher;
 
 class ClassPost extends Model
 {
     protected $fillable = [
         'post_id',
         'course_id',
-        'author_id',
-        'author_type',
+        'teacher_id',
         'title',
         'content',
         'status',
@@ -19,7 +19,7 @@ class ClassPost extends Model
     protected $primaryKey = 'post_id';
 
     // Định nghĩa các quan hệ với các model khác
-    
+
     /**
      * Quan hệ với Course
      */
@@ -29,16 +29,19 @@ class ClassPost extends Model
     }
 
     /**
-     * Quan hệ polymorphic với tác giả (Student hoặc Teacher)
+     * Quan hệ với Teacher (chỉ teacher mới tạo được post)
      */
-    public function author()
+    public function teacher()
     {
-        if ($this->author_type === 'student') {
-            return $this->belongsTo(Student::class, 'author_id', 'student_id');
-        } elseif ($this->author_type === 'teacher') {
-            return $this->belongsTo(Teacher::class, 'author_id', 'teacher_id');
-        }
-        return null;
+        return $this->belongsTo(Teacher::class, 'teacher_id', 'teacher_id');
+    }
+
+    /**
+     * Accessor để lấy tác giả (luôn là teacher)
+     */
+    public function getAuthorAttribute()
+    {
+        return $this->teacher;
     }
 
     /**
@@ -47,8 +50,8 @@ class ClassPost extends Model
     public function comments()
     {
         return $this->hasMany(ClassPostComment::class, 'post_id', 'post_id')
-                    ->where('status', 1)
-                    ->orderBy('created_at', 'asc');
+            ->where('status', 1)
+            ->orderBy('created_at', 'asc');
     }
 
     /**
@@ -72,10 +75,18 @@ class ClassPost extends Model
      */
     public function getAuthorNameAttribute()
     {
-        $author = $this->author();
-        if ($author) {
-            return $author->first()->fullname ?? $author->first()->name ?? 'Unknown';
+        $teacher = $this->teacher;
+        if ($teacher) {
+            return $teacher->fullname ?? $teacher->name ?? 'Unknown';
         }
         return 'Unknown';
+    }
+
+    /**
+     * Accessor để lấy loại tác giả (luôn là teacher)
+     */
+    public function getAuthorTypeAttribute()
+    {
+        return 'teacher';
     }
 }

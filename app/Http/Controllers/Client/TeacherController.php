@@ -7,7 +7,13 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\TeacherRequest;
 use App\Models\Teacher;
-
+use App\Models\Course;
+use App\Models\TeacherCourseAssignment;
+use App\Models\CourseEnrollment;
+use App\Models\ClassPost;
+use App\Models\ClassPostComment;
+use App\Models\Student;
+use App\Models\ExamResult;
 
 class TeacherController extends Controller
 {
@@ -49,5 +55,233 @@ class TeacherController extends Controller
     {
         $admin = Auth::user();
         return view('admin.home')->with('admin', $admin);
+    }
+    // hiển thị danh sách các khóa học đã được phân công cho giáo viên
+    public function AssignedCourses()
+    {
+        $teacher = Auth::guard('teacher')->user();
+
+        $assignedCourses = TeacherCourseAssignment::with('course')
+            ->where('teacher_id', $teacher->teacher_id)
+            ->get();
+        return view('teacher.AssignedCoursesList')->with('assignedCourses', $assignedCourses);
+    }
+    // hiển thị các thông tin của 1 khóa học
+    public function CourseDetails($courseId)
+    {
+        $teacher = Auth::guard('teacher')->user();
+        $course = Course::find($courseId);
+
+        return view('teacher.AssignedCourseDetail')
+            ->with('course', $course);
+    }
+
+
+    public function CourseMembers(Request $request, $courseId)
+    {
+        $teacher = Auth::guard('teacher')->user();
+
+        // Lấy thông tin khóa học
+        $course = Course::find($courseId);
+
+        // Đếm số sinh viên và sinh viên hoạt động
+        $countstudent = CourseEnrollment::with('student')
+            ->where('assigned_course_id', $courseId)
+            ->count();
+
+        $countstudentactive = CourseEnrollment::with('student')
+            ->where('assigned_course_id', $courseId)
+            ->whereHas('student', function ($query) {
+                $query->where('is_status', 1);
+            })
+            ->count();
+
+        // Lấy danh sách giảng viên
+        $countteacheractive = TeacherCourseAssignment::with('teacher')
+            ->where('course_id', $courseId)
+            ->count();
+
+        // Lấy danh sách sinh viên theo khóa học
+        $query = CourseEnrollment::with('student')
+            ->where('assigned_course_id', $courseId);
+
+        // Tìm kiếm theo tên, mã SV, email
+        if ($request->filled('search')) {
+            $searchTerm = $request->search;
+            $query->whereHas('student', function ($q) use ($searchTerm) {
+                $q->where('fullname', 'like', '%' . $searchTerm . '%')
+                    ->orWhere('student_id', 'like', '%' . $searchTerm . '%')
+                    ->orWhere('email', 'like', '%' . $searchTerm . '%');
+            });
+        }
+
+        // Lọc theo trạng thái (1: Hoạt động, 0: Không hoạt động)
+        if ($request->filled('status')) {
+            $query->whereHas('student', function ($q) use ($request) {
+                $q->where('is_status', $request->status);
+            });
+        }
+
+        // Lọc theo giới tính (1: Nam, 0: Nữ)
+        if ($request->filled('gender')) {
+            $query->whereHas('student', function ($q) use ($request) {
+                $q->where('gender', $request->gender);
+            });
+        }
+
+        $members = $query->get();
+
+        return view('teacher.CourseMembers')
+            ->with('members', $members)
+            ->with('course', $course)
+            ->with('countstudent', $countstudent)
+            ->with('countstudentactive', $countstudentactive)
+            ->with('countteacheractive', $countteacheractive);
+    }
+
+
+    public function CourseStudentDetails($courseId, $studentId)
+    {
+
+        $teacher = Auth::guard('teacher')->user();
+        $course = CourseEnrollment::where('assigned_course_id', $courseId)->where('student_id', $studentId)->first();
+
+        // Lấy chi tiết sinh viên
+        $student = Student::where('student_id', $studentId)->first();
+
+        return view('teacher.CourseStudentDetails')
+            ->with('course', $course)
+            ->with('student', $student);
+    }
+
+    //Hiển thị bảng tin của giảng viên
+    public function CourseBulletin($courseId)
+    {
+
+        $teacher = Auth::guard('teacher')->user(); // giáo viên đang đăng nhập
+
+        // Lấy thông tin khóa học
+        $course = Course::find($courseId);
+
+        // Lấy danh sách bài viết của giáo viên đó trong khóa học này
+        $posts = ClassPost::with([
+            'teacher',                  // người tạo bài viết
+            'comments',      // người tạo bình luận (student/teacher)
+        ])
+            ->where('course_id', $courseId)
+            ->where('status', 1)
+            ->orderByDesc('created_at')
+            ->get();
+
+        // Trả về view
+        return view('teacher.CourseBulletin')
+            ->with('posts', $posts)
+            ->with('course', $course)
+            ->with('teacher', $teacher);
+    }
+
+    public function StorePost(Request $request, $courseId)
+    {
+        $request->validate([
+            'title'   => 'required|string|max:255',
+            'content' => 'required|string|max:1000',
+        ]);
+
+        $teacher = Auth::guard('teacher')->user();
+
+        ClassPost::create([
+            'course_id'   => $courseId,
+            'teacher_id'  => $teacher->teacher_id,
+            'title'       => $request->title,
+            'content'     => $request->content,
+            'status'      => 1,
+        ]);
+
+        return redirect()->back()->with('success', 'Đăng bài viết thành công.');
+    }
+
+    /**
+     * Gửi phản hồi cho bài viết
+     */
+    public function StoreComment(Request $request, $postId)
+    {
+        $request->validate([
+            'content' => 'required|string|max:1000',
+        ]);
+
+        $teacher = Auth::guard('teacher')->user();
+
+        ClassPostComment::create([
+            'post_id'    => $postId,
+            'teacher_id' => $teacher->teacher_id,  // ✅ dùng đúng cột trong DB
+            'content'    => $request->content,
+            'status'     => 1,
+        ]);
+
+        return redirect()->back()->with('success', 'Phản hồi đã được gửi.');
+    }
+
+    //Quản lí điểmcủa sinh viên của một khóa học
+    public function CourseGrade(Request $request, $courseId)
+    {
+        $teacher = Auth::guard('teacher')->user();
+
+        // Lấy thông tin khóa học
+        $course = Course::find($courseId);
+
+        // Đếm số sinh viên và sinh viên hoạt động
+        $countstudent = CourseEnrollment::with('student')
+            ->where('assigned_course_id', $courseId)
+            ->count();
+
+        $countstudentactive = CourseEnrollment::with('student')
+            ->where('assigned_course_id', $courseId)
+            ->whereHas('student', function ($query) {
+                $query->where('is_status', 1);
+            })
+            ->count();
+
+        // Lấy danh sách giảng viên
+        $countteacheractive = TeacherCourseAssignment::with('teacher')
+            ->where('course_id', $courseId)
+            ->count();
+
+        // Lấy danh sách các sinh viên theo khóa học có điểm hoặc không có
+        $query = CourseEnrollment::with(['student', 'examResult'])
+            ->where('assigned_course_id', $courseId);
+
+        // Tìm kiếm theo tên, mã SV, email
+        if ($request->filled('search')) {
+            $searchTerm = $request->search;
+            $query->whereHas('student', function ($q) use ($searchTerm) {
+                $q->where('fullname', 'like', '%' . $searchTerm . '%')
+                    ->orWhere('student_id', 'like', '%' . $searchTerm . '%')
+                    ->orWhere('email', 'like', '%' . $searchTerm . '%');
+            });
+        }
+
+        // Lọc theo trạng thái (1: Hoạt động, 0: Không hoạt động)
+        if ($request->filled('status')) {
+            $query->whereHas('student', function ($q) use ($request) {
+                $q->where('is_status', $request->status);
+            });
+        }
+
+        // Lọc theo giới tính (1: Nam, 0: Nữ)
+        if ($request->filled('gender')) {
+            $query->whereHas('student', function ($q) use ($request) {
+                $q->where('gender', $request->gender);
+            });
+        }
+
+        $studentgrades = $query->get();
+        dd($studentgrades);
+
+        return view('teacher.CourseGrade')
+            ->with('studentgrades', $studentgrades)
+            ->with('course', $course)
+            ->with('countstudent', $countstudent)
+            ->with('countstudentactive', $countstudentactive)
+            ->with('countteacheractive', $countteacheractive);
     }
 }

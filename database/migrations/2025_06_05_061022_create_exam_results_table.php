@@ -14,13 +14,13 @@ return new class extends Migration
         Schema::create('exam_results', function (Blueprint $table) {
             $table->id('exam_result_id');
             $table->foreignId('student_id')
-                  ->constrained('students', 'student_id')
-                  ->onDelete('cascade');
+                ->constrained('students', 'student_id')
+                ->onDelete('cascade');
             $table->foreignId('course_id')
-                  ->constrained('courses', 'course_id')
-                  ->onDelete('cascade'); 
+                ->constrained('courses', 'course_id')
+                ->onDelete('cascade');
             $table->date('exam_date'); // Ngày thi
-            $table->double('lisstening_score')->nullable(); // Điểm nghe
+            $table->double('listening_score')->nullable(); // Điểm nghe
             $table->double('reading_score')->nullable(); // Điểm đọc
             $table->double('speaking_score')->nullable(); // Điểm nói   
             $table->double('writing_score')->nullable(); // Điểm viết

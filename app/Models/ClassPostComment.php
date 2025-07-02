@@ -9,8 +9,8 @@ class ClassPostComment extends Model
     protected $fillable = [
         'comment_id',
         'post_id',
-        'author_id',
-        'author_type',
+        'student_id',
+        'teacher_id',
         'content',
         'status',
     ];
@@ -18,7 +18,7 @@ class ClassPostComment extends Model
     protected $primaryKey = 'comment_id';
 
     // Định nghĩa các quan hệ với các model khác
-    
+
     /**
      * Quan hệ với ClassPost
      */
@@ -28,16 +28,31 @@ class ClassPostComment extends Model
     }
 
     /**
-     * Quan hệ polymorphic với tác giả (Student hoặc Teacher)
+     * Quan hệ với Student
      */
-    public function author()
+    public function student()
     {
-        if ($this->author_type === 'student') {
-            return $this->belongsTo(Student::class, 'author_id', 'student_id');
-        } elseif ($this->author_type === 'teacher') {
-            return $this->belongsTo(Teacher::class, 'author_id', 'teacher_id');
+        return $this->belongsTo(Student::class, 'student_id', 'student_id');
+    }
+
+    /**
+     * Quan hệ với Teacher
+     */
+    public function teacher()
+    {
+        return $this->belongsTo(Teacher::class, 'teacher_id', 'teacher_id');
+    }
+
+    /**
+     * Accessor để lấy tác giả (student hoặc teacher)
+     */
+    public function getAuthorAttribute()
+    {
+        if ($this->student_id) {
+            return $this->student;
+        } else {
+            return $this->teacher;
         }
-        return null;
     }
 
     /**
@@ -61,10 +76,23 @@ class ClassPostComment extends Model
      */
     public function getAuthorNameAttribute()
     {
-        $author = $this->author();
-        if ($author) {
-            return $author->first()->fullname ?? $author->first()->name ?? 'Unknown';
+        if ($this->student_id && $this->student) {
+            return $this->student->fullname ?? 'Unknown';
+        } elseif ($this->teacher_id && $this->teacher) {
+            return $this->teacher->fullname ?? 'Unknown';
         }
         return 'Unknown';
+    }
+
+    /**
+     * Accessor để lấy loại tác giả
+     */
+    public function getAuthorTypeAttribute()
+    {
+        if ($this->student_id) {
+            return 'student';
+        } else {
+            return 'teacher';
+        }
     }
 }

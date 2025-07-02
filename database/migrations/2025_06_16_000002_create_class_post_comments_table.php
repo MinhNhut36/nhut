@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('class_post_comments', function (Blueprint $table) {
             $table->id('comment_id');
             $table->foreignId('post_id')
-                  ->constrained('class_posts', 'post_id')
-                  ->onDelete('cascade');
+                ->constrained('class_posts', 'post_id')
+                ->onDelete('cascade');
             $table->unsignedBigInteger('student_id')->nullable(); // ID của student (nếu student comment)
             $table->unsignedBigInteger('teacher_id')->nullable(); // ID của teacher (nếu teacher comment)
             $table->longText('content'); // Nội dung comment

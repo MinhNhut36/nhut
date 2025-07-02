@@ -6,6 +6,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use App\Enum\gender;
 use App\Enum\personStatus;
+
 class Student extends Authenticatable
 {
     use Notifiable;
@@ -37,7 +38,7 @@ class Student extends Authenticatable
     {
         return $this->hasMany(CourseEnrollment::class, 'student_id');
     }
-    
+
     public function studentAnswers()
     {
         return $this->hasMany(StudentAnswer::class, 'student_id');
@@ -63,7 +64,7 @@ class Student extends Authenticatable
     public function classPostComments()
     {
         return $this->hasMany(ClassPostComment::class, 'student_id', 'student_id')
-                    ->where('status', 1)
-                    ->orderBy('created_at', 'desc');
+            ->where('status', 1)
+            ->orderBy('created_at', 'desc');
     }
 }

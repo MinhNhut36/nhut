@@ -3,10 +3,10 @@
 namespace App\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 use App\Enum\gender;
 use App\Enum\personStatus;
+
 class Teacher extends Authenticatable
 {
     use Notifiable;
@@ -14,7 +14,7 @@ class Teacher extends Authenticatable
         'teacher_id',
         'avatar',
         'fullname',
-        'username', 
+        'username',
         'password',
         'date_of_birth',
         'gender',
@@ -39,17 +39,15 @@ class Teacher extends Authenticatable
 
     public function classPosts()
     {
-        return $this->hasMany(ClassPost::class, 'author_id', 'teacher_id')
-                    ->where('author_type', 'teacher')
-                    ->where('status', 1)
-                    ->orderBy('created_at', 'desc');
+        return $this->hasMany(ClassPost::class, 'teacher_id', 'teacher_id')
+            ->where('status', 1)
+            ->orderBy('created_at', 'desc');
     }
 
     public function classPostComments()
     {
-        return $this->hasMany(ClassPostComment::class, 'author_id', 'teacher_id')
-                    ->where('author_type', 'teacher')
-                    ->where('status', 1)
-                    ->orderBy('created_at', 'desc');
+        return $this->hasMany(ClassPostComment::class, 'teacher_id', 'teacher_id')
+            ->where('status', 1)
+            ->orderBy('created_at', 'desc');
     }
 }

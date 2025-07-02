@@ -9,8 +9,8 @@ class ClassPostComment extends Model
     protected $fillable = [
         'comment_id',
         'post_id',
-        'author_id',
-        'author_type',
+        'student_id',
+        'teacher_id',
         'content',
         'status',
     ];
@@ -18,7 +18,7 @@ class ClassPostComment extends Model
     protected $primaryKey = 'comment_id';
 
     // Định nghĩa các quan hệ với các model khác
-    
+
     /**
      * Quan hệ với ClassPost
      */

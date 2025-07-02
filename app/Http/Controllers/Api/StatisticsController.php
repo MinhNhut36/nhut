@@ -132,13 +132,11 @@ class StatisticsController extends Controller
     public function getStudentPerformanceStatistics()
     {
         try {
-            // Top performing students (by completion rate)
+            // Simplified top performing students
             $topStudents = DB::table('course_enrollments')
-                ->select('student_id', DB::raw('COUNT(*) as total_courses'), 
-                        DB::raw('SUM(CASE WHEN status = 3 THEN 1 ELSE 0 END) as completed_courses'))
+                ->select('student_id', DB::raw('COUNT(*) as total_courses'))
                 ->groupBy('student_id')
-                ->having('total_courses', '>', 0)
-                ->orderByRaw('(completed_courses / total_courses) DESC')
+                ->orderBy('total_courses', 'DESC')
                 ->limit(10)
                 ->get();
 

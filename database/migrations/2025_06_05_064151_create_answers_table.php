@@ -16,9 +16,9 @@ return new class extends Migration
             $table->foreignId('questions_id')
                     ->constrained('questions', 'questions_id')
                     ->onDelete('cascade');
-            $table->string('match_key');
+            $table->string('match_key')->nullable();
             $table->string('answer_text'); // Nội dung câu trả lời
-            $table->integer('is_correct'); // 1 nếu là câu trả lời đúng, 0 nếu không
+            $table->boolean('is_correct'); // 1 nếu là câu trả lời đúng, 0 nếu không
             $table->longText('feedback')->nullable(); // Phản hồi cho câu trả lời, có thể là giải thích hoặc gợi ý
             $table->longText('media_url')->nullable(); // URL của media liên quan đến câu trả lời (nếu có)
             $table->integer('order_index'); // Thứ tự của câu trả lời trong câu hỏi

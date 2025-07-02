@@ -13,12 +13,12 @@ return new class extends Migration
     {
         Schema::create('student_progress', function (Blueprint $table) {
             $table->id('progress_id');
-            $table->foreignId('score_id')
-                ->constrained('lesson_part_scores', 'score_id')
-                ->onDelete('cascade');
-            $table->integer('completion_status')->default(0); // Trạng thái hoàn thành: 0 - chưa hoàn thành, 1 - đã hoàn thành
-            $table->datetime('last_updated')->nullable(); // Ngày cập nhật cuối cùng
+            $table->unsignedBigInteger('score_id');
+            $table->boolean('completion_status')->default(false);
+            $table->dateTime('last_updated')->nullable();
             $table->timestamps();
+
+            $table->foreign('score_id')->references('score_id')->on('lesson_part_scores')->onDelete('cascade');
         });
     }
 

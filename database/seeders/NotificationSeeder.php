@@ -43,15 +43,13 @@ class NotificationSeeder extends Seeder
             ],
         ];
 
-        // Tạo thông báo chung (target = 0)
+        // Tạo thông báo chung (target = "all_students")
         foreach ($generalNotifications as $notification) {
             Notification::create([
-                'admin' => $admin->admin_id,
-                'target' => 0, // Tất cả học sinh
+                'admin_id' => $admin->admin_id,
                 'title' => $notification['title'],
                 'message' => $notification['message'],
                 'notification_date' => Carbon::now()->subDays(rand(1, 30)),
-                'status' => 1, // Đã gửi
             ]);
         }
 
@@ -68,51 +66,43 @@ class NotificationSeeder extends Seeder
 
     private function createEnrollmentNotifications($admin, $enrollment)
     {
-        $statusValue = $enrollment->status->value;
+        $statusValue = $enrollment->status;
         $courseName = $enrollment->course->course_name;
 
         switch ($statusValue) {
             case 1: // Pending
                 Notification::create([
-                    'admin' => $admin->admin_id,
-                    'target' => $enrollment->student_id,
+                    'admin_id' => $admin->admin_id,
                     'title' => 'Enrollment Pending',
                     'message' => "Your enrollment in {$courseName} is pending approval. We'll notify you once it's confirmed.",
                     'notification_date' => Carbon::parse($enrollment->registration_date)->addHours(1),
-                    'status' => 1,
                 ]);
                 break;
 
             case 2: // Studying
                 Notification::create([
-                    'admin' => $admin->admin_id,
-                    'target' => $enrollment->student_id,
+                    'admin_id' => $admin->admin_id,
                     'title' => 'Course Started',
                     'message' => "Welcome to {$courseName}! Your course has started. Good luck with your studies!",
                     'notification_date' => Carbon::parse($enrollment->registration_date)->addDays(1),
-                    'status' => 1,
                 ]);
                 break;
 
             case 3: // Passed
                 Notification::create([
-                    'admin' => $admin->admin_id,
-                    'target' => $enrollment->student_id,
+                    'admin_id' => $admin->admin_id,
                     'title' => 'Congratulations!',
                     'message' => "Congratulations! You have successfully completed {$courseName}. Well done!",
                     'notification_date' => Carbon::parse($enrollment->registration_date)->addDays(rand(30, 60)),
-                    'status' => 1,
                 ]);
                 break;
 
             case 4: // Failed
                 Notification::create([
-                    'admin' => $admin->admin_id,
-                    'target' => $enrollment->student_id,
+                    'admin_id' => $admin->admin_id,
                     'title' => 'Course Completion',
                     'message' => "Your {$courseName} course has ended. Please contact your teacher for feedback and next steps.",
                     'notification_date' => Carbon::parse($enrollment->registration_date)->addDays(rand(30, 60)),
-                    'status' => 1,
                 ]);
                 break;
         }
@@ -155,12 +145,10 @@ class NotificationSeeder extends Seeder
             $notification = $randomNotifications[$index];
 
             Notification::create([
-                'admin' => $admin->admin_id,
-                'target' => $student->student_id,
+                'admin_id' => $admin->admin_id,
                 'title' => $notification['title'],
                 'message' => $notification['message'],
                 'notification_date' => Carbon::now()->subDays(rand(1, 20)),
-                'status' => rand(0, 1), // 50% đã gửi, 50% chưa gửi
             ]);
         }
     }

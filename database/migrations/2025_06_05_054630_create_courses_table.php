@@ -13,17 +13,17 @@ return new class extends Migration
     {
         Schema::create('courses', function (Blueprint $table) {
             $table->id('course_id');
-            $table->string('course_name'); 
-            $table->string('level'); 
+            $table->string('level');
+            $table->string('course_name');
             $table->year('year');
             $table->longText('description');
-            $table->string('status')->default('Không hoạt động');
+            $table->string('status')->default('Chờ xác thực');
             $table->date('starts_date');
             $table->timestamps();
             $table->foreign('level')
-                    ->references('level')
-                    ->on('lessons')
-                    ->onDelete('cascade');
+                ->references('level')
+                ->on('lessons')
+                ->onDelete('cascade');
         });
     }
 

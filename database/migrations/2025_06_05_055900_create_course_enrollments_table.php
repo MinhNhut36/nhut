@@ -20,7 +20,7 @@ return new class extends Migration
                   ->constrained('courses', 'course_id') 
                     ->onDelete('cascade');  
             $table->date('registration_date');
-            $table->integer('status')->default(0); // 0: chưa bắt đầu, 1: đang học, 2: đã hoàn thành
+            $table->integer('status')->default(0); // 0: chờ xác nhận, 1: đang học, 2: đạt, 3: không đạt
             $table->timestamps();
         });
     }

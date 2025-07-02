@@ -18,6 +18,8 @@ use App\Enum\courseStatus;
 use App\Models\Lesson;
 use App\Http\Requests\AddLevelRequest;
 use App\Models\LessonPart;
+use App\Http\Requests\UpdateLessonRequest;
+use App\Http\Requests\UpdateLessonPartRequest;
 
 class AdminController extends Controller
 {
@@ -208,7 +210,7 @@ class AdminController extends Controller
             $query->whereYear('created_at', $request->year);
         }
 
-        $courses = $query->paginate(4)->appends($request->all());
+        $courses = $query->orderByRaw("FIELD(status, 'Chờ xác thực', 'Đang mở lớp', 'Đã hoàn thành')")->paginate(4)->appends($request->all());
 
         if ($courses->currentPage() > $courses->lastPage()) {
             return redirect()->route('admin.courses', ['page' => $courses->lastPage()]);
@@ -362,5 +364,30 @@ class AdminController extends Controller
             ->get();
 
         return response()->json($lessonPart);
+    }
+    //Cập nhật lesson
+    public function EditLesson(UpdateLessonRequest $request, string $level)
+    {
+        // Tìm bài học theo level, nếu không tìm thấy sẽ 404
+        $lesson = Lesson::where('level', $level)->firstOrFail();
+
+        // Cập nhật
+        $lesson->update([
+            'level'       => $request->input('level'),
+            'title'       => $request->input('title'),
+            'description' => $request->input('description'),
+            'order_index' => $request->input('order_index'),
+        ]);
+
+        return redirect()->back()->with('success', 'cập nhật trình độ thành công!');
+    }
+    //Cập nhật lesson_part 
+    public function EditLessonPart(UpdateLessonPartRequest  $request, $lesson_part_id)
+    {
+        $part = LessonPart::findOrFail($lesson_part_id);
+
+        $part->update($request->validated());
+
+        return back()->with('success', 'Đã cập nhật phần học.');
     }
 }

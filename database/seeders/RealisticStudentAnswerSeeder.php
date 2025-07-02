@@ -56,7 +56,9 @@ class RealisticStudentAnswerSeeder extends Seeder
 
     private function createStudyingAnswers($enrollment)
     {
-        $lessonParts = LessonPart::where('level', $enrollment->course->level)->get();
+        // Get all lesson parts since level column was removed
+        // TODO: Need to redesign relationship between courses and lesson_parts
+        $lessonParts = LessonPart::all();
 
         // Giảm số lesson parts: chỉ làm 30-60% lesson parts
         $lessonPartsToAnswer = $lessonParts->take(ceil($lessonParts->count() * rand(30, 60) / 100));
@@ -76,7 +78,8 @@ class RealisticStudentAnswerSeeder extends Seeder
 
     private function createPassedAnswers($enrollment)
     {
-        $lessonParts = LessonPart::where('level', $enrollment->course->level)->get();
+        // Get all lesson parts since level column was removed
+        $lessonParts = LessonPart::all();
 
         // Passed students: làm 80-100% lesson parts
         $lessonPartsToAnswer = $lessonParts->take(ceil($lessonParts->count() * rand(80, 100) / 100));
@@ -96,7 +99,8 @@ class RealisticStudentAnswerSeeder extends Seeder
 
     private function createFailedAnswers($enrollment)
     {
-        $lessonParts = LessonPart::where('level', $enrollment->course->level)->get();
+        // Get all lesson parts since level column was removed
+        $lessonParts = LessonPart::all();
 
         // Failed students: làm 60-90% lesson parts
         $lessonPartsToAnswer = $lessonParts->take(ceil($lessonParts->count() * rand(60, 90) / 100));

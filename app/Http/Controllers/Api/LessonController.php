@@ -16,13 +16,28 @@ class LessonController extends Controller
     public function getLessonsByCourseId($courseId)
     {
         try {
-            // Lấy lessons thông qua course level
+            // Lấy course để biết level
+            $course = \App\Models\Course::find($courseId);
+            if (!$course) {
+                return response()->json([
+                    'error' => 'Không tìm thấy khóa học'
+                ], 404);
+            }
+
+            // Lấy lessons theo level của course
             $lessons = Lesson::whereHas('courses', function($query) use ($courseId) {
                 $query->where('courses.course_id', $courseId);
-            })->with('lessonParts')->get();
-            
+            })->get();
+
+            // Thêm lesson parts theo đúng level của course
+            foreach ($lessons as $lesson) {
+                $lesson->lessonParts = LessonPart::whereHas('lesson', function($query) use ($course) {
+                    $query->where('level', $course->level);
+                })->orderBy('order_index')->get();
+            }
+
             return response()->json($lessons, 200);
-            
+
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'Lỗi server',
@@ -32,20 +47,27 @@ class LessonController extends Controller
     }
     
     /**
-     * Lấy bài học theo ID
-     * GET /api/lessons/{lessonId}
+     * Lấy bài học theo Level
+     * GET /api/lessons/{level}
      */
-    public function getLessonById($lessonId)
+    public function getLessonByLevel($level)
     {
         try {
-            $lesson = Lesson::with(['lessonParts', 'courses'])->find($lessonId);
-            
+            $lesson = Lesson::with('courses')->where('level', $level)->first();
+
+            if ($lesson) {
+                // Thêm lesson parts theo đúng level
+                $lesson->lessonParts = LessonPart::whereHas('lesson', function($query) use ($level) {
+                    $query->where('level', $level);
+                })->orderBy('order_index')->get();
+            }
+
             if (!$lesson) {
                 return response()->json([
-                    'error' => 'Không tìm thấy bài học'
+                    'error' => 'Không tìm thấy bài học với level này'
                 ], 404);
             }
-            
+
             return response()->json($lesson, 200);
             
         } catch (\Exception $e) {
@@ -55,50 +77,30 @@ class LessonController extends Controller
             ], 500);
         }
     }
+
     
     /**
-     * Lấy bài học theo level
-     * GET /api/lessons/level/{level}
+     * Lấy lesson parts theo level
+     * GET /api/lesson-parts/lesson/{level}
      */
-    public function getLessonsByLevel($level)
+    public function getLessonPartsByLevel($level)
     {
         try {
-            $lessons = Lesson::where('level', $level)
-                           ->with('lessonParts')
-                           ->orderBy('order_index')
-                           ->get();
-            
-            return response()->json($lessons, 200);
-            
-        } catch (\Exception $e) {
-            return response()->json([
-                'error' => 'Lỗi server',
-                'message' => $e->getMessage()
-            ], 500);
-        }
-    }
-    
-    /**
-     * Lấy lesson parts theo lesson ID
-     * GET /api/lesson-parts/lesson/{lessonId}
-     */
-    public function getLessonPartsByLessonId($lessonId)
-    {
-        try {
-            // Lấy lesson parts theo level của lesson
-            $lesson = Lesson::find($lessonId);
-            
+            // Kiểm tra lesson có tồn tại với level này không
+            $lesson = Lesson::where('level', $level)->first();
+
             if (!$lesson) {
                 return response()->json([
-                    'error' => 'Không tìm thấy bài học'
+                    'error' => 'Không tìm thấy bài học với level này'
                 ], 404);
             }
-            
-            $lessonParts = LessonPart::where('level', $lesson->level)
-                                   ->with('questions')
+
+            // Get all lesson parts since level column was removed
+            // TODO: Need to redesign relationship between lessons and lesson_parts
+            $lessonParts = LessonPart::with('questions')
                                    ->orderBy('order_index')
                                    ->get();
-            
+
             return response()->json($lessonParts, 200);
             
         } catch (\Exception $e) {

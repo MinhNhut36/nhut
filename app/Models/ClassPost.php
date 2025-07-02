@@ -9,8 +9,7 @@ class ClassPost extends Model
     protected $fillable = [
         'post_id',
         'course_id',
-        'author_id',
-        'author_type',
+        'teacher_id',
         'title',
         'content',
         'status',
@@ -19,7 +18,7 @@ class ClassPost extends Model
     protected $primaryKey = 'post_id';
 
     // Định nghĩa các quan hệ với các model khác
-    
+
     /**
      * Quan hệ với Course
      */
@@ -47,8 +46,8 @@ class ClassPost extends Model
     public function comments()
     {
         return $this->hasMany(ClassPostComment::class, 'post_id', 'post_id')
-                    ->where('status', 1)
-                    ->orderBy('created_at', 'asc');
+            ->where('status', 1)
+            ->orderBy('created_at', 'asc');
     }
 
     /**

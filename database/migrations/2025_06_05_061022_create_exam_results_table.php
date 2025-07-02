@@ -19,8 +19,8 @@ return new class extends Migration
             $table->foreignId('course_id')
                   ->constrained('courses', 'course_id')
                   ->onDelete('cascade'); 
-            $table->date('exam_date'); // Ngày thi
-            $table->double('lisstening_score')->nullable(); // Điểm nghe
+            $table->datetime('exam_date'); // Ngày thi
+            $table->double('listening_score')->nullable(); // Điểm nghe
             $table->double('reading_score')->nullable(); // Điểm đọc
             $table->double('speaking_score')->nullable(); // Điểm nói   
             $table->double('writing_score')->nullable(); // Điểm viết

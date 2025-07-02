@@ -108,6 +108,7 @@ class TeacherSeeder extends Seeder
                 'date_of_birth' => $teacher['date_of_birth'],
                 'gender' => $teacher['gender'],
                 'email' => $teacher['email'],
+                'avatar' => 'https://via.placeholder.com/150x150.png?text=' . urlencode(substr($teacher['fullname'], 0, 2)),
                 'is_status' => 1
             ]);
         }

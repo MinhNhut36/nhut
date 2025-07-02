@@ -268,7 +268,7 @@
         .level-badge {
             background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
             color: white;
-            padding: 0.25rem 0.75rem;
+            padding: 0.25rem 0.12rem;
             border-radius: 12px;
             font-size: 0.75rem;
             font-weight: 600;

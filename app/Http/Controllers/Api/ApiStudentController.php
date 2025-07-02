@@ -119,23 +119,7 @@ class ApiStudentController extends Controller
         }
     }
 
-    /**
-     * Nộp điểm số
-     * POST /api/scores
-     */
-    public function submitScore(Request $request)
-    {
-        try {
-            $score = LessonPartScore::create($request->all());
-            return response()->json($score, 201);
 
-        } catch (\Exception $e) {
-            return response()->json([
-                'error' => 'Lỗi server',
-                'message' => $e->getMessage()
-            ], 500);
-        }
-    }
 
 
 

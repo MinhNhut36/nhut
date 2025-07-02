@@ -122,21 +122,35 @@ class CourseController extends Controller
     public function enrollStudent(Request $request)
     {
         try {
+            $validated = $request->validate([
+                'student_id' => 'required|integer|exists:students,student_id',
+                'course_id' => 'required|integer|exists:courses,course_id',
+                'enrollment_date' => 'sometimes|date'
+            ]);
+
+            // Map course_id to assigned_course_id for database compatibility
+            $enrollmentData = [
+                'student_id' => $validated['student_id'],
+                'assigned_course_id' => $validated['course_id'],
+                'enrollment_date' => $validated['enrollment_date'] ?? now(),
+                'status' => 1 // PENDING_CONFIRMATION
+            ];
+
             // Kiểm tra xem đã đăng ký chưa
-            $existingEnrollment = CourseEnrollment::where('student_id', $request->student_id)
-                                                ->where('assigned_course_id', $request->assigned_course_id)
+            $existingEnrollment = CourseEnrollment::where('student_id', $validated['student_id'])
+                                                ->where('assigned_course_id', $validated['course_id'])
                                                 ->first();
-            
+
             if ($existingEnrollment) {
                 return response()->json([
                     'error' => 'Học sinh đã đăng ký khóa học này'
                 ], 409);
             }
-            
-            $enrollment = CourseEnrollment::create($request->all());
-            
+
+            $enrollment = CourseEnrollment::create($enrollmentData);
+
             return response()->json($enrollment, 201);
-            
+
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'Lỗi server',

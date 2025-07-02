@@ -346,13 +346,15 @@
                         </h1>
                     </div>
                     <div>
-                        <button type="button" class="btn btn-add" data-bs-toggle="modal" data-bs-target="#addLevelModal">
-                            <i class="fas fa-plus me-2"></i>
-                            Thêm trình độ
+                        <button type="button" class="btn btn-add" data-bs-toggle="modal" data-bs-target="#lessonModal"
+                            onclick="openLessonModal('create')">
+                            <i class="fas fa-plus me-2"></i> Thêm trình độ
                         </button>
                     </div>
                 </div>
+
                 @include('partials.alerts')
+
                 <!-- Lessons Table -->
                 <div class="lesson-table">
                     <table class="table mb-0">
@@ -390,10 +392,14 @@
                                     </td>
                                     <td>
                                         <div class="action-buttons">
-                                            <a href="#" class="btn-action btn-edit" title="Chỉnh sửa"
-                                                onclick="event.stopPropagation();">
+                                            <button class="btn-action btn-edit" title="Chỉnh sửa" data-bs-toggle="modal"
+                                                data-bs-target="#lessonModal" data-level="{{ $lesson->level }}"
+                                                data-title="{{ $lesson->title }}"
+                                                data-description="{{ $lesson->description }}"
+                                                data-order="{{ $lesson->order_index }}"
+                                                onclick="event.stopPropagation(); openLessonModal('edit', this)">
                                                 <i class="fas fa-edit"></i>
-                                            </a>
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
@@ -413,9 +419,15 @@
                                                         <div class="">
                                                             <span class="badge bg-secondary">Bài:
                                                                 {{ $part->order_index }}</span>
-                                                            <a href="#"
-                                                                onclick="openEditPartModal({{ $part->id }})"
-                                                                title="Chỉnh sửa phần này">
+                                                            <a href="#" class="btn-action btn-edit-part"
+                                                                title="Chỉnh sửa" data-bs-toggle="modal"
+                                                                data-bs-target="#editLessonPartModal"
+                                                                data-id="{{ $part->lesson_part_id }}"
+                                                                data-level="{{ $part->level }}"
+                                                                data-type="{{ $part->part_type }}"
+                                                                data-content="{{ $part->content }}"
+                                                                data-order="{{ $part->order_index }}"
+                                                                onclick="event.stopPropagation();">
                                                                 <i class="fas fa-edit"></i>
                                                             </a>
                                                         </div>
@@ -445,181 +457,308 @@
         </div>
     </div>
 
-    <!-- Add Level Modal -->
-    <div class="modal fade" id="addLevelModal" tabindex="-1" aria-labelledby="addLevelModalLabel" aria-hidden="true">
+    <!-- Lesson Modal (Create & Edit) -->
+    <div class="modal fade" id="lessonModal" tabindex="-1" aria-labelledby="lessonModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="addLevelModalLabel">
-                        <i class="fas fa-plus-circle me-2"></i>
-                        Thêm trình độ mới
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"><i
-                            class="fa-solid fa-xmark"></i></button>
-                </div>
+            <form id="lessonForm" method="POST" action="{{ route('admin.lesson.create') }}">
+                @csrf
+                <input type="hidden" name="_method" id="lessonFormMethod" value="POST">
+                <input type="hidden" name="_form_name" value="lesson_form">
 
-                {{-- form thêm trình độ --}}
-                <div class="modal-body">
-                    <form id="addLevelForm" method="POST" action="{{ route('admin.lesson.create') }}">
-                        @csrf
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="lessonModalTitle"><i class="fas fa-plus-circle me-2"></i> Thêm trình độ
+                            mới</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                    </div>
+                    <div class="modal-body">
                         <div class="row">
                             <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="levelSelect" class="form-label">
-                                        <i class="fas fa-layer-group me-1"></i>
-                                        trình độ
-                                    </label>
-                                    <input class="form-control @error('level') is-invalid @enderror" type="text"
-                                        name="level" value="{{ old('level') }}" placeholder="Nhập tên trình độ...">
-                                    @error('level')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
+                                <label for="lessonLevel">Trình độ</label>
+                                <input type="text" class="form-control @error('level') is-invalid @enderror"
+                                    id="lessonLevel" name="level" value="{{ old('level') }}" required>
+                                @error('level')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
                             <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="lessonTitle" class="form-label">
-                                        <i class="fas fa-heading me-1"></i>
-                                        Tiêu đề cho cấp đô
-                                    </label>
-                                    <input type="text" class="form-control @error('title') is-invalid @enderror"
-                                        id="lessonTitle" name="title" value="{{ old('title') }}"
-                                        placeholder="Nhập tên tiêu đề...">
-                                    @error('title')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="lessonDescription" class="form-label">
-                                <i class="fas fa-align-left me-1"></i>
-                                Mô tả trình độ
-                            </label>
-                            <textarea class="form-control @error('description') is-invalid @enderror" id="lessonDescription" name="description"
-                                rows="4">{{ old('description') }}</textarea>
-                            @error('description')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="lessonOrder" class="form-label">
-                                    <i class="fas fa-sort-numeric-up me-1"></i>
-                                    Thứ tự hiển thị
-                                </label>
-                                <input type="number" class="form-control @error('order_index') is-invalid @enderror"
-                                    name="order_index" id="lessonOrder" min="1"
-                                    value="{{ old('order_index', 1) }}">
-                                @error('order_index')
+                                <label for="lessonTitle">Tiêu đề</label>
+                                <input type="text" class="form-control @error('title') is-invalid @enderror"
+                                    id="lessonTitle" name="title" value="{{ old('title') }}" required>
+                                @error('title')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
                         </div>
-                        <div class="modal-footer">
-                            <button type="submit" class="btn btn-primary" id="saveLesson">
-                                <i class="fas fa-save me-1"></i>
-                                Lưu trình độ
-                            </button>
+                        <div class="mt-3">
+                            <label for="lessonDescription">Mô tả</label>
+                            <textarea class="form-control @error('description') is-invalid @enderror" id="lessonDescription" name="description">{{ old('description') }}</textarea>
+                            @error('description')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
-                    </form>
+                        <div class="mt-3 col-md-6">
+                            <label for="lessonOrder">Thứ tự hiển thị</label>
+                            <input type="number" class="form-control @error('order_index') is-invalid @enderror"
+                                id="lessonOrder" name="order_index" min="1" value="{{ old('order_index', 1) }}" required>
+                            @error('order_index')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-primary" type="submit"><i class="fas fa-save me-1"></i> Lưu</button>
+                    </div>
                 </div>
-            </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Lesson Part Modal -->
+    <div class="modal fade" id="editLessonPartModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <form id="editLessonPartForm" method="POST" action="#">
+                @csrf
+                @method('PUT')
+                <input type="hidden" name="_form_name" value="edit_lesson_part">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title"><i class="fas fa-edit me-2"></i> Chỉnh sửa Lesson Part</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+
+                        <input type="hidden" name="lesson_part_id" id="editPartId">
+                        <input type="hidden" name="level" id="editPartLevel">
+
+                        <div class="mb-3">
+                            <label>Loại</label>
+                            <input type="text" class="form-control @error('part_type') is-invalid @enderror"
+                                id="editPartType" name="part_type" value="{{ old('part_type') }}" required>
+                            @error('part_type')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <div class="mb-3">
+                            <label>Nội dung</label>
+                            <textarea class="form-control @error('content') is-invalid @enderror" id="editPartContent" name="content">{{ old('content') }}</textarea>
+                            @error('content')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <div class="mb-3">
+                            <label>Thứ tự</label>
+                            <input type="number" class="form-control @error('order_index') is-invalid @enderror"
+                                id="editPartOrder" name="order_index" value="{{ old('order_index') }}" required>
+                            @error('order_index')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+                    </div>
+                </div>
+            </form>
         </div>
     </div>
 @endsection
 
 @section('js')
-    @if ($errors->any())
-        <script>
-            window.addEventListener('DOMContentLoaded', function() {
-                var addLevelModal = new bootstrap.Modal(document.getElementById('addLevelModal'));
-                addLevelModal.show();
-            });
-        </script>
-    @endif
     <!-- CKEditor Script -->
-    <script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
+    <script src="https://cdn.ckeditor.com/ckeditor5/41.4.2/classic/ckeditor.js"></script>
+
     <script>
-        CKEDITOR.replace('lessonDescription');
-    </script>
-    <script>
-        // Custom accordion toggle function sử dụng order_index
-        function toggleAccordion(orderIndex) {
-            console.log('Toggle accordion for order_index:', orderIndex);
+        let lessonEditor = null;
 
-            const partsRow = document.getElementById('parts-' + orderIndex);
-            const chevronIcon = document.getElementById('chevron-' + orderIndex);
+        // Initialize CKEditor
+        function initializeCKEditor() {
+            ClassicEditor
+                .create(document.querySelector('#lessonDescription'))
+                .then(editor => {
+                    lessonEditor = editor;
+                })
+                .catch(error => console.error('Error initializing CKEditor:', error));
+        }
 
-            console.log('Parts row:', partsRow);
-            console.log('Chevron icon:', chevronIcon);
+        // Open lesson modal for create or edit
+        function openLessonModal(mode, button = null) {
+            const form = document.getElementById('lessonForm');
+            const methodInput = document.getElementById('lessonFormMethod');
+            const modalTitle = document.getElementById('lessonModalTitle');
+            const levelInput = document.getElementById('lessonLevel');
+            const titleInput = document.getElementById('lessonTitle');
+            const orderInput = document.getElementById('lessonOrder');
 
-            // Check if elements exist
-            if (!partsRow || !chevronIcon) {
-                console.error('Elements not found for order_index:', orderIndex);
-                return;
+            // Clear previous validation errors
+            clearValidationErrors();
+
+            if (mode === 'create') {
+                modalTitle.innerHTML = `<i class="fas fa-plus-circle me-2"></i> Thêm trình độ mới`;
+                form.action = "{{ route('admin.lesson.create') }}";
+                methodInput.value = 'POST';
+
+                // Reset form
+                levelInput.value = '';
+                titleInput.value = '';
+                orderInput.value = 1;
+                if (lessonEditor) lessonEditor.setData('');
             }
 
-            // Get computed style to check current display state
-            const currentDisplay = window.getComputedStyle(partsRow).display;
-            console.log('Current display:', currentDisplay);
+            if (mode === 'edit' && button) {
+                const level = button.getAttribute('data-level');
+                const title = button.getAttribute('data-title');
+                const description = button.getAttribute('data-description');
+                const order = button.getAttribute('data-order');
 
-            if (currentDisplay === 'none') {
-                // Show the parts
-                partsRow.style.display = 'table-row';
-                chevronIcon.classList.add('rotated');
-                console.log('Expanded order_index:', orderIndex);
-            } else {
-                // Hide the parts
-                partsRow.style.display = 'none';
-                chevronIcon.classList.remove('rotated');
-                console.log('Collapsed order_index:', orderIndex);
+                modalTitle.innerHTML = `<i class="fas fa-edit me-2"></i> Chỉnh sửa trình độ`;
+                form.action = "{{ route('admin.lesson.EditLesson', ['level' => '__level__']) }}".replace('__level__',
+                    encodeURIComponent(level));
+                methodInput.value = 'PUT';
+
+                // Fill form with data
+                levelInput.value = level;
+                titleInput.value = title;
+                orderInput.value = order;
+                if (lessonEditor) lessonEditor.setData(description || '');
             }
         }
 
-        // Initialize after DOM is loaded
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM loaded, initializing accordion...');
+        // Clear validation error classes and messages
+        function clearValidationErrors() {
+            document.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+            document.querySelectorAll('.invalid-feedback').forEach(el => el.remove());
+            document.querySelectorAll('.alert-danger').forEach(el => el.remove());
+        }
 
-            // Tooltips
-            document.querySelectorAll('[title]').forEach(function(element) {
+        // Toggle accordion
+        function toggleAccordion(orderIndex) {
+            const partsRow = document.getElementById('parts-' + orderIndex);
+            const chevronIcon = document.getElementById('chevron-' + orderIndex);
+            if (!partsRow || !chevronIcon) return;
+
+            const isHidden = window.getComputedStyle(partsRow).display === 'none';
+            partsRow.style.display = isHidden ? 'table-row' : 'none';
+            chevronIcon.classList.toggle('rotated', isHidden);
+        }
+
+        // Document ready
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize CKEditor
+            initializeCKEditor();
+
+            // Initialize tooltips
+            document.querySelectorAll('[title]').forEach(el => {
                 if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
-                    new bootstrap.Tooltip(element);
+                    new bootstrap.Tooltip(el);
                 }
             });
 
-            // Add event listeners for accordion toggle
-            const accordionRows = document.querySelectorAll('.accordion-toggle');
-            console.log('Found accordion rows:', accordionRows.length);
-
-            accordionRows.forEach(function(row, index) {
-                console.log('Adding listener to row:', index, row);
-
+            // Setup accordion toggles
+            document.querySelectorAll('.accordion-toggle').forEach(row => {
                 row.addEventListener('click', function(e) {
-                    console.log('Row clicked:', e.target);
-
-                    // Don't trigger if clicking on action buttons
-                    if (e.target.closest('.action-buttons')) {
-                        console.log('Clicked on action button, ignoring...');
-                        return;
-                    }
-
-                    // Lấy order_index từ data attribute
-                    const orderIndex = this.getAttribute('data-lesson-order');
-                    console.log('Order Index from attribute:', orderIndex);
-
-                    if (orderIndex) {
-                        toggleAccordion(orderIndex);
-                    } else {
-                        console.error('No order index found on row');
+                    if (!e.target.closest('.action-buttons')) {
+                        toggleAccordion(this.getAttribute('data-lesson-order'));
                     }
                 });
-
-                // Also add cursor pointer style
                 row.style.cursor = 'pointer';
             });
+
+            // Setup lesson form submission
+            const lessonForm = document.getElementById('lessonForm');
+            if (lessonForm) {
+                lessonForm.addEventListener('submit', function() {
+                    if (lessonEditor) {
+                        document.getElementById('lessonDescription').value = lessonEditor.getData();
+                    }
+                });
+            }
+
+            // Setup edit lesson part modal
+            const editPartModal = document.getElementById('editLessonPartModal');
+            editPartModal.addEventListener('show.bs.modal', function(event) {
+                const button = event.relatedTarget;
+                if (!button) return;
+
+                const id = button.getAttribute('data-id');
+                const level = button.getAttribute('data-level');
+                const type = button.getAttribute('data-type');
+                const content = button.getAttribute('data-content');
+                const order = button.getAttribute('data-order');
+
+                // Update form action
+                const form = document.getElementById('editLessonPartForm');
+                form.action = "{{ route('admin.lesson.EditLessonPart', ['lesson_part_id' => '__id__']) }}"
+                    .replace('__id__', id);
+
+                // Fill form data
+                document.getElementById('editPartId').value = id;
+                document.getElementById('editPartLevel').value = level;
+                document.getElementById('editPartType').value = type;
+                document.getElementById('editPartContent').value = content;
+                document.getElementById('editPartOrder').value = order;
+            });
         });
+
+        // Show modals on validation errors
+        @if ($errors->any())
+            @if (old('_form_name') === 'lesson_form')
+                document.addEventListener('DOMContentLoaded', function() {
+                    // Restore form mode first
+                    const mode = '{{ old('_method') === 'PUT' ? 'edit' : 'create' }}';
+                    const modal = new bootstrap.Modal(document.getElementById('lessonModal'));
+
+                    // Set up form based on mode before showing modal
+                    if (mode === 'create') {
+                        // Setup for create mode
+                        document.getElementById('lessonModalTitle').innerHTML =
+                            `<i class="fas fa-plus-circle me-2"></i> Thêm trình độ mới`;
+                        document.getElementById('lessonForm').action = "{{ route('admin.lesson.create') }}";
+                        document.getElementById('lessonFormMethod').value = 'POST';
+                    } else {
+                        // Setup for edit mode
+                        document.getElementById('lessonModalTitle').innerHTML =
+                            `<i class="fas fa-edit me-2"></i> Chỉnh sửa trình độ`;
+                        const level = '{{ old('level') }}';
+                        document.getElementById('lessonForm').action =
+                            "{{ route('admin.lesson.EditLesson', ['level' => '__level__']) }}".replace('__level__',
+                                encodeURIComponent(level));
+                        document.getElementById('lessonFormMethod').value = 'PUT';
+                    }
+
+                    // Fill form with old values
+                    document.getElementById('lessonLevel').value = '{{ old('level', '') }}';
+                    document.getElementById('lessonTitle').value = '{{ old('title', '') }}';
+                    document.getElementById('lessonOrder').value = '{{ old('order_index', '1') }}';
+
+                    // Show modal
+                    modal.show();
+
+                    // Set CKEditor content after modal is shown
+                    setTimeout(() => {
+                        if (lessonEditor) {
+                            lessonEditor.setData(`{!! old('description', '') !!}`);
+                        }
+                    }, 500);
+                });
+            @elseif (old('_form_name') === 'edit_lesson_part')
+                document.addEventListener('DOMContentLoaded', function() {
+                    const modal = new bootstrap.Modal(document.getElementById('editLessonPartModal'));
+                    modal.show();
+
+                    // Fill old values
+                    document.getElementById('editPartId').value = '{{ old('lesson_part_id') }}';
+                    document.getElementById('editPartLevel').value = '{{ old('level') }}';
+                    document.getElementById('editPartType').value = '{{ old('part_type') }}';
+                    document.getElementById('editPartContent').value = '{{ old('content') }}';
+                    document.getElementById('editPartOrder').value = '{{ old('order_index') }}';
+
+                    // Update form action
+                    const form = document.getElementById('editLessonPartForm');
+                    form.action = "{{ route('admin.lesson.EditLessonPart', ['lesson_part_id' => '__id__']) }}"
+                        .replace('__id__', '{{ old('lesson_part_id') }}');
+                });
+            @endif
+        @endif
     </script>
 @endsection

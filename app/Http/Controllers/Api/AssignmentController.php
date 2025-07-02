@@ -27,9 +27,9 @@ class AssignmentController extends Controller
                 ], 404);
             }
 
-            // Lấy tất cả questions thuộc course này thông qua lesson parts
+            // Get all questions from all lesson parts since level column was removed
+            // TODO: Need to redesign relationship between courses and lesson_parts
             $questions = Question::join('lesson_parts', 'questions.lesson_part_id', '=', 'lesson_parts.lesson_part_id')
-                                ->where('lesson_parts.level', $course->level)
                                 ->select('questions.*', 'lesson_parts.part_type', 'lesson_parts.lesson_part_id')
                                 ->with('Answers')
                                 ->orderBy('lesson_parts.order_index')
@@ -222,27 +222,142 @@ class AssignmentController extends Controller
         }
     }
     
+
+
     /**
-     * Lấy câu trả lời của học sinh
-     * GET /api/student-answers/student/{studentId}
+     * Lấy câu trả lời của học sinh theo course và lesson part
+     * GET /api/student-answers/student/{studentId}/course/{courseId}/lesson-part/{lessonPartId}
      */
-    public function getAnswersByStudentId($studentId)
+    public function getAnswersByStudentCourseAndLessonPart(Request $request, $studentId, $courseId, $lessonPartId)
     {
         try {
-            $answers = StudentAnswer::where('student_id', $studentId)
-                                  ->with(['Question', 'Course', 'Student'])
-                                  ->get();
-            
-            return response()->json($answers, 200);
-            
+            $query = StudentAnswer::where('student_id', $studentId)
+                                 ->where('course_id', $courseId)
+                                 ->whereHas('Question', function($q) use ($lessonPartId) {
+                                     $q->where('lesson_part_id', $lessonPartId);
+                                 })
+                                 ->with(['Question.lessonPart', 'Course', 'Student']);
+
+            // Filter by date range if provided
+            if ($request->has('from_date')) {
+                $query->where('answered_at', '>=', $request->from_date);
+            }
+
+            if ($request->has('to_date')) {
+                $query->where('answered_at', '<=', $request->to_date);
+            }
+
+            // Order by most recent first
+            $answers = $query->orderBy('answered_at', 'desc')->get();
+
+            // Add additional computed fields
+            $answers = $answers->map(function($answer) {
+                $answer->lesson_part_id = $answer->Question?->lesson_part_id;
+                $answer->lesson_part_name = $answer->Question?->lessonPart?->part_name;
+                return $answer;
+            });
+
+            return response()->json([
+                'success' => true,
+                'data' => $answers,
+                'total_count' => $answers->count(),
+                'student_id' => $studentId,
+                'course_id' => $courseId,
+                'lesson_part_id' => $lessonPartId,
+                'filters_applied' => [
+                    'from_date' => $request->from_date,
+                    'to_date' => $request->to_date
+                ]
+            ], 200);
+
         } catch (\Exception $e) {
             return response()->json([
+                'success' => false,
                 'error' => 'Lỗi server',
                 'message' => $e->getMessage()
             ], 500);
         }
     }
-    
+
+    /**
+     * Lấy câu trả lời của học sinh theo course, lesson part và answered_at
+     * GET /api/student-answers/student/{studentId}/course/{courseId}/lesson-part/{lessonPartId}/answered-at/{answeredAt}
+     */
+    public function getAnswersByStudentCourseAndLessonPartAndDate(Request $request, $studentId, $courseId, $lessonPartId, $answeredAt)
+    {
+        try {
+            // Parse answered_at parameter (expect format: YYYY-MM-DD or YYYY-MM-DD_HH:MM:SS)
+            $answeredAtDate = str_replace('_', ' ', $answeredAt);
+
+            // Validate date format
+            if (!strtotime($answeredAtDate)) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Invalid answered_at format. Use YYYY-MM-DD or YYYY-MM-DD_HH:MM:SS'
+                ], 400);
+            }
+
+            $query = StudentAnswer::where('student_id', $studentId)
+                                 ->where('course_id', $courseId)
+                                 ->whereHas('Question', function($q) use ($lessonPartId) {
+                                     $q->where('lesson_part_id', $lessonPartId);
+                                 })
+                                 ->with(['Question.lessonPart', 'Course', 'Student']);
+
+            // Filter by specific date or date range
+            if (strlen($answeredAtDate) == 10) {
+                // Date only (YYYY-MM-DD) - get all answers for that day
+                $startTime = $answeredAtDate . ' 00:00:00';
+                $endTime = $answeredAtDate . ' 23:59:59';
+                $query->whereBetween('answered_at', [$startTime, $endTime]);
+            } else {
+                // DateTime - get answers within 1 hour of specified time
+                $startTime = date('Y-m-d H:i:s', strtotime($answeredAtDate . ' -30 minutes'));
+                $endTime = date('Y-m-d H:i:s', strtotime($answeredAtDate . ' +30 minutes'));
+                $query->whereBetween('answered_at', [$startTime, $endTime]);
+            }
+
+            // Additional query parameters
+            if ($request->has('exact_time') && $request->exact_time == 'true') {
+                // Exact timestamp match (within 1 minute)
+                $startTime = date('Y-m-d H:i:s', strtotime($answeredAtDate . ' -30 seconds'));
+                $endTime = date('Y-m-d H:i:s', strtotime($answeredAtDate . ' +30 seconds'));
+                $query->whereBetween('answered_at', [$startTime, $endTime]);
+            }
+
+            // Order by answered_at
+            $answers = $query->orderBy('answered_at', 'desc')->get();
+
+            // Add additional computed fields
+            $answers = $answers->map(function($answer) {
+                $answer->lesson_part_id = $answer->Question?->lesson_part_id;
+                $answer->lesson_part_name = $answer->Question?->lessonPart?->part_name;
+                $answer->formatted_answered_at = $answer->answered_at?->format('Y-m-d H:i:s');
+                return $answer;
+            });
+
+            return response()->json([
+                'success' => true,
+                'data' => $answers,
+                'total_count' => $answers->count(),
+                'student_id' => $studentId,
+                'course_id' => $courseId,
+                'lesson_part_id' => $lessonPartId,
+                'answered_at_filter' => $answeredAtDate,
+                'query_parameters' => [
+                    'exact_time' => $request->exact_time ?? 'false'
+                ]
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Lỗi server',
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
     /**
      * Lấy đáp án theo câu hỏi
      * GET /api/answers/question/{questionId}

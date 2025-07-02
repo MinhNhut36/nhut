@@ -539,9 +539,6 @@
                 <table class="student-table">
                     <thead>
                         <tr>
-                            <th>
-                                <input type="checkbox" class="form-check-input" id="selectAll">
-                            </th>
                             <th>Thông tin giáo viên</th>
                             <th>Tên đăng nhập</th>
                             <th>Email</th>
@@ -553,10 +550,6 @@
                     <tbody>
                         @foreach ($teachers as $teacher)
                             <tr>
-                                <td>
-                                    <input type="checkbox" class="form-check-input student-checkbox"
-                                        value="{{ $teacher->student_id }}">
-                                </td>
                                 <td>
                                     <div class="student-info">
                                         <img src="{{ asset('uploads/avatars/' . $teacher->avatar) }}" alt="Avatar"

@@ -26,9 +26,10 @@ class LessonPartController extends Controller
 
             $studentId = $request->query('student_id');
 
-            $lessonParts = LessonPart::where('level', $course->level)
-                ->orderBy('order_index')
-                ->get();
+            // Get lesson parts by course level through lesson relationship
+            $lessonParts = LessonPart::whereHas('lesson', function($query) use ($course) {
+                $query->where('level', $course->level);
+            })->orderBy('order_index')->get();
 
             // Transform to include real progress data from database
             $lessonPartsWithProgress = $lessonParts->map(function($part) use ($studentId, $courseId) {
@@ -142,7 +143,6 @@ class LessonPartController extends Controller
 
             $response = [
                 'lesson_part_id' => $lessonPart->lesson_part_id,
-                'level' => $lessonPart->level,
                 'part_type' => $lessonPart->part_type,
                 'content' => $lessonPart->content,
                 'questions' => $questions,

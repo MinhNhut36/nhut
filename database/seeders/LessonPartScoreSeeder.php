@@ -32,7 +32,9 @@ class LessonPartScoreSeeder extends Seeder
             return;
         }
 
-        $lessonParts = LessonPart::where('level', $enrollment->course->level)->get();
+        // Get all lesson parts since level column was removed
+        // TODO: Need to redesign relationship between courses and lesson_parts
+        $lessonParts = LessonPart::all();
 
         foreach ($lessonParts as $lessonPart) {
             $this->createScoreForLessonPart($enrollment, $lessonPart, $statusValue);

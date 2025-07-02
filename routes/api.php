@@ -9,7 +9,7 @@ use App\Http\Controllers\Api\ProgressController;
 use App\Http\Controllers\Api\CourseController;
 use App\Http\Controllers\Api\LessonController;
 use App\Http\Controllers\Api\LessonPartController;
-use App\Http\Controllers\Api\AssignmentController;
+use App\Http\Controllers\Api\TeacherAssignmentController;
 use App\Http\Controllers\Api\QuestionController;
 use App\Http\Controllers\Api\ClassPostController;
 use App\Http\Controllers\Api\NotificationController;
@@ -36,8 +36,10 @@ Route::get('courses/student/{studentId}', [CourseController::class, 'getCoursesB
 Route::get('courses/level/{level}', [CourseController::class, 'getCoursesByLevel']);
 
 // ==================== COURSE ENROLLMENT ====================
-Route::post('enrollments', [CourseController::class, 'enrollStudent']);
 Route::get('enrollments/course/{courseId}', [CourseController::class, 'getEnrollmentsByCourseId']);
+
+// ==================== NEW SMART ENROLLMENT ====================
+Route::post('enrollments/smart-register/student/{studentId}', [EnrollmentController::class, 'smartCourseRegistration']);
 
 // ==================== TEACHER MANAGEMENT ====================
 Route::get('teachers', [ApiTeacherController::class, 'getAllTeachers']);
@@ -46,11 +48,10 @@ Route::get('teachers/course/{courseId}', [ApiTeacherController::class, 'getTeach
 
 // ==================== LESSON MANAGEMENT ====================
 Route::get('lessons/course/{courseId}', [LessonController::class, 'getLessonsByCourseId']);
-Route::get('lessons/{lessonId}', [LessonController::class, 'getLessonById']);
-Route::get('lessons/level/{level}', [LessonController::class, 'getLessonsByLevel']);
+Route::get('lessons/{level}', [LessonController::class, 'getLessonByLevel'])->where('level', '.*');
 
 // ==================== LESSON PARTS ====================
-Route::get('lesson-parts/lesson/{lessonId}', [LessonController::class, 'getLessonPartsByLessonId']);
+Route::get('lesson-parts/lesson/{level}', [LessonController::class, 'getLessonPartsByLevel'])->where('level', '.*');
 Route::get('lesson-parts/{lessonPartId}', [LessonController::class, 'getLessonPartById']);
 Route::get('lesson-part-questions/{lessonPartId}', [LessonController::class, 'getLessonPartQuestions']);
 Route::get('lesson-parts/course/{courseId}', [LessonPartController::class, 'getLessonPartsByCourse']);
@@ -60,7 +61,6 @@ Route::get('lesson-parts/{lessonPartId}/student/{studentId}/progress', [LessonPa
 // ==================== SCORES & PROGRESS ====================
 Route::get('scores/student/{studentId}', [ApiStudentController::class, 'getScoresByStudentId']);
 Route::get('scores/lesson-part/{lessonPartId}/student/{studentId}', [ApiStudentController::class, 'getScoreByLessonPartAndStudent']);
-Route::post('scores', [ApiStudentController::class, 'submitScore']);
 
 // ==================== PROGRESS TRACKING ====================
 
@@ -77,7 +77,7 @@ Route::get('progress/lesson/{lessonLevel}/student/{studentId}', [ProgressControl
 Route::get('progress/lesson/{lessonLevel}/student/{studentId}/course/{courseId}', [ProgressController::class, 'getLessonProgress']);
 
 // Student Progress APIs (comprehensive progress tracking)
-Route::post('student-progress', [ProgressController::class, 'updateStudentProgress']);
+Route::post('student-progress', [ProgressController::class, 'createOrUpdateStudentProgress']);
 Route::get('progress/course/{courseId}/student/{studentId}/detailed', [ProgressController::class, 'getCourseProgress']);
 Route::get('progress/student/{studentId}/overview/detailed', [ProgressController::class, 'getStudentProgressOverview']);
 
@@ -87,16 +87,23 @@ Route::put('enrollments/{enrollmentId}/status', [EnrollmentController::class, 'u
 
 
 
-// ==================== ASSIGNMENTS & QUESTIONS ====================
-Route::get('assignments/course/{courseId}', [AssignmentController::class, 'getAssignmentsByCourseId']);
-Route::get('assignments/{assignmentId}', [AssignmentController::class, 'getAssignmentById']);
-Route::get('questions/assignment/{assignmentId}', [AssignmentController::class, 'getQuestionsByAssignmentId']);
-Route::get('questions/{questionId}', [AssignmentController::class, 'getQuestionById']);
+// ==================== TEACHER COURSE ASSIGNMENTS & QUESTIONS ====================
+Route::get('teacher-assignments/course/{courseId}', [TeacherAssignmentController::class, 'getTeacherAssignmentsByCourseId']);
+Route::get('teacher-assignments/{assignmentId}', [TeacherAssignmentController::class, 'getTeacherAssignmentById']);
+Route::get('teacher-assignments/teacher/{teacherId}', [TeacherAssignmentController::class, 'getAssignmentsByTeacherId']);
+Route::post('teacher-assignments', [TeacherAssignmentController::class, 'createTeacherAssignment']);
+Route::put('teacher-assignments/{assignmentId}', [TeacherAssignmentController::class, 'updateTeacherAssignment']);
+Route::delete('teacher-assignments/{assignmentId}', [TeacherAssignmentController::class, 'deleteTeacherAssignment']);
+Route::get('questions/{questionId}', [QuestionController::class, 'getQuestionById']);
 Route::get('questions/lesson-part/{lessonPartId}', [QuestionController::class, 'getQuestionsByLessonPart']);
 Route::get('answers/question/{questionId}', [QuestionController::class, 'getAnswersForQuestion']);
-Route::post('student-answers', [QuestionController::class, 'submitStudentAnswer']);
 Route::post('lesson-part-scores', [QuestionController::class, 'submitLessonPartScore']);
-Route::get('student-answers/student/{studentId}', [AssignmentController::class, 'getAnswersByStudentId']);
+Route::get('student-answers/student/{studentId}/course/{courseId}/lesson-part/{lessonPartId}', [QuestionController::class, 'getAnswersByStudentCourseAndLessonPart']);
+Route::get('student-answers/student/{studentId}/course/{courseId}/lesson-part/{lessonPartId}/answered-at/{answeredAt}', [QuestionController::class, 'getAnswersByStudentCourseAndLessonPartAndDate']);
+
+// ==================== NEW STUDENT ANSWER MANAGEMENT ====================
+Route::post('student-answers/student/{studentId}/course/{courseId}/lesson-part/{lessonPartId}', [QuestionController::class, 'submitStudentAnswerByCourseAndLessonPart']);
+Route::get('student-answers/recent-submission/student/{studentId}/course/{courseId}/lesson-part/{lessonPartId}', [QuestionController::class, 'getRecentSubmissionScoreAndProgress']);
 
 // ==================== CLASS POSTS & COMMUNICATION ====================
 Route::get('class-posts/course/{courseId}', [ClassPostController::class, 'getClassPostsByCourseId']);
@@ -105,7 +112,6 @@ Route::get('class-posts/{postId}', [ClassPostController::class, 'getClassPostByI
 Route::post('class-posts', [ClassPostController::class, 'createClassPost']);
 Route::put('class-posts/{postId}', [ClassPostController::class, 'updateClassPost']);
 Route::delete('class-posts/{postId}', [ClassPostController::class, 'deleteClassPost']);
-Route::post('answers', [AssignmentController::class, 'createAnswer']);
 Route::get('class-post-replies/post/{postId}', [ClassPostController::class, 'getClassPostReplies']);
 Route::post('class-post-replies', [ClassPostController::class, 'createClassPostReply']);
 Route::put('class-post-replies/{commentId}', [ClassPostController::class, 'updateClassPostReply']);
@@ -113,13 +119,15 @@ Route::delete('class-post-replies/{commentId}', [ClassPostController::class, 'de
 
 // ==================== NOTIFICATIONS ====================
 Route::get('notifications/student/{studentId}', [NotificationController::class, 'getNotificationsByStudentId']);
-Route::get('notifications/student/{studentId}/unread-count', [NotificationController::class, 'getUnreadNotificationCount']);
 Route::get('notifications/{notificationId}', [NotificationController::class, 'getNotificationById']);
-Route::put('notifications/{notificationId}/read', [NotificationController::class, 'markNotificationAsRead']);
+Route::post('notifications', [NotificationController::class, 'createNotification']);
+Route::put('notifications/{notificationId}', [NotificationController::class, 'updateNotification']);
+Route::delete('notifications/{notificationId}', [NotificationController::class, 'deleteNotification']);
 
 // ==================== EXAM RESULTS & EVALUATION ====================
+Route::get('exam-results/{examId}', [ExamController::class, 'getExamById']);
 Route::get('exam-results/student/{studentId}', [ExamController::class, 'getExamResultsByStudentId']);
-Route::get('exam-results/course/{courseId}', [ExamController::class, 'getExamResultsByCourseId']);
+Route::get('exam-results/course/{courseId}/student/{studentId}', [ExamController::class, 'getExamResultsByCourseAndStudent']);
 Route::post('exam-results', [ExamController::class, 'submitExamResult']);
 Route::get('evaluations/student/{studentId}', [ExamController::class, 'getStudentEvaluations']);
 Route::post('evaluations', [ExamController::class, 'createStudentEvaluation']);

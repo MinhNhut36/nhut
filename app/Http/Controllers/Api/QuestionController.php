@@ -53,61 +53,6 @@ class QuestionController extends Controller
     }
 
     /**
-     * Submit student answer
-     * POST /api/student-answers
-     */
-    public function submitStudentAnswer(Request $request)
-    {
-        try {
-            $validated = $request->validate([
-                'student_id' => 'required|integer',
-                'questions_id' => 'required|integer',
-                'course_id' => 'required|integer',
-                'answer_text' => 'required|string'
-            ]);
-
-            // Get correct answer
-            $correctAnswer = Answer::where('questions_id', $validated['questions_id'])
-                ->where('is_correct', 1)
-                ->first();
-
-            $isCorrect = false;
-            $feedback = 'Incorrect answer';
-            $scorePoints = 0;
-
-            if ($correctAnswer) {
-                $isCorrect = strtolower(trim($validated['answer_text'])) === 
-                           strtolower(trim($correctAnswer->answer_text));
-                $feedback = $isCorrect ? 'Correct!' : ($correctAnswer->feedback ?? 'Try again');
-                $scorePoints = $isCorrect ? 10 : 0;
-            }
-
-            // Save student answer
-            StudentAnswer::create([
-                'student_id' => $validated['student_id'],
-                'questions_id' => $validated['questions_id'],
-                'course_id' => $validated['course_id'],
-                'answer_text' => $validated['answer_text'],
-                'answered_at' => now()
-            ]);
-
-            return response()->json([
-                'success' => true,
-                'is_correct' => $isCorrect,
-                'correct_answer' => $correctAnswer?->answer_text,
-                'feedback' => $feedback,
-                'score_points' => $scorePoints
-            ], 200);
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Server error: ' . $e->getMessage()
-            ], 500);
-        }
-    }
-
-    /**
      * Submit lesson part score
      * POST /api/lesson-part-scores
      */
@@ -118,11 +63,18 @@ class QuestionController extends Controller
                 'student_id' => 'required|integer',
                 'lesson_part_id' => 'required|integer',
                 'course_id' => 'required|integer',
-                'attempt_no' => 'required|integer',
+                'attempt_no' => 'sometimes|integer',
                 'score' => 'required|numeric',
                 'total_questions' => 'required|integer',
                 'correct_answers' => 'required|integer'
             ]);
+
+            // Auto-calculate attempt_no if not provided
+            if (!isset($validated['attempt_no'])) {
+                $validated['attempt_no'] = LessonPartScore::where('student_id', $validated['student_id'])
+                    ->where('lesson_part_id', $validated['lesson_part_id'])
+                    ->max('attempt_no') + 1;
+            }
 
             // Save lesson part score
             $lessonPartScore = LessonPartScore::create([
@@ -144,7 +96,7 @@ class QuestionController extends Controller
             $progressUpdated = false;
             if ($isCompleted) {
                 try {
-                    \App\Models\StudentProgres::updateOrCreate(
+                    \App\Models\StudentProgress::updateOrCreate(
                         ['score_id' => $lessonPartScore->score_id],
                         [
                             'completion_status' => 1,
@@ -222,6 +174,227 @@ class QuestionController extends Controller
 
         } catch (\Exception) {
             return 0;
+        }
+    }
+
+    /**
+     * Calculate if answer is correct by comparing with correct answer
+     */
+    private function calculateCorrectness($question, $answerText)
+    {
+        try {
+            $correctAnswer = Answer::where('questions_id', $question->questions_id)
+                ->where('is_correct', 1)
+                ->first();
+
+            if (!$correctAnswer) {
+                return false;
+            }
+
+            return strtolower(trim($answerText)) === strtolower(trim($correctAnswer->answer_text));
+        } catch (\Exception) {
+            return false;
+        }
+    }
+
+    /**
+     * Submit student answers by course and lesson part
+     * POST /api/student-answers/student/{studentId}/course/{courseId}/lesson-part/{lessonPartId}
+     */
+    public function submitStudentAnswerByCourseAndLessonPart(Request $request, $studentId, $courseId, $lessonPartId)
+    {
+        try {
+            $validated = $request->validate([
+                'answers' => 'required|array',
+                'answers.*.question_id' => 'required|integer|exists:questions,questions_id',
+                'answers.*.answer_text' => 'required|string',
+                'answers.*.is_correct' => 'sometimes|boolean'
+            ]);
+
+            $updatedAnswers = [];
+            $totalQuestions = count($validated['answers']);
+            $correctAnswers = 0;
+
+            foreach ($validated['answers'] as $answerData) {
+                // Kiểm tra question thuộc lesson_part
+                $question = Question::where('questions_id', $answerData['question_id'])
+                    ->where('lesson_part_id', $lessonPartId)
+                    ->first();
+
+                if (!$question) {
+                    return response()->json([
+                        'error' => 'Question not found in specified lesson part'
+                    ], 404);
+                }
+
+                // Tính toán is_correct nếu không được truyền vào
+                if (!isset($answerData['is_correct'])) {
+                    $answerData['is_correct'] = $this->calculateCorrectness($question, $answerData['answer_text']);
+                }
+
+                if ($answerData['is_correct']) {
+                    $correctAnswers++;
+                }
+
+                // Update hoặc create student answer
+                $studentAnswer = StudentAnswer::updateOrCreate(
+                    [
+                        'student_id' => $studentId,
+                        'questions_id' => $answerData['question_id']
+                    ],
+                    [
+                        'answer_text' => $answerData['answer_text'],
+                        'course_id' => $courseId,
+                        'answered_at' => now()
+                    ]
+                );
+
+                $updatedAnswers[] = $studentAnswer;
+            }
+
+            // Tính điểm và cập nhật lesson part score
+            $score = ($totalQuestions > 0) ? ($correctAnswers / $totalQuestions) * 10 : 0;
+
+            // Lấy attempt_no hiện tại
+            $currentAttempt = LessonPartScore::where('student_id', $studentId)
+                ->where('lesson_part_id', $lessonPartId)
+                ->max('attempt_no') ?? 0;
+
+            $lessonPartScore = LessonPartScore::updateOrCreate(
+                [
+                    'student_id' => $studentId,
+                    'lesson_part_id' => $lessonPartId
+                ],
+                [
+                    'course_id' => $courseId,
+                    'attempt_no' => $currentAttempt + 1,
+                    'score' => $score,
+                    'total_questions' => $totalQuestions,
+                    'correct_answers' => $correctAnswers,
+                    'submit_time' => now()
+                ]
+            );
+
+            // Cập nhật student progress nếu đạt 70%
+            if ($score >= 7.0) {
+                \App\Models\StudentProgress::updateOrCreate(
+                    ['score_id' => $lessonPartScore->score_id],
+                    [
+                        'completion_status' => 1,
+                        'last_updated' => now()
+                    ]
+                );
+            }
+
+            return response()->json([
+                'message' => 'Student answers updated successfully',
+                'data' => [
+                    'updated_answers' => $updatedAnswers,
+                    'lesson_part_score' => $lessonPartScore,
+                    'total_questions' => $totalQuestions,
+                    'correct_answers' => $correctAnswers,
+                    'score' => $score,
+                    'completion_percentage' => ($score / 10) * 100
+                ]
+            ], 200);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'error' => 'Validation failed',
+                'details' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Server error',
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Get recent submission score and progress
+     * GET /api/student-answers/recent-submission/student/{studentId}/course/{courseId}/lesson-part/{lessonPartId}
+     */
+    public function getRecentSubmissionScoreAndProgress(Request $request, $studentId, $courseId, $lessonPartId)
+    {
+        try {
+            $submissionTime = $request->query('submission_time');
+
+            if (!$submissionTime) {
+                return response()->json([
+                    'error' => 'submission_time parameter is required'
+                ], 400);
+            }
+
+            // Lấy student answers từ thời điểm submission_time
+            $studentAnswers = StudentAnswer::where('student_id', $studentId)
+                ->whereHas('question', function($query) use ($lessonPartId) {
+                    $query->where('lesson_part_id', $lessonPartId);
+                })
+                ->where('answered_at', '>=', $submissionTime)
+                ->with(['question' => function($query) {
+                    $query->select('questions_id', 'lesson_part_id', 'question_text', 'question_type');
+                }])
+                ->orderBy('answered_at', 'desc')
+                ->get();
+
+            if ($studentAnswers->isEmpty()) {
+                return response()->json([
+                    'message' => 'No recent submissions found',
+                    'data' => []
+                ], 200);
+            }
+
+            // Lấy lesson part score
+            $lessonPartScore = LessonPartScore::where('student_id', $studentId)
+                ->where('lesson_part_id', $lessonPartId)
+                ->first();
+
+            // Lấy student progress
+            $studentProgress = null;
+            if ($lessonPartScore) {
+                $studentProgress = \App\Models\StudentProgress::where('score_id', $lessonPartScore->score_id)
+                    ->first();
+            }
+
+            // Tính toán thống kê - cần tính lại is_correct vì không lưu trong DB
+            $totalAnswers = $studentAnswers->count();
+            $correctAnswers = 0;
+
+            foreach ($studentAnswers as $answer) {
+                if ($this->calculateCorrectness($answer->question, $answer->answer_text)) {
+                    $correctAnswers++;
+                }
+            }
+
+            $accuracy = $totalAnswers > 0 ? ($correctAnswers / $totalAnswers) * 100 : 0;
+
+            return response()->json([
+                'message' => 'Recent submission data retrieved successfully',
+                'data' => [
+                    'student_id' => $studentId,
+                    'course_id' => $courseId,
+                    'lesson_part_id' => $lessonPartId,
+                    'submission_time' => $submissionTime,
+                    'recent_answers' => $studentAnswers,
+                    'lesson_part_score' => $lessonPartScore,
+                    'student_progress' => $studentProgress,
+                    'statistics' => [
+                        'total_answers' => $totalAnswers,
+                        'correct_answers' => $correctAnswers,
+                        'accuracy_percentage' => round($accuracy, 2),
+                        'score' => $lessonPartScore ? $lessonPartScore->score : 0,
+                        'is_completed' => $studentProgress ? $studentProgress->completion_status : false,
+                        'attempts_count' => $lessonPartScore ? $lessonPartScore->attempts_count : 0
+                    ]
+                ]
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Server error',
+                'message' => $e->getMessage()
+            ], 500);
         }
     }
 }

@@ -19,7 +19,7 @@ class StudentProgressSeeder extends Seeder
         // Tạo progress cho mỗi score dựa trên logic thực tế
         foreach ($scores as $score) {
             // Completion status dựa trên điểm số (>= 7.0 là hoàn thành)
-            $completionStatus = $score->score >= 7.0 ? 1 : 0;
+            $completionStatus = $score->score >= 7.0 ? true : false;
 
             StudentProgres::create([
                 'score_id' => $score->score_id,

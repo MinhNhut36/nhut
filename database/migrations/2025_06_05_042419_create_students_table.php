@@ -15,10 +15,10 @@ return new class extends Migration
             $table->id('student_id');
             $table->longText('avatar')->nullable(); // Hình đại diện
             $table->string('fullname');
-            $table->string('username')->nullable();
-            $table->string('password')->nullable();
+            $table->string('username');
+            $table->string('password');
             $table->date('date_of_birth');
-            $table->integer('gender')->nullable(); // 1: Nam, 2: Nữ, 3: Khác
+            $table->integer('gender'); // 1: Nam, 2: Nữ, 3: Khác
             $table->string('email');
             $table->integer('is_status')->default(1);
             $table->timestamps();

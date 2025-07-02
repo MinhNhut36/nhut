@@ -311,14 +311,14 @@
                                         {{ $lesson->level }}
                                     </span>
                                 </div>
-                                @if($lesson->description)
+                                @if ($lesson->description)
                                     <div class="info-row">
                                         <span class="info-label">
                                             <i class="fas fa-info-circle"></i>
                                             Mô tả
                                         </span>
                                         <span class="info-value">
-                                            {{ Str::limit($lesson->description, 50) }}
+                                            {{ Str::limit(strip_tags($lesson->description), 50) }}
                                         </span>
                                     </div>
                                 @endif
@@ -337,7 +337,8 @@
             <div class="empty-state">
                 <i class="fas fa-book-open"></i>
                 <h3>Chưa có trình độ nào</h3>
-                <p>Hiện tại chưa có trình độ học tập nào được thiết lập. Vui lòng liên hệ với giáo vụ để biết thêm thông tin.</p>
+                <p>Hiện tại chưa có trình độ học tập nào được thiết lập. Vui lòng liên hệ với giáo vụ để biết thêm thông
+                    tin.</p>
             </div>
         @endif
     </div>

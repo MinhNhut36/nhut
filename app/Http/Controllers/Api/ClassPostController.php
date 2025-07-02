@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\ClassPost;
 use App\Models\ClassPostComment;
+use App\Models\Course;
 use Illuminate\Http\Request;
 
 class ClassPostController extends Controller
@@ -251,37 +252,70 @@ class ClassPostController extends Controller
     public function getClassPostCommentsByCourse($courseId)
     {
         try {
+            // Validate course exists
+            $course = Course::findOrFail($courseId);
+
             $comments = ClassPostComment::whereHas('post', function($query) use ($courseId) {
                                 $query->where('course_id', $courseId);
                             })
                             ->where('status', 1)
-                            ->with(['student', 'teacher', 'post'])
+                            ->with(['student', 'teacher', 'post.course'])
                             ->orderBy('created_at', 'desc')
                             ->get();
 
-            // Thêm thông tin tác giả cho mỗi comment
-            foreach ($comments as $comment) {
-                if ($comment->student_id) {
-                    $comment->author = $comment->student;
-                    $comment->author_type = 'student';
-                    $comment->author_name = $comment->student ? $comment->student->fullname : 'Unknown';
-                } else {
-                    $comment->author = $comment->teacher;
-                    $comment->author_type = 'teacher';
-                    $comment->author_name = $comment->teacher ? $comment->teacher->fullname : 'Unknown';
-                }
-                $comment->post_title = $comment->post->title;
-            }
+            // Transform data for better structure
+            $transformedComments = $comments->map(function($comment) {
+                return [
+                    'comment_id' => $comment->comment_id,
+                    'content' => $comment->content,
+                    'created_at' => $comment->created_at,
+                    'updated_at' => $comment->updated_at,
+                    'status' => $comment->status,
+
+                    // Author information
+                    'author' => [
+                        'id' => $comment->student_id ?: $comment->teacher_id,
+                        'type' => $comment->student_id ? 'student' : 'teacher',
+                        'name' => $comment->student_id
+                            ? ($comment->student?->fullname ?? 'Unknown Student')
+                            : ($comment->teacher?->fullname ?? 'Unknown Teacher'),
+                        'email' => $comment->student_id
+                            ? ($comment->student?->email ?? null)
+                            : ($comment->teacher?->email ?? null)
+                    ],
+
+                    // Post information
+                    'post' => [
+                        'post_id' => $comment->post->post_id,
+                        'title' => $comment->post->title,
+                        'course_id' => $comment->post->course_id,
+                        'course_name' => $comment->post->course->course_name ?? 'Unknown Course'
+                    ]
+                ];
+            });
 
             return response()->json([
                 'success' => true,
-                'data' => $comments
+                'data' => $transformedComments,
+                'meta' => [
+                    'course_id' => $courseId,
+                    'course_name' => $course->course_name,
+                    'total_comments' => $transformedComments->count(),
+                    'student_comments' => $transformedComments->where('author.type', 'student')->count(),
+                    'teacher_comments' => $transformedComments->where('author.type', 'teacher')->count()
+                ]
             ], 200);
 
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Course not found',
+                'message' => 'The specified course does not exist'
+            ], 404);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'error' => 'Lỗi server',
+                'error' => 'Server error',
                 'message' => $e->getMessage()
             ], 500);
         }

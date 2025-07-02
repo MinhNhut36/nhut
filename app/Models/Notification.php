@@ -8,12 +8,10 @@ class Notification extends Model
 {
     protected $fillable = [
         'notification_id',
-        'admin',
-        'target',
+        'admin_id',
         'title',
         'message',
         'notification_date',
-        'status',
     ];
     protected $primaryKey = 'notification_id';
     //định nghĩa các quan hệ với các model khác

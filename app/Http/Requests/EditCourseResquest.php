@@ -24,7 +24,7 @@ class EditCourseResquest extends FormRequest
     public function rules(): array
     {
         $rules = [
-            'course_name' => ['required', 'string', 'max:255', 'regex:/^[a-zA-ZÀ-ỹ0-9\s]+$/u'],
+            'course_name' => ['required', 'string', 'max:255'],
             'level' => ['required', 'string'],
             'year' => ['required', 'integer', 'min:2020'],
             'description' => ['nullable', 'string'],
@@ -58,7 +58,9 @@ class EditCourseResquest extends FormRequest
                     default => [],
                 };
 
-                if (!in_array($this->input('status'), $nextValidStatus)) {
+                $requestedStatus = $this->input('status');
+
+                if (!in_array($requestedStatus, $nextValidStatus) && $requestedStatus !== $currentStatus) {
                     $rules['status'][] = function ($attribute, $value, $fail) use ($currentStatus) {
                         $fail("Không thể chuyển trạng thái từ [$currentStatus] sang [$value].");
                     };
@@ -74,7 +76,6 @@ class EditCourseResquest extends FormRequest
     {
         return [
             'course_name.required' => 'Vui lòng nhập tên khóa học.',
-            'course_name.regex' => 'Tên khóa học không được chứa ký tự đặc biệt.',
 
             'level.required' => 'Vui lòng chọn cấp độ.',
 

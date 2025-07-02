@@ -159,4 +159,188 @@ class EnrollmentController extends Controller
             return 0;
         }
     }
+
+    /**
+     * Smart course registration based on level and schedule
+     * POST /api/enrollments/smart-register/student/{studentId}
+     */
+    public function smartCourseRegistration(Request $request, $studentId)
+    {
+        try {
+            $validated = $request->validate([
+                'level' => 'required|string|in:A1,A2,A3,TA 2/6',
+                'schedule_preference' => 'sometimes|string', // Optional field
+            ]);
+
+            // Tìm các courses phù hợp với level
+            $matchingCourses = Course::where('level', $validated['level'])
+                ->where('status', 'Đang mở lớp')
+                ->get();
+
+            // Filter by schedule preference if provided
+            if (isset($validated['schedule_preference'])) {
+                $matchingCourses = $matchingCourses->filter(function($course) use ($validated) {
+                    return stripos($course->description, $validated['schedule_preference']) !== false;
+                });
+            }
+
+            if ($matchingCourses->isEmpty()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No courses found matching the specified level and schedule',
+                    'available_schedules' => $this->getAvailableSchedules($validated['level'])
+                ], 404);
+            }
+
+            // Kiểm tra student đã đăng ký course nào trong level này chưa
+            $existingEnrollment = CourseEnrollment::where('student_id', $studentId)
+                ->whereHas('course', function($query) use ($validated) {
+                    $query->where('level', $validated['level']);
+                })
+                ->whereIn('status', [1, 2]) // Pending hoặc studying
+                ->first();
+
+            if ($existingEnrollment) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Student already enrolled in a course of this level',
+                    'existing_enrollment' => [
+                        'course_id' => $existingEnrollment->assigned_course_id,
+                        'course_name' => $existingEnrollment->course->course_name,
+                        'status' => $existingEnrollment->status
+                    ]
+                ], 409);
+            }
+
+            // Đếm số học sinh trong mỗi course
+            $coursesWithStudentCount = $matchingCourses->map(function($course) {
+                $studentCount = CourseEnrollment::where('assigned_course_id', $course->course_id)
+                    ->whereIn('status', [1, 2, 3]) // Pending, studying, passed
+                    ->count();
+
+                return [
+                    'course' => $course,
+                    'student_count' => $studentCount
+                ];
+            })->sortBy('student_count');
+
+            // Áp dụng logic phân bổ
+            $selectedCourse = $this->selectCourseByAllocationLogic($coursesWithStudentCount);
+
+            // Tạo enrollment
+            $enrollment = CourseEnrollment::create([
+                'student_id' => $studentId,
+                'assigned_course_id' => $selectedCourse['course']->course_id,
+                'status' => 1, // Pending confirmation
+                'registration_date' => now()
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Student successfully registered for course',
+                'enrollment' => [
+                    'enrollment_id' => $enrollment->enrollment_id,
+                    'student_id' => $studentId,
+                    'assigned_course_id' => $selectedCourse['course']->course_id,
+                    'course_name' => $selectedCourse['course']->course_name,
+                    'level' => $selectedCourse['course']->level,
+                    'description' => $selectedCourse['course']->description,
+                    'status' => $enrollment->status,
+                    'registration_date' => $enrollment->registration_date,
+                    'current_student_count' => $selectedCourse['student_count'] + 1
+                ],
+                'allocation_info' => [
+                    'total_matching_courses' => $coursesWithStudentCount->count(),
+                    'selected_course_previous_count' => $selectedCourse['student_count'],
+                    'allocation_reason' => $this->getAllocationReason($coursesWithStudentCount, $selectedCourse)
+                ]
+            ], 201);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Server error: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Select course based on allocation logic
+     */
+    private function selectCourseByAllocationLogic($coursesWithStudentCount)
+    {
+        $courses = $coursesWithStudentCount->values();
+
+        if ($courses->count() == 1) {
+            return $courses->first();
+        }
+
+        // Lấy course có ít học sinh nhất và ít nhì
+        $minCount = $courses->first()['student_count'];
+        $secondMinCount = $courses->count() > 1 ? $courses->get(1)['student_count'] : $minCount;
+
+        // Nếu chênh lệch > 3, chọn course có ít học sinh nhất
+        if ($secondMinCount - $minCount > 3) {
+            return $courses->first();
+        }
+
+        // Nếu chênh lệch <= 3, chọn ngẫu nhiên trong các courses có sĩ số gần nhau
+        $similarCourses = $courses->filter(function($course) use ($minCount) {
+            return $course['student_count'] - $minCount <= 3;
+        });
+
+        return $similarCourses->random();
+    }
+
+    /**
+     * Get allocation reason for logging
+     */
+    private function getAllocationReason($coursesWithStudentCount, $selectedCourse)
+    {
+        $courses = $coursesWithStudentCount->values();
+
+        if ($courses->count() == 1) {
+            return 'Only one course available';
+        }
+
+        $minCount = $courses->first()['student_count'];
+        $secondMinCount = $courses->count() > 1 ? $courses->get(1)['student_count'] : $minCount;
+
+        if ($secondMinCount - $minCount > 3) {
+            return 'Assigned to course with fewest students (difference > 3)';
+        }
+
+        return 'Random assignment among courses with similar student counts (difference <= 3)';
+    }
+
+    /**
+     * Get available schedules for a level
+     */
+    private function getAvailableSchedules($level)
+    {
+        try {
+            $schedules = Course::where('level', $level)
+                ->where('status', 'Đang mở lớp')
+                ->pluck('description')
+                ->map(function($description) {
+                    // Extract schedule from description
+                    if (preg_match('/Lịch học: (.+?)\. Hình thức/', $description, $matches)) {
+                        return $matches[1];
+                    }
+                    return $description;
+                })
+                ->unique()
+                ->values();
+
+            return $schedules;
+        } catch (\Exception) {
+            return [];
+        }
+    }
 }

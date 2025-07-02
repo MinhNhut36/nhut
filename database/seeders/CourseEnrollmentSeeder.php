@@ -49,7 +49,7 @@ class CourseEnrollmentSeeder extends Seeder
 
     private function getRandomStatus()
     {
-        $statuses = [0, 1, 1, 1, 2, 2, 3]; // 1=pending, 2=studying, 3=passed, 4=failed
+        $statuses = [0, 1, 1, 1, 2, 2, 3]; // 0=pending, 1=studying, 2=passed, 3=failed
         return $statuses[array_rand($statuses)];
     }
 

@@ -22,7 +22,7 @@ class AddCourseRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'course_name' => ['required', 'string', 'max:255', 'regex:/^[a-zA-ZÀ-ỹ0-9\s]+$/u'],
+            'course_name' => ['required', 'string', 'max:255'],
             'level' => ['required', 'string'],
             'year' => ['required', 'integer', 'min:2020'],
             'description' => ['nullable', 'string'],
@@ -34,7 +34,6 @@ class AddCourseRequest extends FormRequest
     {
         return [
             'course_name.required' => 'Vui lòng nhập tên khóa học.',
-            'course_name.regex' => 'Tên khóa học không được chứa ký tự đặc biệt.',
 
             'level.required' => 'Vui lòng chọn cấp độ.',
 

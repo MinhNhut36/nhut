@@ -13,14 +13,12 @@ return new class extends Migration
     {
         Schema::create('notifications', function (Blueprint $table) {
             $table->id('notification_id');
-            $table->foreignId('admin')
+            $table->foreignId('admin_id')
                   ->constrained('users', 'admin_id')
                   ->onDelete('cascade');
-            $table->integer('target'); 
-            $table->longText('title');
-            $table->longText('message');
-            $table->date('notification_date');
-            $table->integer('status')->default(0); // 0: chưa gửi, 1: đã gửi
+            $table->string('title');
+            $table->string('message');
+            $table->datetime('notification_date');
             $table->timestamps();
         
         });

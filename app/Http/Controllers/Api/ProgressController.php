@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Student;
-use App\Models\StudentProgres;
+use App\Models\StudentProgress;
 use App\Models\LessonPart;
 use App\Models\Lesson;
 use App\Models\Course;
@@ -18,27 +18,26 @@ use Illuminate\Support\Facades\DB;
 class ProgressController extends Controller
 {
     /**
-     * Update student progress
+     * Create or update student progress
      * POST /api/student-progress
      */
-    public function updateStudentProgress(Request $request)
+    public function createOrUpdateStudentProgress(Request $request)
     {
         try {
             $validated = $request->validate([
-                'score_id' => 'required|integer',
+                'score_id' => 'required|integer|exists:lesson_part_scores,score_id',
                 'completion_status' => 'required|boolean'
             ]);
 
-            // Get student_id from score
-            $score = LessonPartScore::find($validated['score_id']);
-            if (!$score) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Score not found'
-                ], 404);
-            }
+            // Get score with related data
+            $score = LessonPartScore::with(['student', 'lessonPart', 'course'])
+                                   ->findOrFail($validated['score_id']);
 
-            $progress = StudentProgres::updateOrCreate(
+            // Check if progress already exists
+            $existingProgress = StudentProgress::where('score_id', $validated['score_id'])->first();
+            $isUpdate = $existingProgress !== null;
+
+            $progress = StudentProgress::updateOrCreate(
                 ['score_id' => $validated['score_id']],
                 [
                     'completion_status' => $validated['completion_status'],
@@ -48,14 +47,39 @@ class ProgressController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Progress updated successfully',
-                'progress_id' => $progress->progress_id
-            ], 200);
+                'message' => $isUpdate ? 'Progress updated successfully' : 'Progress created successfully',
+                'data' => [
+                    'progress_id' => $progress->progress_id,
+                    'score_id' => $progress->score_id,
+                    'completion_status' => $progress->completion_status,
+                    'last_updated' => $progress->last_updated,
+                    'is_new_record' => !$isUpdate
+                ],
+                'related_info' => [
+                    'student_id' => $score->student_id,
+                    'student_name' => $score->student->fullname ?? 'Unknown',
+                    'lesson_part_id' => $score->lesson_part_id,
+                    'course_id' => $score->course_id,
+                    'score' => $score->score
+                ]
+            ], $isUpdate ? 200 : 201);
 
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Score not found'
+            ], 404);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $e->errors()
+            ], 422);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Server error: ' . $e->getMessage()
+                'message' => 'Server error',
+                'error' => $e->getMessage()
             ], 500);
         }
     }
@@ -97,10 +121,10 @@ class ProgressController extends Controller
                     JOIN questions q ON lp.lesson_part_id = q.lesson_part_id
                     LEFT JOIN student_answers sa ON q.questions_id = sa.questions_id AND sa.student_id = ? AND sa.course_id = ?
                     LEFT JOIN answers a ON q.questions_id = a.questions_id AND a.is_correct = 1
-                    WHERE lp.level = ?
+                    WHERE 1=1
                     GROUP BY lp.lesson_part_id
                 ) AS progress_table
-            ", [$studentId, $courseId, $course->level]);
+            ", [$studentId, $courseId]);
 
             $totalQuestions = $progressData[0]->total_questions ?? 0;
             $totalAnswered = $progressData[0]->total_answered ?? 0;
@@ -115,8 +139,9 @@ class ProgressController extends Controller
                 $isCompleted = ($totalAnswered >= $totalQuestions) && ($totalCorrect >= (0.7 * $totalQuestions));
             }
 
-            // Get lesson parts for detailed breakdown
-            $lessonParts = LessonPart::where('level', $course->level)->get();
+            // Get all lesson parts since level column was removed
+            // TODO: Need to redesign relationship between courses and lesson_parts
+            $lessonParts = LessonPart::all();
             $lessonsProgress = [];
 
             foreach ($lessonParts as $lessonPart) {
@@ -305,12 +330,13 @@ class ProgressController extends Controller
                 ], 404);
             }
 
-            // 1. Tổng số lesson_parts trong lesson
-            $totalParts = LessonPart::where('level', $lessonLevel)->count();
+            // 1. Tổng số lesson_parts (all since level column removed)
+            // TODO: Need to redesign relationship between lessons and lesson_parts
+            $totalParts = LessonPart::count();
 
             // 2. Tính số lesson_parts đã hoàn thành
             $completedParts = 0;
-            $lessonParts = LessonPart::where('level', $lessonLevel)->get();
+            $lessonParts = LessonPart::all();
 
             foreach ($lessonParts as $lessonPart) {
                 // Lấy tiến độ của từng lesson_part (không cần course context cho lesson progress)
@@ -381,10 +407,10 @@ class ProgressController extends Controller
                             FROM lesson_parts lp
                             JOIN questions q ON lp.lesson_part_id = q.lesson_part_id
                             LEFT JOIN student_answers sa ON q.questions_id = sa.questions_id AND sa.student_id = ? AND sa.course_id = ?
-                            WHERE lp.level = ?
+                            WHERE 1=1
                             GROUP BY lp.lesson_part_id
                         ) AS progress_table
-                    ", [$studentId, $enrollment->assigned_course_id, $course->level]);
+                    ", [$studentId, $enrollment->assigned_course_id]);
 
                     $totalQuestions = $progressData[0]->total_questions ?? 0;
                     $totalAnswered = $progressData[0]->total_answered ?? 0;

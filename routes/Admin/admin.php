@@ -40,15 +40,16 @@ Route::middleware(['web', 'admin'])->prefix('admin')->name('admin.')->group(func
 
     Route::delete('/course/remove-teacher', [AdminController::class, 'removeTeacher'])->name('course.remove-teacher');
 
-
     Route::get('/lessons', [AdminController::class, 'ShowListLesson'])->name('lesson');
 
     Route::post('/lessons/create', [AdminController::class, 'store'])->name('lesson.create');
 
+    Route::put('/lessons/EditLesson/{level}', [AdminController::class, 'EditLesson'])->where('level', '.*')->name('lesson.EditLesson');
+
+    Route::put('/lessons/EditLessonPart/{lesson_part_id}', [AdminController::class, 'EditLessonPart'])->name('lesson.EditLessonPart');
 
     //Route dành cho quản lý câu hỏi 
     Route::get('/level/lessons', [AdminController::class, 'showLessonsWithLevels'])->name('level.lessons');
 
     Route::get('/api/lessons/by-level/{level}', [AdminController::class, 'getLessonsByLevel']);
-
 });

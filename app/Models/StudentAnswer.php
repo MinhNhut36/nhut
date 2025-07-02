@@ -10,8 +10,8 @@ class StudentAnswer extends Model
         'student_answer_id',
         'student_id',
         'questions_id',
-        'answer_text',
         'course_id',
+        'answer_text',
         'answered_at',
     ];
     protected $primaryKey = 'student_answer_id';

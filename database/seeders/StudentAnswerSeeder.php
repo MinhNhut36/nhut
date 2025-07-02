@@ -47,6 +47,8 @@ class StudentAnswerSeeder extends Seeder
                     'questions_id' => $question->questions_id,
                     'course_id' => $course->course_id,
                     'answer_text' => $sampleAnswers[array_rand($sampleAnswers)],
+                    'is_correct' => rand(0, 1),
+                    'submit_time' => Carbon::now()->subDays(rand(1, 30)),
                     'answered_at' => Carbon::now()->subDays(rand(1, 30)),
                 ]);
             }

@@ -167,26 +167,62 @@
             font-size: 1rem;
         }
 
-        .progress {
-            width: 100%;
-            height: 8px;
-            background-color: #e9ecef;
-            border-radius: 4px;
-            overflow: hidden;
+        .score {
+            margin: 0;
+            padding: 0.25rem 0.75rem;
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .progress-status {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
             margin: 0.5rem 0;
         }
 
-        .progress-bar {
-            height: 100%;
-            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
-            border-radius: 4px;
-            transition: width 0.3s ease;
-            display: flex;
+        .status-badge {
+            display: inline-flex;
             align-items: center;
-            justify-content: center;
-            font-size: 0.7rem;
-            color: white;
+            gap: 0.4rem;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
             font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            transition: all 0.3s ease;
+        }
+
+        .status-pass {
+            background: linear-gradient(135deg, #10b981, #34d399);
+            color: white;
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+        }
+
+        .status-fail {
+            background: linear-gradient(135deg, #ef4444, #f87171);
+            color: white;
+            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+        }
+
+        .status-pending {
+            background: linear-gradient(135deg, #f59e0b, #fbbf24);
+            color: white;
+            box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+        }
+
+        .status-badge:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .status-badge i {
+            font-size: 0.9rem;
         }
 
         /* Responsive Design */
@@ -212,17 +248,16 @@
             .btn-study {
                 justify-content: center;
             }
-        }
 
-        .score {
-            margin: 0;
-            padding: 0.25rem 0.75rem;
-            background: linear-gradient(135deg, #4CAF50, #45a049);
-            color: white;
-            border-radius: 20px;
-            font-weight: bold;
-            font-size: 0.9rem;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            .progress-status {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+            
+            .status-badge {
+                align-self: flex-start;
+            }
         }
     </style>
 @endsection
@@ -244,11 +279,11 @@
                             $score = $lesson->myScore->score ?? null;
                             $total = $lesson->myScore->total_questions ?? null;
                             $correct = $lesson->myScore->correct_answers ?? 0;
-                            $percent = $total > 0 ? round(($correct / $total) * 100) : 0;
+                            $status = $lesson->myScore->StudentProgcess->completion_status ?? null;
+                            
                         @endphp
 
                         <div class="lesson-card">
-
                             <!-- Lesson Type Badge -->
                             <div class="lesson-type-badge">
                                 <i class="fas fa-book"></i> {{ $lesson->part_type ?? 'Bài Học' }}
@@ -262,17 +297,26 @@
                             <!-- Action Buttons -->
                             <div class="lesson-actions">
                                 <div style="width: 100%; margin-bottom: 1rem;">
-                                    <p><strong>Tiến độ:</strong> {{ $correct }} / {{ $total }} câu đúng</p>
+                                    <p><strong>Kết quả lần trước:</strong> {{ $correct }} / {{ $total }} câu đúng</p>
                                     <p class="score">
                                         <i class="fas fa-star" style="margin-right: 0.25rem;"></i>{{ $score }} điểm
                                     </p>
-                                    @if ($total > 0)
-                                        <div class="progress">
-                                            <div class="progress-bar" role="progressbar"
-                                                style="width: {{ $percent }}%;" aria-valuenow="{{ $correct }}"
-                                                aria-valuemin="0" aria-valuemax="{{ $total }}">
-                                                {{ $percent }}%
-                                            </div>
+                                    
+                                    @if ($status !== null)
+                                        <div class="progress-status">
+                                            <strong>Tiến độ:</strong>
+                                            <span class="status-badge {{ $status ? 'status-pass' : 'status-fail' }}">
+                                                <i class="fas {{ $status ? 'fa-check-circle' : 'fa-times-circle' }}"></i>
+                                                {{ $status ? 'Đạt' : 'Không đạt' }}
+                                            </span>
+                                        </div>
+                                    @else
+                                        <div class="progress-status">
+                                            <strong>Tiến độ:</strong>
+                                            <span class="status-badge status-pending">
+                                                <i class="fas fa-clock"></i>
+                                                Chưa làm bài
+                                            </span>
                                         </div>
                                     @endif
                                 </div>

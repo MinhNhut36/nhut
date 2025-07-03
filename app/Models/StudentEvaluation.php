@@ -19,7 +19,7 @@ class StudentEvaluation extends Model
     //định nghĩa các quan hệ với các model khác
     public function progress()
     {
-        return $this->belongsTo(StudentProgres::class, 'progress_id');
+        return $this->belongsTo(StudentProgress::class, 'progress_id');
     }
     public function student()
     {

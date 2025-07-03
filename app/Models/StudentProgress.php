@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class StudentProgres extends Model
+class StudentProgress extends Model
 {
     protected $table = 'student_progress';
 

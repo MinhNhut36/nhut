@@ -33,8 +33,8 @@ class LessonPartScore extends Model
     {
         return $this->belongsTo(Student::class, 'student_id');
     }
-    public function StudentProces()
+    public function StudentProgcess()
     {
-        return $this->belongsTo(StudentProgres::class, 'score_id');
+        return $this->belongsTo(StudentProgress::class, 'score_id');
     }
 }

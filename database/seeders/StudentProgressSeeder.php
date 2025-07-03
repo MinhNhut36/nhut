@@ -3,8 +3,8 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use App\Models\StudentProgres;
 use App\Models\LessonPartScore;
+use App\Models\StudentProgress;
 use Carbon\Carbon;
 
 class StudentProgressSeeder extends Seeder
@@ -21,7 +21,7 @@ class StudentProgressSeeder extends Seeder
             // Completion status dựa trên điểm số (>= 7.0 là hoàn thành)
             $completionStatus = $score->score >= 7.0 ? true : false;
 
-            StudentProgres::create([
+            StudentProgress::create([
                 'score_id' => $score->score_id,
                 'completion_status' => $completionStatus,
                 'last_updated' => Carbon::parse($score->submit_time)->addMinutes(rand(1, 30)),

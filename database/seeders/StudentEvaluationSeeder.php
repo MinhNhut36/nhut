@@ -7,6 +7,7 @@ use App\Models\StudentEvaluation;
 use App\Models\Student;
 use App\Models\ExamResult;
 use App\Models\StudentProgres;
+use App\Models\StudentProgress;
 use Carbon\Carbon;
 
 class StudentEvaluationSeeder extends Seeder
@@ -38,7 +39,7 @@ class StudentEvaluationSeeder extends Seeder
 
         foreach ($examResults as $examResult) {
             // Tìm progress records của student này thông qua lesson_part_scores
-            $studentProgresses = StudentProgres::whereHas('lessonPartScore', function($query) use ($examResult) {
+            $studentProgresses = StudentProgress::whereHas('lessonPartScore', function($query) use ($examResult) {
                 $query->where('student_id', $examResult->student_id);
             })->get();
 

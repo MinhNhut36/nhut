@@ -16,7 +16,9 @@ use App\Models\LessonPartScore;
 use App\Models\Question;
 use App\Models\LessonPartContent;
 use App\Models\Answer;
+use App\Models\Notification;
 use App\Models\StudentAnswer;
+use App\Models\StudentProgress;
 use Illuminate\Support\Facades\Log;
 
 class StudentController extends Controller
@@ -34,7 +36,8 @@ class StudentController extends Controller
             }
             // Nếu tài khoản hoạt động, đăng nhập
             if (Auth::guard('student')->attempt($credentials)) {
-
+            
+ 
                 return redirect()->route('student.home');
             }
         }
@@ -47,6 +50,7 @@ class StudentController extends Controller
     public function home()
     {
         $student = Auth::guard('student')->user();
+       
         return view('student.home')
             ->with('student', $student);
     }
@@ -125,10 +129,10 @@ class StudentController extends Controller
     public function ShowListLesson(string $level)
     {
         $studentId = Auth::guard('student')->user()->student_id;
-        $lessonParts = LessonPart::with(['myScore']) // chỉ điểm của học sinh hiện tại
+        $lessonParts = LessonPart::with(['myScore.StudentProgcess']) // chỉ điểm của học sinh hiện tại
             ->where('level', $level)
             ->orderBy('order_index')
-            ->get();
+            ->get();    
         return view('student.Studying', compact('lessonParts'));
     }
 
@@ -152,6 +156,7 @@ class StudentController extends Controller
         $courseIds = Course::where('level', $level->level)
             ->pluck('course_id')    // chỉ lấy cột course_id
             ->toArray();
+
         $courseId = CourseEnrollment::with('course')->where('student_id', $studentId)->whereIn('assigned_course_id', $courseIds)->where('status', 1)->value('assigned_course_id');
 
 
@@ -183,7 +188,7 @@ class StudentController extends Controller
         ]);
     }
 
-    //submit 
+    // sinh viên nộp câu hỏi
     public function submitAnswer(Request $request, int $lessonPartId)
     {
 
@@ -193,6 +198,10 @@ class StudentController extends Controller
         $scoreId = $request->score_id;
 
         $results = [];
+
+        // Tổng số câu hỏi trong lesson part và tổng điểm cho từng câu 
+        $totalQuestions = Question::where('lesson_part_id', $lessonPartId)->count();
+        $scorePerQuestion = $totalQuestions > 0 ? 10 / $totalQuestions : 0;
 
         foreach ($answers as $questionId => $answerId) {
             $question = Question::with('answers')->find($questionId);
@@ -211,9 +220,9 @@ class StudentController extends Controller
 
             if ($isCorrect) {
                 LessonPartScore::where('score_id', $scoreId)->increment('correct_answers');
-                LessonPartScore::where('score_id', $scoreId)->increment('score');
+                LessonPartScore::where('score_id', $scoreId)->increment('score', $scorePerQuestion);
             }
-
+            //cập nhật lại thời gian nhập
             $results[$questionId] = [
                 'your_answer' => $answerId,
                 'correct_answer' => $correctAnswer->answers_id,
@@ -223,6 +232,21 @@ class StudentController extends Controller
                     : ($correctAnswer->feedback ?? 'Hãy xem lại nhé, đây là một gợi ý hữu ích 📘'),
             ];
         }
+        LessonPartScore::find($scoreId)?->update(['submit_time' => now()]);
+
+        // Lấy điểm hiện tại để đánh giá đạt hay không
+        $lessonScore = LessonPartScore::find($scoreId);
+        $isCompleted = $lessonScore && $lessonScore->score >= 7;
+
+        // Cập nhật hoặc tạo mới tiến trình học
+        $progress = StudentProgress::updateOrCreate(
+            ['score_id' => $scoreId],
+            [
+                'completion_status' => $isCompleted,
+                'last_updated' => now(),
+            ]
+        );
+        log::debug($progress);
 
         return response()->json([
             'success' => true,

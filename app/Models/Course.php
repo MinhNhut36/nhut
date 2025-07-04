@@ -3,10 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Enum\courseStatus;
+
 class Course extends Model
 {
+    protected $table = 'courses';
     protected $fillable = [
         'course_id',
         'level',
@@ -17,7 +18,7 @@ class Course extends Model
         'starts_date',
     ];
     protected $primaryKey = 'course_id';
-     protected $casts = [
+    protected $casts = [
         'status' => courseStatus::class,
     ];
     //định nghĩa các quan hệ với các model khác
@@ -58,7 +59,7 @@ class Course extends Model
     public function classPosts()
     {
         return $this->hasMany(ClassPost::class, 'course_id', 'course_id')
-                    ->where('status', 1)
-                    ->orderBy('created_at', 'desc');
+            ->where('status', 1)
+            ->orderBy('created_at', 'desc');
     }
 }

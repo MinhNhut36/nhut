@@ -558,13 +558,11 @@
             </div>
 
             <div class="nav-tabs-container" id="teacher-tabs">
-                <a href="{{ route('teacher.home') }}"
-                    class="btn nav-button text-dark {{ request()->routeIs('teacher.home') ? 'active' : '' }}">
+                <a href="{{ route('teacher.home') }}" class="btn nav-button text-dark">
                     <i class="fas fa-user-tie"></i>
                     <span>Thông tin giáo viên</span>
                 </a>
-                <a href="{{ route('teacher.assignedcourseslist') }}"
-                    class="btn nav-button text-dark {{ request()->routeIs('teacher.assignedcourseslist') ? 'active' : '' }}">
+                <a href="{{ route('teacher.coursesopening') }}" class="btn nav-button text-dark">
                     <i class="fas fa-graduation-cap"></i>
                     <span>Khóa học</span>
                 </a>

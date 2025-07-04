@@ -379,18 +379,6 @@
                 <div class="stat-number">{{ $countstudent }}</div>
                 <div class="stat-label">Tổng sinh viên</div>
             </div>
-            <div class="stat-card">
-                <div class="stat-icon"><i class="fas fa-user-check"></i></div>
-                <div class="stat-number">{{ $countteacheractive }}
-                </div>
-                <div class="stat-label">Tổng giảng viên</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon"><i class="fas fa-user-check"></i></div>
-                <div class="stat-number">{{ $countstudentactive }}
-                </div>
-                <div class="stat-label">Đang hoạt động</div>
-            </div>
         </div>
 
         {{-- Search & Filter --}}
@@ -469,6 +457,9 @@
                         @endforeach
                     </tbody>
                 </table>
+                <div style="padding: 0 30px 30px;">
+                    {{ $members->links('pagination::bootstrap-5') }}
+                </div>
             </div>
         </div>
     </div>

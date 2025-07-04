@@ -6,7 +6,9 @@ use App\Http\Controllers\Client\TeacherController;
 Route::prefix('teacher')->name('teacher.')->middleware(['web', 'teacher'])->group(function () {
     Route::get('/home', [TeacherController::class, 'home'])->name('home');
 
-    Route::get('/home/AssignedCoursesList', [TeacherController::class, 'AssignedCourses'])->name('assignedcourseslist');
+    Route::get('/CoursesOpening', [TeacherController::class, 'CoursesOpening'])->name('coursesopening');
+
+    Route::get('/CoursesCompleted', [TeacherController::class, 'CoursesCompleted'])->name('coursescompleted');
 
     Route::get('/home/AssignedCoursesList/{courseId}', [TeacherController::class, 'CourseDetails'])->name('coursedetails');
 
@@ -23,12 +25,9 @@ Route::prefix('teacher')->name('teacher.')->middleware(['web', 'teacher'])->grou
         Route::post('/posts', [TeacherController::class, 'StorePost'])->name('post'); // Đăng bài viết mới
         Route::post('/comment', [TeacherController::class, 'StoreComment'])->name('comment'); // Gửi bình luận cho một bài viết
 
+        // Course Grade
         Route::get('/grade', [TeacherController::class, 'CourseGrade'])->name('grade');
-
-        Route::get('/announcements', [TeacherController::class, 'ShowBulletinBoard'])->name('showbulletinboard');
-        Route::post('/announcements/create', [TeacherController::class, 'createAnnouncement'])->name('announcements.create');
-        Route::put('/announcements/{announcementId}', [TeacherController::class, 'updateAnnouncement'])->name('announcements.update');
-        Route::delete('/announcements/{announcementId}', [TeacherController::class, 'deleteAnnouncement'])->name('announcements.delete');
+        Route::post('/grade/update', [TeacherController::class, 'updateGrade'])->name('updategrade');
 
         // Course Assignments
         Route::get('/assignments', [TeacherController::class, 'assignments'])->name('assignments');

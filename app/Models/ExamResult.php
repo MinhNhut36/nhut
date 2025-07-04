@@ -9,6 +9,7 @@ class ExamResult extends Model
     protected $fillable = [
         'exam_result_id',
         'student_id',
+        'course_id',
         'exam_date',
         'listening_score',
         'reading_score',

@@ -4,7 +4,7 @@
     @include('layouts.SidebarTeacher')
 @endsection
 
-@section('content')
+@section('styles')
     <style>
         .members-container {
             padding: 0;
@@ -364,35 +364,14 @@
             }
         }
     </style>
+@endsection
 
+@section('content')
     <div class="members-container">
-
-        {{-- Page Header & Stats --}}
-        <div class="page-header ">
+        <div class="page-header">
             <h2><i class="fas fa-users me-2"></i>Quản lý điểm sinh viên</h2>
         </div>
 
-        <div class="members-stats ">
-            <div class="stat-card">
-                <div class="stat-icon"><i class="fas fa-user-graduate"></i></div>
-                <div class="stat-number">{{ $countstudent }}</div>
-                <div class="stat-label">Tổng sinh viên</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon"><i class="fas fa-user-check"></i></div>
-                <div class="stat-number">{{ $countteacheractive }}
-                </div>
-                <div class="stat-label">Tổng giảng viên</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon"><i class="fas fa-user-check"></i></div>
-                <div class="stat-number">{{ $countstudentactive }}
-                </div>
-                <div class="stat-label">Đang hoạt động</div>
-            </div>
-        </div>
-
-        {{-- Search & Filter --}}
         <form method="GET" action="{{ route('teacher.grade', $course->course_id) }}">
             <div class="search-controls">
                 <div class="search-input-group">
@@ -405,10 +384,9 @@
                 <div class="d-flex gap-2 align-items-center">
                     <select class="filter-select" name="status" onchange="this.form.submit()">
                         <option value="">Tất cả trạng thái</option>
-                        <option value="1" {{ request('status') == '1' ? 'selected' : '' }}>Đang hoạt động</option>
+                        <option value="1" {{ request('status') == '1' ? 'selected' : '' }}> Đang hoạt động</option>
                         <option value="0" {{ request('status') == '0' ? 'selected' : '' }}>Không hoạt động</option>
                     </select>
-
                     <select class="filter-select" name="gender" onchange="this.form.submit()">
                         <option value="">Tất cả giới tính</option>
                         <option value="1" {{ request('gender') == '1' ? 'selected' : '' }}>Nam</option>
@@ -418,91 +396,97 @@
             </div>
         </form>
 
-        {{-- Members Table --}}
         <div class="members-table-container mt-2">
             <div class="table-header">
                 <h5 class="mb-0"><i class="fas fa-list me-2"></i>Danh sách sinh viên</h5>
                 <span class="badge bg-primary">{{ $studentgrades->count() }} sinh viên</span>
             </div>
-            <div class="table-responsive">
-                <table class="table members-table">
-                    <thead>
-                        <tr>
-                            <th>Sinh viên</th>
-                            <th>Email</th>
-                            <th>Nghe</th>
-                            <th>Nói</th>
-                            <th>Viết</th>
-                            <th>Đọc</th>
-                            <th>Hoạt động</th>
-                        </tr>
-                    </thead>
-                    <tbody id="studentsTableBody">
-                        @foreach ($studentgrades as $studentgrade)
-                            <tr>
-                                <td>
-                                    <div class="student-info">
-                                        <div class="student-avatar">
-                                            <img src="{{ asset('uploads/avatars/' . $studentgrade->avatar) }}"
-                                                alt="Avatar" class="student-avatar me-3"
-                                                onerror="this.onerror=null;this.src='{{ asset('uploads/avatars/AvtMacDinh.jpg') }}';">
-                                        </div>
-                                        <div class="student-details">
-                                            <h6>{{ $studentgrade->student->fullname }}</h6>
-                                            <div class="student-id">{{ $studentgrade->student->student_id }}</div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>{{ $studentgrade->student->email }}</td>
-                                <td>{{ $studentgrade->examResult->listening_score ?? '-' }}</td>
-                                <td>{{ $studentgrade->examResult->speaking_score ?? '-' }}</td>
-                                <td>{{ $studentgrade->examResult->writing_score ?? '-' }}</td>
-                                <td>{{ $studentgrade->examResult->reading_score ?? '-' }}</td>
-                                <td>
-                                    <div class="action-buttons">
-                                        <a href="{{ route('teacher.coursestudentdetails', ['courseId' => $course->course_id, 'studentId' => $studentgrade->student->student_id]) }}"
-                                            class="btn-action btn-view" title="Sửa điểm">
-                                            <i class="fas fa-pen-to-square"></i>
-                                        </a>
-                                    </div>
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+
+            <div class="text-end mb-3">
+                <button type="button" id="enable-edit" class="btn btn-warning">Sửa điểm</button>
             </div>
+
+            <form method="POST" action="{{ route('teacher.updategrade', $course->course_id) }}">
+                @csrf
+                <div class="table-responsive">
+                    <table class="table members-table">
+                        <thead>
+                            <tr>
+                                <th>Họ tên</th>
+                                <th>Email</th>
+                                <th>Nghe</th>
+                                <th>Nói</th>
+                                <th>Viết</th>
+                                <th>Đọc</th>
+                                <th>Ngày cập nhật điểm</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($studentgrades as $studentgrade)
+                                <tr>
+                                    <td>{{ $studentgrade->student->fullname }}</td>
+                                    <td>{{ $studentgrade->student->email }}</td>
+                                    <input type="hidden"
+                                        name="grades[{{ $studentgrade->student->student_id }}][student_id]"
+                                        value="{{ $studentgrade->student->student_id }}">
+
+                                    <td><input type="number" step="0.1" min="0" max="10"
+                                            class="form-control input-grade"
+                                            name="grades[{{ $studentgrade->student->student_id }}][listening_score]"
+                                            value="{{ $studentgrade->examResult->listening_score ?? '' }}" disabled></td>
+                                    <td><input type="number" step="0.1" min="0" max="10"
+                                            class="form-control input-grade"
+                                            name="grades[{{ $studentgrade->student->student_id }}][speaking_score]"
+                                            value="{{ $studentgrade->examResult->speaking_score ?? '' }}" disabled></td>
+                                    <td><input type="number" step="0.1" min="0" max="10"
+                                            class="form-control input-grade"
+                                            name="grades[{{ $studentgrade->student->student_id }}][writing_score]"
+                                            value="{{ $studentgrade->examResult->writing_score ?? '' }}" disabled></td>
+                                    <td><input type="number" step="0.1" min="0" max="10"
+                                            class="form-control input-grade"
+                                            name="grades[{{ $studentgrade->student->student_id }}][reading_score]"
+                                            value="{{ $studentgrade->examResult->reading_score ?? '' }}" disabled></td>
+                                    <td><input type="date" class="form-control input-grade"
+                                            name="grades[{{ $studentgrade->student->student_id }}][exam_date]"
+                                            value="{{ $studentgrade->examResult->exam_date ?? '' }}" disabled></td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+                <div class="text-end">
+                    <button type="submit" id="save-all" class="btn btn-success mt-3" style="display:none">Lưu tất
+                        cả</button>
+                </div>
+            </form>
         </div>
+
+        @if (session('success'))
+            <div class="alert alert-success mt-3">
+                {{ session('success') }}
+            </div>
+        @endif
     </div>
 @endsection
-
 
 @section('js')
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Hiệu ứng hiện dần các stat-card
-            const statCards = document.querySelectorAll('.stat-card');
-            statCards.forEach((card, i) => {
-                card.style.opacity = '0';
-                card.style.transform = 'translateY(20px)';
-                card.style.transition = 'all 0.5s ease';
+            const form = document.querySelector('form');
+            const enableBtn = document.getElementById('enable-edit');
+            const saveBtn = document.getElementById('save-all');
+            const inputs = document.querySelectorAll('.input-grade');
 
-                setTimeout(() => {
-                    card.style.opacity = '1';
-                    card.style.transform = 'translateY(0)';
-                }, i * 100);
+            enableBtn.addEventListener('click', function() {
+                inputs.forEach(input => input.disabled = false);
+                enableBtn.disabled = true;
+                enableBtn.textContent = 'Đang chỉnh sửa';
+                enableBtn.classList.replace('btn-warning', 'btn-secondary');
+                saveBtn.style.display = 'inline-block';
             });
 
-            // Hiệu ứng hiện dần từng dòng sinh viên
-            const tableRows = document.querySelectorAll('#studentsTableBody tr');
-            tableRows.forEach((row, i) => {
-                row.style.opacity = '0';
-                row.style.transform = 'translateX(-20px)';
-                row.style.transition = 'all 0.3s ease';
-
-                setTimeout(() => {
-                    row.style.opacity = '1';
-                    row.style.transform = 'translateX(0)';
-                }, i * 50);
+            form.addEventListener('submit', function() {
+                inputs.forEach(input => input.disabled = false);
             });
         });
     </script>

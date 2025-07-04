@@ -187,7 +187,7 @@
                             </ul>
                         </div>
                         <div class="card-footer bg-transparent border-top-0">
-                            <a href="{{ route('student.lesson', $MyCourse->course->level) }}"
+                            <a href="{{ route('student.lesson', $MyCourse->course->course_id) }}"
                                 class="btn course-btn w-100 text-white d-flex justify-content-between align-items-center">
                                 <span>
                                     @if (request()->routeIs('student.myCourses'))

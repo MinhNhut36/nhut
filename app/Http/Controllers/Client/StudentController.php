@@ -36,8 +36,8 @@ class StudentController extends Controller
             }
             // Nếu tài khoản hoạt động, đăng nhập
             if (Auth::guard('student')->attempt($credentials)) {
-            
- 
+
+
                 return redirect()->route('student.home');
             }
         }
@@ -50,7 +50,7 @@ class StudentController extends Controller
     public function home()
     {
         $student = Auth::guard('student')->user();
-       
+
         return view('student.home')
             ->with('student', $student);
     }
@@ -121,18 +121,33 @@ class StudentController extends Controller
     public function CoursesCompleted()
     {
         $student = Auth::guard('student')->user();
-        $MyCourses = CourseEnrollment::with('course')->where('student_id', $student->student_id)->whereIn('status', [2, 3])->get();
+        $MyCourses = CourseEnrollment::with('course')->where('student_id', $student->student_id)->whereIn('status', [2, 3])->paginate(10);
+        
         return view('student.MyCoursesCompleted')->with('enrollment', $MyCourses);
     }
 
     //danh sách bài học thuộc lesson
-    public function ShowListLesson(string $level)
+    public function ShowListLesson(int $course_id)
     {
+
         $studentId = Auth::guard('student')->user()->student_id;
-        $lessonParts = LessonPart::with(['myScore.StudentProgcess']) // chỉ điểm của học sinh hiện tại
+
+        // B1: Lấy level của khóa học
+        $course = Course::findOrFail($course_id);
+        $level = $course->level;
+
+        // B2: Lấy danh sách lesson_part theo level đó
+        $lessonParts = LessonPart::with([
+            // nếu muốn hiển thị tên bài học
+            'myScore' => function ($query) use ($studentId, $course_id) {
+                $query->where('student_id', $studentId)
+                    ->where('course_id', $course_id)
+                    ->with('StudentProgcess');
+            }
+        ])
             ->where('level', $level)
             ->orderBy('order_index')
-            ->get();    
+            ->get();
         return view('student.Studying', compact('lessonParts'));
     }
 
@@ -173,7 +188,7 @@ class StudentController extends Controller
 
         // 5. Lấy danh sách câu hỏi dạng single_choice
         $questions = Question::with('answers')->where('lesson_part_id', $lessonPartId)
-            ->where('question_type', 'single_choice')
+            ->whereIn('question_type', ['single_choice', 'fill_blank'])
             ->orderBy('order_index')
             ->get();
 
@@ -191,10 +206,10 @@ class StudentController extends Controller
     // sinh viên nộp câu hỏi
     public function submitAnswer(Request $request, int $lessonPartId)
     {
-
+        log::debug("đây nè");
         $studentId = Auth::guard('student')->user()->student_id;
         $answers = $request->input('answers', []);
-        $courseId =  $request->input('course_id');
+        $courseId = $request->input('course_id');
         $scoreId = $request->score_id;
 
         $results = [];
@@ -203,18 +218,48 @@ class StudentController extends Controller
         $totalQuestions = Question::where('lesson_part_id', $lessonPartId)->count();
         $scorePerQuestion = $totalQuestions > 0 ? 10 / $totalQuestions : 0;
 
-        foreach ($answers as $questionId => $answerId) {
+        foreach ($answers as $questionId => $answerValue) {
             $question = Question::with('answers')->find($questionId);
-            $correctAnswer = $question->answers->where('is_correct', 1)->first();
-            $isCorrect = $answerId == $correctAnswer->answers_id;
 
-            $userAnswer = Answer::find($answerId);
+            if (!$question) continue;
 
+            $questionType = $question->question_type instanceof \BackedEnum
+                ? $question->question_type->value
+                : $question->question_type;
+
+            $isCorrect = false;
+            $correctAnswer = null;
+            $answerText = '';
+            $feedback = '';
+
+            if ($questionType === 'single_choice') {
+                $correctAnswer = $question->answers->where('is_correct', 1)->first();
+                $isCorrect = $answerValue == $correctAnswer?->answers_id;
+                $userAnswer = Answer::find($answerValue);
+                $answerText = $userAnswer?->answer_text ?? '';
+
+                $feedback = $isCorrect
+                    ? ($userAnswer->feedback ?? '✅ Chính xác! Làm tốt lắm 👏')
+                    : ($correctAnswer->feedback ?? '❌ Hãy xem lại, đây là một gợi ý 📘');
+            } elseif ($questionType === 'fill_blank') {
+                $correctAnswer = $question->answers->first(); // chứa đáp án đúng
+                $studentText = trim(mb_strtolower($answerValue));
+                $correctText = trim(mb_strtolower($correctAnswer->answer_text));
+
+                $isCorrect = $studentText === $correctText;
+                $answerText = $answerValue;
+
+                $feedback = $isCorrect
+                    ? ($correctAnswer->feedback ?? '✅ Điền chính xác!')
+                    : ($correctAnswer->feedback ?? '❌ Gợi ý: hãy kiểm tra lại chính tả hoặc ngữ nghĩa.');
+            }
+
+            // Lưu kết quả
             StudentAnswer::create([
                 'student_id' => $studentId,
                 'questions_id' => $questionId,
                 'course_id' => $courseId,
-                'answer_text' => Answer::find($answerId)->answer_text ?? '',
+                'answer_text' => $answerText === '' ? null : $answerText,
                 'answered_at' => now(),
             ]);
 
@@ -222,31 +267,30 @@ class StudentController extends Controller
                 LessonPartScore::where('score_id', $scoreId)->increment('correct_answers');
                 LessonPartScore::where('score_id', $scoreId)->increment('score', $scorePerQuestion);
             }
-            //cập nhật lại thời gian nhập
+
             $results[$questionId] = [
-                'your_answer' => $answerId,
-                'correct_answer' => $correctAnswer->answers_id,
-                'is_correct' => $isCorrect,
-                'feedback'       => $isCorrect
-                    ? ($userAnswer->feedback ?? 'Chính xác! Làm tốt lắm 👏')
-                    : ($correctAnswer->feedback ?? 'Hãy xem lại nhé, đây là một gợi ý hữu ích 📘'),
+                'your_answer'     => $answerValue,
+                'correct_answer'  => $questionType === 'single_choice'
+                    ? $correctAnswer?->answers_id
+                    : $correctAnswer?->answer_text,
+                'is_correct'      => $isCorrect,
+                'feedback'        => $feedback,
             ];
         }
+
         LessonPartScore::find($scoreId)?->update(['submit_time' => now()]);
 
-        // Lấy điểm hiện tại để đánh giá đạt hay không
+        // Cập nhật tiến độ học
         $lessonScore = LessonPartScore::find($scoreId);
         $isCompleted = $lessonScore && $lessonScore->score >= 7;
 
-        // Cập nhật hoặc tạo mới tiến trình học
-        $progress = StudentProgress::updateOrCreate(
+        StudentProgress::updateOrCreate(
             ['score_id' => $scoreId],
             [
                 'completion_status' => $isCompleted,
                 'last_updated' => now(),
             ]
         );
-        log::debug($progress);
 
         return response()->json([
             'success' => true,

@@ -318,7 +318,7 @@
                                             Mô tả
                                         </span>
                                         <span class="info-value">
-                                            {{ Str::limit(strip_tags($lesson->description), 50) }}
+                                            {!! $lesson->description !!}
                                         </span>
                                     </div>
                                 @endif

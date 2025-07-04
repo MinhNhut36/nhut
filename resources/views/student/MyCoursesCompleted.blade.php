@@ -367,7 +367,7 @@
         @if(method_exists($enrollment, 'links'))
             <div class="row mt-4">
                 <div class="col-12 d-flex justify-content-center">
-                    {{ $enrollment->links() }}
+                    {{ $enrollment->links('pagination::bootstrap-5') }}
                 </div>
             </div>
         @endif

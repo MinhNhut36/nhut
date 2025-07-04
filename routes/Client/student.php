@@ -16,7 +16,7 @@ Route::prefix('student')->name('student.')->middleware(['web', 'student'])->grou
 
         Route::get('/myCoursesCompleted', [StudentController::class, 'CoursesCompleted'])->name('MyCoursesCompleted');
 
-        Route::get('/lesson/{level}', [StudentController::class, 'ShowListLesson'])->where('level', '.*')->name('lesson');
+        Route::get('/lesson/{course_id}', [StudentController::class, 'ShowListLesson'])->name('lesson');
 
 
         // Học sinh vào làm bài tập 

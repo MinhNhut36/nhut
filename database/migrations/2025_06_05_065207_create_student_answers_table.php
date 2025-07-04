@@ -22,7 +22,7 @@ return new class extends Migration
             $table->foreignId('course_id')
                 ->constrained('courses', 'course_id')
                 ->onDelete('cascade');
-            $table->string('answer_text'); // Nội dung câu trả lời của học sinh
+            $table->string('answer_text')->nullable(); // Nội dung câu trả lời của học sinh
             $table->datetime('answered_at'); // Ngày giờ học sinh trả lời câu hỏi
             $table->timestamps();
         });

@@ -310,6 +310,25 @@
                 font-size: 0.9rem;
             }
         }
+
+        input.correct {
+            border: 2px solid green;
+            background: #d4edda;
+        }
+
+        input.incorrect {
+            border: 2px solid red;
+            background: #f8d7da;
+        }
+
+        .fill-blank-input {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
     </style>
     <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
@@ -326,21 +345,26 @@
         @php $total = $questions->count(); @endphp
 
         @foreach ($questions as $i => $question)
-            <div class="question-block" data-index="{{ $i }}">
+            <div class="question-block" data-index="{{ $i }}" data-question-id="{{ $question->questions_id }}">
                 <div class="question-counter">Câu {{ $i + 1 }} / {{ $totalQuestions }}</div>
                 <p class="question-text">{{ $question->question_text }}</p>
-                <ul class="answers">
-                    @foreach ($question->answers as $j => $answer)
-                        <li>
-                            <input type="radio" name="answer_{{ $question->questions_id }}"
-                                value="{{ $answer->answers_id }}"
-                                id="q{{ $question->questions_id }}_a{{ $j }}">
-                            <label for="q{{ $question->questions_id }}_a{{ $j }}" class="answer-btn">
-                                {{ chr(65 + $j) }}. {{ $answer->answer_text }}
-                            </label>
-                        </li>
-                    @endforeach
-                </ul>
+                @if ($question->question_type == 'single_choice')
+                    <ul class="answers">
+                        @foreach ($question->answers as $j => $answer)
+                            <li>
+                                <input type="radio" name="answer_{{ $question->questions_id }}"
+                                    value="{{ $answer->answers_id }}"
+                                    id="q{{ $question->questions_id }}_a{{ $j }}">
+                                <label for="q{{ $question->questions_id }}_a{{ $j }}" class="answer-btn">
+                                    {{ chr(65 + $j) }}. {{ $answer->answer_text }}
+                                </label>
+                            </li>
+                        @endforeach
+                    </ul>
+                @elseif ($question->question_type == 'fill_blank')
+                    <input type="text" class="fill-blank-input" name="answer_{{ $question->questions_id }}"
+                        placeholder="Nhập câu trả lời..." style="width:100%; padding:12px; font-size:16px;">
+                @endif
                 <div class="btn-group">
                     <button class="btn btn-prev" @if ($i === 0) disabled @endif>
                         ← Câu trước
@@ -351,11 +375,11 @@
                         </button>
                     @else
                         <button class="btn btn-submit" id="btn-submit">
-                            📝 Nộp bài
+                            Nộp bài
                         </button>
-                        <a href="{{ route('student.lesson', ['level' => $level]) }}" class="btn btn-complete"
+                        <a href="{{ route('student.lesson', ['course_id' => $courseId]) }}" class="btn btn-complete"
                             id="btn-complete">
-                            ✅ Hoàn thành
+                            Hoàn thành
                         </a>
                     @endif
                 </div>
@@ -384,14 +408,12 @@
             }
 
             function show(i) {
-                // Chỉ sử dụng classList.toggle('active') - không dùng style.display
                 blocks.forEach((b, j) => b.classList.toggle('active', j === i));
                 loading.classList.remove('active');
                 updateProgress();
             }
 
             function showLoading() {
-                // Ẩn tất cả question blocks
                 blocks.forEach(b => b.classList.remove('active'));
                 loading.classList.add('active');
             }
@@ -399,7 +421,7 @@
             // Hiển thị câu hỏi đầu tiên
             show(0);
 
-            // Navigation buttons
+            // Next / Previous
             document.querySelectorAll('.btn-next').forEach(btn =>
                 btn.addEventListener('click', () => {
                     if (idx < total - 1) {
@@ -408,7 +430,6 @@
                     }
                 })
             );
-
             document.querySelectorAll('.btn-prev').forEach(btn =>
                 btn.addEventListener('click', () => {
                     if (idx > 0) {
@@ -418,23 +439,29 @@
                 })
             );
 
-            // Submit functionality
+            // Submit bài làm
             if (btnSubmit) {
                 btnSubmit.addEventListener('click', () => {
-                    // Hiển thị loading
                     showLoading();
 
+                    // 1. Thu thập câu trả lời
                     const answers = {};
-                    const allQuestions = document.querySelectorAll('.question-block');
+                    blocks.forEach(block => {
+                        const qid = block.getAttribute('data-question-id');
+                        if (!qid) return;
 
-                    allQuestions.forEach(block => {
-                        const qid = block.querySelector('input[type="radio"]')?.name?.split('_')[1];
-                        const selected = block.querySelector('input[type="radio"]:checked');
-                        if (qid) {
-                            answers[qid] = selected ? selected.value : null;
+                        // Kiểm tra có radio (single_choice) hay text input (fill_blank)
+                        const radio = block.querySelector('input[type="radio"]:checked');
+                        const text = block.querySelector('input[type="text"]');
+
+                        if (radio) {
+                            answers[qid] = radio.value;
+                        } else if (text) {
+                            answers[qid] = text.value.trim() || null;
                         }
                     });
 
+                    // 2. Gửi lên server
                     fetch(`/student/exercise/{{ $lessonPartId }}/submit`, {
                             method: 'POST',
                             headers: {
@@ -451,76 +478,87 @@
                         .then(json => {
                             if (!json.success) {
                                 alert("Có lỗi khi nộp bài. Vui lòng thử lại!");
-                                show(idx); // Quay lại câu hỏi hiện tại
+                                show(idx);
                                 return;
                             }
 
                             const results = json.results;
 
-                            // Process results
+                            // 3. Hiển thị kết quả, highlight và feedback
                             Object.entries(results).forEach(([qid, data]) => {
-                                const allOptions = document.querySelectorAll(
-                                    `input[name="answer_${qid}"]`);
-                                allOptions.forEach(opt => {
-                                    const label = document.querySelector(
-                                        `label[for="${opt.id}"]`);
-                                    opt.disabled = true;
-
-                                    // Reset styles
-                                    label.classList.remove('correct', 'incorrect');
-
-                                    // Mark correct answer
-                                    if (parseInt(opt.value) == data.correct_answer) {
-                                        label.classList.add('correct');
-                                    }
-
-                                    // Mark incorrect user answer
-                                    if (data.your_answer && parseInt(opt.value) == data
-                                        .your_answer && !data.is_correct) {
-                                        label.classList.add('incorrect');
-                                    }
-                                });
-
-                                // Add feedback
-                                const block = document.querySelector(`input[name="answer_${qid}"]`)
-                                    ?.closest('.question-block');
-                                if (block) {
-                                    let fb = block.querySelector('.feedback');
-                                    if (!fb) {
-                                        fb = document.createElement('div');
-                                        fb.classList.add('feedback');
-                                        block.appendChild(fb);
-                                    }
-
-                                    fb.classList.remove('correct', 'incorrect');
-                                    fb.classList.add(data.is_correct ? 'correct' : 'incorrect');
-                                    fb.innerHTML = data.feedback || (data.is_correct ?
-                                        '✅ Chính xác!' : '❌ Câu trả lời chưa đúng!');
+                                // Tìm block theo data-question-id thay vì tìm theo input
+                                const block = document.querySelector(`.question-block[data-question-id="${qid}"]`);
+                                if (!block) {
+                                    console.warn(`Không tìm thấy block cho câu hỏi ${qid}`);
+                                    return;
                                 }
+
+                                // Nếu là single_choice
+                                const radios = block.querySelectorAll('input[type="radio"]');
+                                if (radios.length > 0) {
+                                    radios.forEach(opt => {
+                                        const label = block.querySelector(`label[for="${opt.id}"]`);
+                                        if (!label) return;
+                                        
+                                        opt.disabled = true;
+                                        label.classList.remove('correct', 'incorrect');
+                                        
+                                        // Highlight câu trả lời đúng
+                                        if (parseInt(opt.value) === data.correct_answer) {
+                                            label.classList.add('correct');
+                                        }
+                                        
+                                        // Highlight câu trả lời sai của user
+                                        if (data.your_answer && parseInt(opt.value) === data.your_answer && !data.is_correct) {
+                                            label.classList.add('incorrect');
+                                        }
+                                    });
+                                }
+                                // Nếu là fill_blank
+                                else {
+                                    const input = block.querySelector('input[type="text"]');
+                                    if (input) {
+                                        input.disabled = true;
+                                        input.classList.remove('correct', 'incorrect');
+                                        input.classList.add(data.is_correct ? 'correct' : 'incorrect');
+                                    }
+                                }
+
+                                // Thêm feedback
+                                let fb = block.querySelector('.feedback');
+                                if (!fb) {
+                                    fb = document.createElement('div');
+                                    fb.classList.add('feedback');
+                                    block.appendChild(fb);
+                                }
+                                fb.classList.remove('correct', 'incorrect');
+                                fb.classList.add(data.is_correct ? 'correct' : 'incorrect');
+                                fb.innerHTML = data.feedback || (data.is_correct ? 'Chính xác!' : 'Sai rồi!');
                             });
 
-                            // Hide submit button and show complete button
+                            // 4. Chuyển UI sang trạng thái đã nộp
                             btnSubmit.style.display = 'none';
                             btnComplete.style.display = 'inline-block';
 
-                            // Reset to first question to review
+                            // Quay lại câu đầu để review
                             idx = 0;
                             show(0);
                         })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            alert("Có lỗi khi nộp bài. Vui lòng thử lại!");
-                            show(idx); // Quay lại câu hỏi hiện tại
+                        .catch(err => {
+                            console.error('Lỗi khi submit:', err);
+                            alert("Lỗi mạng, vui lòng thử lại!");
+                            show(idx);
                         });
                 });
             }
 
-            // Keyboard navigation
-            document.addEventListener('keydown', (e) => {
+            // Phím điều hướng
+            document.addEventListener('keydown', e => {
                 if (e.key === 'ArrowLeft' && idx > 0) {
                     idx--;
                     show(idx);
-                } else if (e.key === 'ArrowRight' && idx < total - 1) {
+                }
+                if (e.key === 'ArrowRight' && idx < total - 1) {
                     idx++;
                     show(idx);
                 }

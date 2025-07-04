@@ -17,7 +17,7 @@ return new class extends Migration
                   ->constrained('users', 'admin_id')
                   ->onDelete('cascade');
             $table->string('title');
-            $table->string('message');
+            $table->longText('message');
             $table->datetime('notification_date');
             $table->timestamps();
         

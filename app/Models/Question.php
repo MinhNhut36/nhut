@@ -17,9 +17,7 @@ class Question extends Model
     ];
     protected $primaryKey = 'questions_id';
 
-    protected $casts = [
-        'question_type' => QuestionType::class,
-    ];
+
     //định nghĩa các quan hệ với các model khác
 
 

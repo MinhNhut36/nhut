@@ -35,6 +35,6 @@ class LessonPartScore extends Model
     }
     public function StudentProgcess()
     {
-        return $this->belongsTo(StudentProgress::class, 'score_id');
+        return $this->hasOne(StudentProgress::class, 'score_id');
     }
 }

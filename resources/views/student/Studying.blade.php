@@ -6,6 +6,14 @@
         .lesson-main {
             padding: 2rem 0;
             min-height: calc(100vh - 100px);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .content-container {
+            width: 80%;
+            margin: 0 auto;
         }
 
         .lesson-header {
@@ -226,7 +234,17 @@
         }
 
         /* Responsive Design */
+        @media (max-width: 1200px) {
+            .content-container {
+                width: 90%;
+            }
+        }
+
         @media (max-width: 768px) {
+            .content-container {
+                width: 95%;
+            }
+            
             .lesson-header h1 {
                 font-size: 2rem;
             }
@@ -241,6 +259,15 @@
         }
 
         @media (max-width: 480px) {
+            .content-container {
+                width: 100%;
+                padding: 0 1rem;
+            }
+            
+            .lesson-main {
+                padding: 1rem 0;
+            }
+            
             .lesson-actions {
                 flex-direction: column;
             }
@@ -279,7 +306,7 @@
                             $score = $lesson->myScore->score ?? null;
                             $total = $lesson->myScore->total_questions ?? null;
                             $correct = $lesson->myScore->correct_answers ?? 0;
-                            $status = $lesson->myScore->StudentProgcess->completion_status ?? null;
+                            $status = $lesson->myScore->StudentProgcess ?? null;
                             
                         @endphp
 
@@ -302,12 +329,12 @@
                                         <i class="fas fa-star" style="margin-right: 0.25rem;"></i>{{ $score }} điểm
                                     </p>
                                     
-                                    @if ($status !== null)
+                                    @if ($status?->completion_status !== null)
                                         <div class="progress-status">
                                             <strong>Tiến độ:</strong>
-                                            <span class="status-badge {{ $status ? 'status-pass' : 'status-fail' }}">
-                                                <i class="fas {{ $status ? 'fa-check-circle' : 'fa-times-circle' }}"></i>
-                                                {{ $status ? 'Đạt' : 'Không đạt' }}
+                                            <span class="status-badge {{ $status->completion_status ? 'status-pass' : 'status-fail' }}">
+                                                <i class="fas {{ $status->completion_status ? 'fa-check-circle' : 'fa-times-circle' }}"></i>
+                                                {{ $status->completion_status ? 'Đạt' : 'Không đạt' }}
                                             </span>
                                         </div>
                                     @else

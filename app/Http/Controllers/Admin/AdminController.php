@@ -20,6 +20,8 @@ use App\Http\Requests\AddLevelRequest;
 use App\Models\LessonPart;
 use App\Http\Requests\UpdateLessonRequest;
 use App\Http\Requests\UpdateLessonPartRequest;
+use App\Models\Question;
+use App\Models\Answer;
 
 class AdminController extends Controller
 {
@@ -389,5 +391,164 @@ class AdminController extends Controller
         $part->update($request->validated());
 
         return back()->with('success', 'Đã cập nhật phần học.');
+    }
+
+
+
+    //Thêm câu hỏi
+    public function AddQuestion(Request $request)
+    {
+
+        $type = $request->input('question_type');
+
+        switch ($type) {
+            case 'single_choice':
+                return $this->handleSingleChoice($request);
+            case 'matching':
+                return $this->handleMatching($request);
+            case 'classification':
+                return $this->handleClassification($request);
+            case 'fill_blank':
+                return $this->handleFillBlank($request);
+            case 'arrangement':
+                return $this->handleArrangement($request);
+            case 'image_word':
+                return $this->handleImageWord($request);
+            default:
+                return back()->withErrors(['message' => 'Loại câu hỏi không hợp lệ']);
+        }
+    }
+
+    private function handleSingleChoice(Request $request)
+    {
+        // 1. Tạo câu hỏi
+        $question = Question::create([
+            'lesson_part_id' => $request->lesson_part_id,
+            'question_type' => 'single_choice',
+            'media_url' => null,
+            'question_text' => $request->question_text,
+            'order_index' => $request->order_index,
+        ]);
+
+        // 2. Tạo các đáp án liên kết
+        foreach ($request->answers as $index => $answerText) {
+            Answer::create([
+                'questions_id' => $question->questions_id,
+                'match_ket' => null,
+                'answer_text' => $answerText,
+                'is_correct' => $index == $request->correct_answer ? 1 : 0,
+                'feedback' => $index == $request->correct_answer
+                    ? $request->correct_feedback
+                    : $request->wrong_feedback,
+                'order_index' => $index + 1,
+                'media_url' => null,
+            ]);
+        }
+
+        return back()->with('success', 'Tạo câu hỏi trắc nghiệm thành công!');
+    }
+
+    private function handleMatching(Request $request)
+    {
+        dd($request);
+        $pairs = [];
+        foreach ($request->words as $i => $word) {
+            $image = $request->file('images')[$i] ?? null;
+            $imagePath = $image ? $image->store('matching_images', 'public') : null;
+            $pairs[] = ['word' => $word, 'image' => $imagePath];
+        }
+
+        Question::create([
+            'lesson_part_id' => $request->lesson_part_id,
+            'question_type' => 'matching',
+            'order_index' => $request->order_index,
+            'question_text' => $request->question_text,
+            'matching_pairs' => json_encode($pairs),
+        ]);
+
+        return back()->with('success', 'Tạo câu hỏi nối từ thành công!');
+    }
+
+    private function handleClassification(Request $request)
+    {
+         dd($request);
+        $classificationData = [
+            'nouns' => preg_split('/\r\n|\r|\n/', $request->nouns ?? ''),
+            'verbs' => preg_split('/\r\n|\r|\n/', $request->verbs ?? ''),
+            'adjectives' => preg_split('/\r\n|\r|\n/', $request->adjectives ?? ''),
+        ];
+
+        Question::create([
+            'lesson_part_id' => $request->lesson_part_id,
+            'question_type' => 'classification',
+            'order_index' => $request->order_index,
+            'question_text' => $request->question_text,
+            'classification_data' => json_encode($classificationData),
+        ]);
+
+        return back()->with('success', 'Tạo câu hỏi phân loại từ thành công!');
+    }
+
+    private function handleFillBlank(Request $request)
+    {
+        // 1. Tạo câu hỏi
+        $question = Question::create([
+            'lesson_part_id' => $request->lesson_part_id,
+            'question_type' => 'fill_blank',
+            'question_text' => $request->question_text, // Ví dụ: I ___ to school every day.
+            'order_index' => $request->order_index,
+            'media_url' => null,
+        ]);
+
+        // 2. Tạo đáp án đúng duy nhất
+        Answer::create([
+            'questions_id' => $question->questions_id,
+            'answer_text' => $request->correct_word, // ví dụ: "go"
+            'is_correct' => 1,
+            'match_ket' => null,
+            'order_index' => 1,
+            'feedback' => $request->wrong_feedback,
+            'media_url' => null,
+        ]);
+
+        return back()->with('success', 'Tạo câu hỏi điền chỗ trống thành công!');
+    }
+
+    private function handleArrangement(Request $request)
+    {
+         dd($request);
+        $words = explode(' ', $request->correct_sentence);
+        shuffle($words);
+
+        Question::create([
+            'lesson_part_id' => $request->lesson_part_id,
+            'question_type' => 'arrangement',
+            'order_index' => $request->order_index,
+            'question_text' => $request->question_text,
+            'correct_answer' => $request->correct_sentence,
+            'options' => json_encode($words),
+        ]);
+
+        return back()->with('success', 'Tạo câu hỏi sắp xếp câu thành công!');
+    }
+
+    private function handleImageWord(Request $request)
+    {
+        dd($request);
+        $mediaPath = $request->file('media_url')->store('image_word', 'public');
+        $letters = str_split($request->correct_word);
+        shuffle($letters);
+
+        Question::create([
+            'lesson_part_id' => $request->lesson_part_id,
+            'question_type' => 'image_word',
+            'order_index' => $request->order_index,
+            'media_url' => $mediaPath,
+            'correct_answer' => $request->correct_word,
+            'hint' => $request->hint,
+            'options' => json_encode($letters),
+        ]);
+
+        return back()->with('success', 'Tạo câu hỏi nhìn ảnh ghép từ thành công!');
     }
 }

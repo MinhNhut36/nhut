@@ -86,6 +86,7 @@
 @endsection
 
 @section('content')
+    @include('partials.alerts')
     <div class="container-fluid">
         <div class="row">
             <div class="col-12">
@@ -195,200 +196,150 @@
                             </div>
                         </div>
 
-                        <!-- các Form nhập câu hỏi theo dạng-->
-                        <div id="questionFormContainer" class="question-form-container" style="display: none;">
+                        <!-- Form 1: Trắc nghiệm -->
+                        <div id="singleChoiceFormContainer" class="question-form-container" style="display: none;">
+                            <form id="singleChoiceForm" method="POST" enctype="multipart/form-data"
+                                action="{{ route('admin.questions.store') }}">
+                                @csrf
+                                <input type="hidden" name="lesson_part_id" class="lesson-part-input">
+                                <input type="hidden" name="question_type" value="single_choice">
 
-                            <form id="questionForm">
-                                <input type="hidden" id="selectedLessonPart" name="lesson_part_id">
-                                <input type="hidden" id="selectedQuestionType" name="question_type">
-
-                                <!-- Form cho Trắc nghiệm -->
-                                <div id="singleChoiceForm" class="question-form" style="display: none;">
-                                    <h5 class="mb-3">
-                                        <i class="fas fa-list-ul me-2"></i>Câu Hỏi Trắc Nghiệm
-                                    </h5>
-
-                                    {{-- Câu hỏi --}}
-                                    <div class="mb-3">
-                                        <label class="form-label">Câu hỏi:</label>
-                                        <input class="form-control" name="question_text"
-                                            placeholder="Nhập câu hỏi..."></input>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">Thứ tự câu hỏi (order_index):</label>
-                                        <input type="number" class="form-control" name="order_index"
-                                            placeholder="Nhập thứ tự (ví dụ: 1)" min="1">
-                                    </div>
-                                    <label class="form-label">Đáp án (chọn đáp án đúng):</label>
-                                    <div id="multipleChoiceAnswers">
-                                        @php $labels = ['A', 'B', 'C', 'D']; @endphp
-                                        @foreach ($labels as $index => $label)
-                                            <div class="answer-option mb-2">
-                                                <label class="d-flex align-items-center w-100">
-                                                    <input type="radio" name="correct_answer"
-                                                        value="{{ $index }}" class="me-2">
-                                                    <span class="me-2 fw-bold">{{ $label }}.</span>
-                                                    <input type="text" class="form-control" name="answers[]"
-                                                        placeholder="Nhập đáp án {{ $label }}">
-                                                </label>
-                                            </div>
-                                        @endforeach
-                                        <div class="mb-3">
-                                            <label class="form-label">Phản hồi khi đúng:</label>
-                                            <input type="text" class="form-control" name="correct_feedback"
-                                                placeholder="Ví dụ: Chính xác!">
+                                <h5 class="mb-3">
+                                    <i class="fas fa-list-ul me-2"></i>Câu Hỏi Trắc Nghiệm
+                                </h5>
+                                <div class="mb-3">
+                                    <label class="form-label">Thứ tự câu hỏi (order_index):</label>
+                                    <input type="number" class="form-control" name="order_index"
+                                        placeholder="Nhập thứ tự (ví dụ: 1)" min="1" value="1">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Câu hỏi:</label>
+                                    <textarea class="form-control" name="question_text" rows="3" placeholder="Nhập câu hỏi..."></textarea>
+                                </div>
+                                <label class="form-label">Đáp án (chọn đáp án đúng):</label>
+                                <div id="multipleChoiceAnswers">
+                                    @php $labels = ['A', 'B', 'C', 'D']; @endphp
+                                    @foreach ($labels as $index => $label)
+                                        <div class="answer-option mb-2">
+                                            <label class="d-flex align-items-center w-100">
+                                                <input type="radio" name="correct_answer" value="{{ $index }}"
+                                                    class="me-2">
+                                                <span class="me-2 fw-bold">{{ $label }}.</span>
+                                                <input type="text" class="form-control" name="answers[]"
+                                                    placeholder="Nhập đáp án {{ $label }}">
+                                            </label>
                                         </div>
-
-                                        <div class="mb-3">
-                                            <label class="form-label">Phản hồi khi sai:</label>
-                                            <input type="text" class="form-control" name="wrong_feedback"
-                                                placeholder="Ví dụ: Bạn cần ôn lại phần này.">
-                                        </div>
-                                    </div>
+                                    @endforeach
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Phản hồi khi đúng:</label>
+                                    <input type="text" class="form-control" name="correct_feedback"
+                                        placeholder="Ví dụ: Chính xác!">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Phản hồi khi sai:</label>
+                                    <input type="text" class="form-control" name="wrong_feedback"
+                                        placeholder="Ví dụ: Bạn cần ôn lại phần này.">
                                 </div>
 
-                                <!-- Form cho Nối từ -->
-                                <div id="matchingForm" class="question-form" style="display: none;">
-                                    <h5 class="mb-3">
-                                        <i class="fas fa-link me-2"></i>Câu Hỏi Nối Từ
-                                    </h5>
-
-                                    <div class="mb-3">
-                                        <label class="form-label">Hướng dẫn:</label>
-                                        <textarea class="form-control" name="question_text" rows="2"
-                                            placeholder="Ví dụ: Nối từ với hình ảnh tương ứng..."></textarea>
-                                    </div>
-
-                                    <label class="form-label">Các cặp nối:</label>
-                                    <div id="matchingPairs">
-                                        <div class="matching-pair">
-                                            <div class="flex-fill">
-                                                <input type="text" class="form-control" name="words[]"
-                                                    placeholder="Từ vựng">
-                                            </div>
-                                            <i class="fas fa-arrows-alt-h text-muted"></i>
-                                            <div class="flex-fill">
-                                                <input type="file" class="form-control" name="images[]"
-                                                    accept="image/*">
-                                            </div>
-                                            <button type="button" class="btn btn-sm btn-danger remove-pair">
-                                                <i class="fas fa-times"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <button type="button" class="btn btn-sm btn-primary" id="addMatchingPair">
-                                        <i class="fas fa-plus me-1"></i>Thêm cặp
+                                <div class="mt-4">
+                                    <button type="submit" class="btn btn-primary me-2">
+                                        <i class="fas fa-save me-1"></i>Lưu Câu Hỏi
+                                    </button>
+                                    <button type="button" class="btn btn-secondary cancel-btn">
+                                        <i class="fas fa-times me-1"></i>Hủy
                                     </button>
                                 </div>
+                            </form>
+                        </div>
 
-                                <!-- Form cho Phân loại từ -->
-                                <div id="classificationForm" class="question-form" style="display: none;">
-                                    <h5 class="mb-3">
-                                        <i class="fas fa-tags me-2"></i>Câu Hỏi Phân Loại Từ
-                                    </h5>
+                        <!-- Form 2: Nối từ -->
+                        <div id="matchingFormContainer" class="question-form-container" style="display: none;">
+                            <form id="matchingForm" method="POST" enctype="multipart/form-data"
+                                action="{{ route('admin.questions.store') }}">
+                                @csrf
+                                <input type="hidden" name="lesson_part_id" class="lesson-part-input">
+                                <input type="hidden" name="question_type" value="matching">
 
-                                    <div class="mb-3">
-                                        <label class="form-label">Câu hỏi:</label>
-                                        <textarea class="form-control" name="question_text" rows="2"
-                                            placeholder="Ví dụ: Phân loại các từ sau theo loại từ..."></textarea>
-                                    </div>
-
-                                    <div class="row">
-                                        <div class="col-md-4">
-                                            <label class="form-label">Danh từ (Nouns):</label>
-                                            <textarea class="form-control" name="nouns" rows="4" placeholder="Nhập các danh từ, mỗi từ một dòng"></textarea>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <label class="form-label">Động từ (Verbs):</label>
-                                            <textarea class="form-control" name="verbs" rows="4" placeholder="Nhập các động từ, mỗi từ một dòng"></textarea>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <label class="form-label">Tính từ (Adjectives):</label>
-                                            <textarea class="form-control" name="adjectives" rows="4" placeholder="Nhập các tính từ, mỗi từ một dòng"></textarea>
-                                        </div>
-                                    </div>
+                                <h5 class="mb-3">
+                                    <i class="fas fa-link me-2"></i>Câu Hỏi Nối Từ
+                                </h5>
+                                <div class="mb-3">
+                                    <label class="form-label">Thứ tự câu hỏi (order_index):</label>
+                                    <input type="number" class="form-control" name="order_index"
+                                        placeholder="Nhập thứ tự (ví dụ: 1)" min="1" value="1">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Hướng dẫn:</label>
+                                    <textarea class="form-control" name="question_text" rows="2"
+                                        placeholder="Ví dụ: Nối từ với hình ảnh tương ứng..."></textarea>
                                 </div>
 
-                                <!-- Form cho Điền chỗ trống -->
-                                <div id="fillBlankForm" class="question-form" style="display: none;">
-                                    <h5 class="mb-3">
-                                        <i class="fas fa-edit me-2"></i>Câu Hỏi Điền Chỗ Trống
-                                    </h5>
-
-                                    <div class="mb-3">
-                                        <label class="form-label">Câu hỏi (dùng ___ để đánh dấu chỗ trống):</label>
-                                        <textarea class="form-control" name="question_text" rows="3"
-                                            placeholder="Ví dụ: I ___ to school every day. (go/goes/going)"></textarea>
-                                    </div>
-
-                                    <div class="mb-3">
-                                        <label class="form-label">Từ đúng:</label>
-                                        <input type="text" class="form-control" name="correct_word"
-                                            placeholder="Nhập từ đúng">
-                                    </div>
-
-                                    <div class="mb-3">
-                                        <label class="form-label">Các lựa chọn khác (tùy chọn):</label>
-                                        <input type="text" class="form-control" name="other_options"
-                                            placeholder="Nhập các lựa chọn sai, cách nhau bởi dấu phẩy">
-                                    </div>
-                                </div>
-
-                                <!-- Form cho Sắp xếp câu -->
-                                <div id="arrangementForm" class="question-form" style="display: none;">
-                                    <h5 class="mb-3">
-                                        <i class="fas fa-sort me-2"></i>Câu Hỏi Sắp Xếp Câu
-                                    </h5>
-
-                                    <div class="mb-3">
-                                        <label class="form-label">Hướng dẫn:</label>
-                                        <textarea class="form-control" name="question_text" rows="2"
-                                            placeholder="Ví dụ: Sắp xếp các từ sau thành câu đúng..."></textarea>
-                                    </div>
-
-                                    <div class="mb-3">
-                                        <label class="form-label">Câu đúng:</label>
-                                        <input type="text" class="form-control" name="correct_sentence"
-                                            placeholder="Nhập câu đúng">
-                                    </div>
-
-                                    <div class="mb-3">
-                                        <label class="form-label">Các từ sẽ được xáo trộn:</label>
-                                        <div id="scrambledWords" class="d-flex flex-wrap gap-2"></div>
-                                    </div>
-                                </div>
-
-                                <!-- Form cho Nhìn ảnh ghép từ -->
-                                <div id="imageWordForm" class="question-form" style="display: none;">
-                                    <h5 class="mb-3">
-                                        <i class="fas fa-image me-2"></i>Câu Hỏi Nhìn Ảnh Ghép Từ
-                                    </h5>
-
-                                    <div class="mb-3">
-                                        <label class="form-label">Hình ảnh:</label>
-                                        <div class="image-upload-area">
-                                            <i class="fas fa-cloud-upload-alt fa-2x text-muted mb-2"></i>
-                                            <p class="text-muted">Click để chọn ảnh</p>
-                                            <input type="file" class="form-control" name="media_url" accept="image/*"
-                                                style="display: none;" required>
+                                <label class="form-label">Các cặp nối:</label>
+                                <div id="matchingPairs">
+                                    <div class="matching-pair">
+                                        <div class="flex-fill">
+                                            <input type="text" class="form-control" name="words[]"
+                                                placeholder="Từ vựng">
                                         </div>
+                                        <i class="fas fa-arrows-alt-h text-muted"></i>
+                                        <div class="flex-fill">
+                                            <input type="file" class="form-control" name="images[]" accept="image/*">
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-danger remove-pair">
+                                            <i class="fas fa-times"></i>
+                                        </button>
                                     </div>
+                                </div>
+                                <button type="button" class="btn btn-sm btn-primary mb-3" id="addMatchingPair">
+                                    <i class="fas fa-plus me-1"></i>Thêm cặp
+                                </button>
 
-                                    <div class="mb-3">
-                                        <label class="form-label">Từ đúng:</label>
-                                        <input type="text" class="form-control" name="correct_word"
-                                            placeholder="Nhập từ đúng" id="correctWordInput">
+                                <div class="mt-4">
+                                    <button type="submit" class="btn btn-primary me-2">
+                                        <i class="fas fa-save me-1"></i>Lưu Câu Hỏi
+                                    </button>
+                                    <button type="button" class="btn btn-secondary cancel-btn">
+                                        <i class="fas fa-times me-1"></i>Hủy
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Form 3: Phân loại từ -->
+                        <div id="classificationFormContainer" class="question-form-container" style="display: none;">
+                            <form id="classificationForm" method="POST" enctype="multipart/form-data"
+                                action="{{ route('admin.questions.store') }}">
+                                @csrf
+                                <input type="hidden" name="lesson_part_id" class="lesson-part-input">
+                                <input type="hidden" name="question_type" value="classification">
+
+                                <h5 class="mb-3">
+                                    <i class="fas fa-tags me-2"></i>Câu Hỏi Phân Loại Từ
+                                </h5>
+                                <div class="mb-3">
+                                    <label class="form-label">Thứ tự câu hỏi (order_index):</label>
+                                    <input type="number" class="form-control" name="order_index"
+                                        placeholder="Nhập thứ tự (ví dụ: 1)" min="1" value="1">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Câu hỏi:</label>
+                                    <textarea class="form-control" name="question_text" rows="2"
+                                        placeholder="Ví dụ: Phân loại các từ sau theo loại từ..."></textarea>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <label class="form-label">Danh từ (Nouns):</label>
+                                        <textarea class="form-control" name="nouns" rows="4" placeholder="Nhập các danh từ, mỗi từ một dòng"></textarea>
                                     </div>
-
-                                    <div class="mb-3">
-                                        <label class="form-label">Các chữ cái sẽ được xáo trộn:</label>
-                                        <div id="letterBoxes" class="word-letters"></div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">Động từ (Verbs):</label>
+                                        <textarea class="form-control" name="verbs" rows="4" placeholder="Nhập các động từ, mỗi từ một dòng"></textarea>
                                     </div>
-
-                                    <div class="mb-3">
-                                        <label class="form-label">Gợi ý (tùy chọn):</label>
-                                        <input type="text" class="form-control" name="hint"
-                                            placeholder="Nhập gợi ý cho câu hỏi">
+                                    <div class="col-md-4">
+                                        <label class="form-label">Tính từ (Adjectives):</label>
+                                        <textarea class="form-control" name="adjectives" rows="4" placeholder="Nhập các tính từ, mỗi từ một dòng"></textarea>
                                     </div>
                                 </div>
 
@@ -396,7 +347,149 @@
                                     <button type="submit" class="btn btn-primary me-2">
                                         <i class="fas fa-save me-1"></i>Lưu Câu Hỏi
                                     </button>
-                                    <button type="button" class="btn btn-secondary" id="cancelBtn">
+                                    <button type="button" class="btn btn-secondary cancel-btn">
+                                        <i class="fas fa-times me-1"></i>Hủy
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Form 4: Điền chỗ trống -->
+                        <div id="fillBlankFormContainer" class="question-form-container" style="display: none;">
+                            <form id="fillBlankForm" method="POST" enctype="multipart/form-data"
+                                action="{{ route('admin.questions.store') }}">
+                                @csrf
+                                <input type="hidden" name="lesson_part_id" class="lesson-part-input">
+                                <input type="hidden" name="question_type" value="fill_blank">
+
+                                <h5 class="mb-3">
+                                    <i class="fas fa-edit me-2"></i>Câu Hỏi Điền Chỗ Trống
+                                </h5>
+                                <div class="mb-3">
+                                    <label class="form-label">Thứ tự câu hỏi (order_index):</label>
+                                    <input type="number" class="form-control" name="order_index"
+                                        placeholder="Nhập thứ tự (ví dụ: 1)" min="1" value="1">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Câu hỏi (dùng ___ để đánh dấu chỗ trống):</label>
+                                    <textarea class="form-control" name="question_text" rows="3"
+                                        placeholder="Ví dụ: I ___ to school every day. (go/goes/going)"></textarea>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Từ đúng:</label>
+                                    <input type="text" class="form-control" name="correct_word"
+                                        placeholder="Nhập từ đúng">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Gợi ý khi sai:</label>
+                                    <input type="text" class="form-control" name="wrong_feedback"
+                                        placeholder="Ví dụ: Bạn cần ôn lại phần này.">
+                                </div>
+
+                                <div class="mt-4">
+                                    <button type="submit" class="btn btn-primary me-2">
+                                        <i class="fas fa-save me-1"></i>Lưu Câu Hỏi
+                                    </button>
+                                    <button type="button" class="btn btn-secondary cancel-btn">
+                                        <i class="fas fa-times me-1"></i>Hủy
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Form 5: Sắp xếp câu -->
+                        <div id="arrangementFormContainer" class="question-form-container" style="display: none;">
+                            <form id="arrangementForm" method="POST" enctype="multipart/form-data"
+                                action="{{ route('admin.questions.store') }}">
+                                @csrf
+                                <input type="hidden" name="lesson_part_id" class="lesson-part-input">
+                                <input type="hidden" name="question_type" value="arrangement">
+
+                                <h5 class="mb-3">
+                                    <i class="fas fa-sort me-2"></i>Câu Hỏi Sắp Xếp Câu
+                                </h5>
+                                <div class="mb-3">
+                                    <label class="form-label">Thứ tự câu hỏi (order_index):</label>
+                                    <input type="number" class="form-control" name="order_index"
+                                        placeholder="Nhập thứ tự (ví dụ: 1)" min="1" value="1">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Hướng dẫn:</label>
+                                    <textarea class="form-control" name="question_text" rows="2"
+                                        placeholder="Ví dụ: Sắp xếp các từ sau thành câu đúng..."></textarea>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Câu đúng:</label>
+                                    <input type="text" class="form-control" name="correct_sentence"
+                                        placeholder="Nhập câu đúng">
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Các từ sẽ được xáo trộn:</label>
+                                    <div id="scrambledWords" class="d-flex flex-wrap gap-2"></div>
+                                </div>
+
+                                <div class="mt-4">
+                                    <button type="submit" class="btn btn-primary me-2">
+                                        <i class="fas fa-save me-1"></i>Lưu Câu Hỏi
+                                    </button>
+                                    <button type="button" class="btn btn-secondary cancel-btn">
+                                        <i class="fas fa-times me-1"></i>Hủy
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Form 6: Nhìn ảnh ghép từ -->
+                        <div id="imageWordFormContainer" class="question-form-container" style="display: none;">
+                            <form id="imageWordForm" method="POST" enctype="multipart/form-data"
+                                action="{{ route('admin.questions.store') }}">
+                                @csrf
+                                <input type="hidden" name="lesson_part_id" class="lesson-part-input">
+                                <input type="hidden" name="question_type" value="image_word">
+
+                                <h5 class="mb-3">
+                                    <i class="fas fa-image me-2"></i>Câu Hỏi Nhìn Ảnh Ghép Từ
+                                </h5>
+                                <div class="mb-3">
+                                    <label class="form-label">Thứ tự câu hỏi (order_index):</label>
+                                    <input type="number" class="form-control" name="order_index"
+                                        placeholder="Nhập thứ tự (ví dụ: 1)" min="1" value="1">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Hình ảnh:</label>
+                                    <div class="image-upload-area" data-form="imageWord">
+                                        <i class="fas fa-cloud-upload-alt fa-2x text-muted mb-2"></i>
+                                        <p class="text-muted">Click để chọn ảnh</p>
+                                        <input type="file" class="form-control" name="media_url" accept="image/*"
+                                            style="display: none;">
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Từ đúng:</label>
+                                    <input type="text" class="form-control" name="correct_word"
+                                        placeholder="Nhập từ đúng" id="correctWordInput">
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Các chữ cái sẽ được xáo trộn:</label>
+                                    <div id="letterBoxes" class="word-letters"></div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Gợi ý (tùy chọn):</label>
+                                    <input type="text" class="form-control" name="hint"
+                                        placeholder="Nhập gợi ý cho câu hỏi">
+                                </div>
+
+                                <div class="mt-4">
+                                    <button type="submit" class="btn btn-primary me-2">
+                                        <i class="fas fa-save me-1"></i>Lưu Câu Hỏi
+                                    </button>
+                                    <button type="button" class="btn btn-secondary cancel-btn">
                                         <i class="fas fa-times me-1"></i>Hủy
                                     </button>
                                 </div>
@@ -413,6 +506,7 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         let selectedQuestionType = '';
+        let selectedLessonPartId = '';
 
         $(document).ready(function() {
             // Xử lý chọn level
@@ -420,7 +514,7 @@
                 const level = $(this).val();
                 $('#lessonSelect').html('<option value="">-- Đang tải bài học... --</option>');
                 $('#questionTypeSection').hide();
-                $('#questionFormContainer').hide();
+                hideAllForms();
 
                 if (level) {
                     $.ajax({
@@ -445,11 +539,12 @@
             $('#lessonSelect').on('change', function() {
                 const lessonPartId = $(this).val();
                 if (lessonPartId) {
+                    selectedLessonPartId = lessonPartId;
                     $('#questionTypeSection').show();
-                    $('#selectedLessonPart').val(lessonPartId);
+                    $('.lesson-part-input').val(lessonPartId);
                 } else {
                     $('#questionTypeSection').hide();
-                    $('#questionFormContainer').hide();
+                    hideAllForms();
                 }
             });
 
@@ -459,8 +554,6 @@
                 $(this).addClass('active');
 
                 selectedQuestionType = $(this).data('type');
-                $('#selectedQuestionType').val(selectedQuestionType);
-
                 showQuestionForm(selectedQuestionType);
             });
 
@@ -496,184 +589,271 @@
             });
 
             // Tự động tạo từ xáo trộn cho sắp xếp câu
-            $('input[name="correct_sentence"]').on('input', function() {
+            $(document).on('input', 'input[name="correct_sentence"]', function() {
                 const sentence = $(this).val();
                 if (sentence) {
                     const words = sentence.split(' ').filter(word => word.length > 0);
                     const scrambledHtml = words.map(word =>
                         `<span class="badge bg-secondary">${word}</span>`
-                    ).join('');
+                    ).join(' ');
                     $('#scrambledWords').html(scrambledHtml);
                 }
             });
 
-            // Tự động tạo chữ cái cho ghép từ
-            $('#correctWordInput').on('input', function() {
+            // Tự động tạo ô chữ cái cho ghép từ
+            $(document).on('input', '#correctWordInput', function() {
                 const word = $(this).val().toUpperCase();
                 if (word) {
-                    const letters = word.split('');
-                    const letterBoxesHtml = letters.map(letter =>
+                    const lettersHtml = word.split('').map(letter =>
                         `<div class="letter-box">${letter}</div>`
                     ).join('');
-                    $('#letterBoxes').html(letterBoxesHtml);
+                    $('#letterBoxes').html(lettersHtml);
                 }
             });
 
-            // Xử lý submit form
-            $('#questionForm').on('submit', function(e) {
-                e.preventDefault();
-
-                // Validate form
-                if (!validateForm()) {
-                    return;
-                }
-
-                // Tạo FormData để gửi file
-                const formData = new FormData(this);
-
-                // Xử lý dữ liệu theo từng loại câu hỏi
-                processFormData(formData);
-
-                // Gửi AJAX request
-                $.ajax({
-                    url: '/admin/questions/store',
-                    method: 'POST',
-                    data: formData,
-                    processData: false,
-                    contentType: false,
-                    success: function(response) {
-                        alert('Câu hỏi đã được tạo thành công!');
-                        resetForm();
-                    },
-                    error: function(xhr) {
-                        alert('Có lỗi xảy ra: ' + xhr.responseText);
-                    }
-                });
+            // Xử lý nút hủy
+            $('.cancel-btn').on('click', function() {
+                hideAllForms();
+                $('.question-type-card').removeClass('active');
+                selectedQuestionType = '';
             });
 
-            // Xử lý hủy
-            $('#cancelBtn').on('click', function() {
-                resetForm();
+            // Xử lý radio button cho trắc nghiệm
+            $(document).on('change', 'input[name="correct_answer"]', function() {
+                $('.answer-option').removeClass('correct-answer');
+                $(this).closest('.answer-option').addClass('correct-answer');
+            });
+
+            // Xử lý preview ảnh
+            $(document).on('change', 'input[type="file"]', function() {
+                const file = this.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    const $container = $(this).closest('.image-upload-area, .matching-pair');
+
+                    reader.onload = function(e) {
+                        const preview = `
+                            <div class="preview mt-2">
+                                <img src="${e.target.result}" alt="Preview" 
+                                     style="max-width: 200px; max-height: 200px; border-radius: 5px;">
+                            </div>
+                        `;
+                        $container.find('.preview').remove();
+                        $container.append(preview);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            // Validation trước khi submit
+            $(document).on('submit', 'form', function(e) {
+                const formType = $(this).attr('id');
+                let isValid = true;
+
+                switch (formType) {
+                    case 'singleChoiceForm':
+                        isValid = validateSingleChoice();
+                        break;
+                    case 'matchingForm':
+                        isValid = validateMatching();
+                        break;
+                    case 'classificationForm':
+                        isValid = validateClassification();
+                        break;
+                    case 'fillBlankForm':
+                        isValid = validateFillBlank();
+                        break;
+                    case 'arrangementForm':
+                        isValid = validateArrangement();
+                        break;
+                    case 'imageWordForm':
+                        isValid = validateImageWord();
+                        break;
+                }
+
+                if (!isValid) {
+                    e.preventDefault();
+                }
             });
         });
 
         function showQuestionForm(type) {
-            // Ẩn tất cả các form trước
-            $('.question-form').hide();
+            hideAllForms();
 
             const formMap = {
-                'single_choice': '#singleChoiceForm',
-                'matching': '#matchingForm',
-                'classification': '#classificationForm',
-                'fill_blank': '#fillBlankForm',
-                'arrangement': '#arrangementForm',
-                'image_word': '#imageWordForm'
+                'single_choice': '#singleChoiceFormContainer',
+                'matching': '#matchingFormContainer',
+                'classification': '#classificationFormContainer',
+                'fill_blank': '#fillBlankFormContainer',
+                'arrangement': '#arrangementFormContainer',
+                'image_word': '#imageWordFormContainer'
             };
 
             const targetForm = formMap[type];
             if (targetForm) {
                 $(targetForm).show();
-                $('#questionFormContainer').show();
+                console.log('Showing form:', targetForm); // Debug log
             } else {
-                alert('Loại câu hỏi không hợp lệ!');
+                console.error('Form type not found:', type);
             }
         }
 
-        function processFormData(formData) {
-            // Xử lý dữ liệu dựa trên loại câu hỏi
-            switch (selectedQuestionType) {
-                case 'single_choice':
-                    // Dữ liệu đã được xử lý trong form
-                    break;
-
-                case 'matching':
-                    // Kết hợp words và images thành JSON
-                    const words = $('input[name="words[]"]').map(function() {
-                        return $(this).val();
-                    }).get();
-                    const matchingData = {
-                        words: words
-                    };
-                    formData.append('matching_data', JSON.stringify(matchingData));
-                    break;
-
-                case 'classification':
-                    const nouns = $('textarea[name="nouns"]').val().split('\n').filter(w => w.trim());
-                    const verbs = $('textarea[name="verbs"]').val().split('\n').filter(w => w.trim());
-                    const adjectives = $('textarea[name="adjectives"]').val().split('\n').filter(w => w.trim());
-                    const classificationData = {
-                        nouns,
-                        verbs,
-                        adjectives
-                    };
-                    formData.append('classification_data', JSON.stringify(classificationData));
-                    break;
-
-                case 'fill_blank':
-                    // Dữ liệu đã được xử lý trong form
-                    break;
-
-                case 'arrangement':
-                    const correctSentence = $('input[name="correct_sentence"]').val();
-                    const wordsArray = correctSentence.split(' ').filter(w => w.trim());
-                    formData.append('arrangement_data', JSON.stringify({
-                        words: wordsArray
-                    }));
-                    break;
-
-                case 'image_word':
-                    // Dữ liệu đã được xử lý trong form
-                    break;
-            }
+        function hideAllForms() {
+            $('.question-form-container').hide();
         }
 
-        function validateForm() {
-            // Validate cơ bản
-            if (!$('#selectedLessonPart').val()) {
-                alert('Vui lòng chọn bài học');
+        // Validation functions
+        function validateSingleChoice() {
+            const question = $('textarea[name="question_text"]').val();
+            const answers = $('input[name="answers[]"]').map(function() {
+                return $(this).val().trim();
+            }).get();
+            const correctAnswer = $('input[name="correct_answer"]:checked').val();
+
+            if (!question.trim()) {
+                alert('Vui lòng nhập câu hỏi');
                 return false;
             }
 
-            if (!selectedQuestionType) {
-                alert('Vui lòng chọn dạng câu hỏi');
+            // Kiểm tra tất cả đáp án đã được nhập
+            if (answers.some(answer => !answer)) {
+                alert('Vui lòng nhập đầy đủ 4 đáp án');
                 return false;
             }
 
-            // Validate theo từng loại
-            switch (selectedQuestionType) {
-                case 'single_choice':
-                    if (!$('input[name="correct_answer"]:checked').length) {
-                        alert('Vui lòng chọn đáp án đúng');
-                        return false;
-                    }
-                    break;
+            // Kiểm tra đáp án có trùng lặp không
+            const uniqueAnswers = [...new Set(answers)];
+            if (uniqueAnswers.length !== answers.length) {
+                alert('Các đáp án không được trùng lặp. Vui lòng nhập 4 đáp án khác nhau.');
+                return false;
+            }
 
-                case 'matching':
-                    if ($('input[name="words[]"]').filter(function() {
-                            return $(this).val().trim() !== '';
-                        }).length < 2) {
-                        alert('Vui lòng nhập ít nhất 2 cặp từ');
-                        return false;
-                    }
-                    break;
 
-                case 'image_word':
-                    if (!$('input[name="media_url"]')[0].files.length) {
-                        alert('Vui lòng chọn hình ảnh');
-                        return false;
-                    }
-                    break;
+            if (correctAnswer === undefined) {
+                alert('Vui lòng chọn đáp án đúng cho câu hỏi');
+                return false;
             }
 
             return true;
         }
 
-        function resetForm() {
-            $('#questionForm')[0].reset();
+        function validateMatching() {
+            const words = $('#matchingForm input[name="words[]"]').map(function() {
+                return $(this).val();
+            }).get();
+            const images = $('#matchingForm input[name="images[]"]').map(function() {
+                return this.files[0];
+            }).get();
+
+            if (words.length < 2) {
+                alert('Cần ít nhất 2 cặp nối');
+                return false;
+            }
+
+            if (words.some(word => !word.trim())) {
+                alert('Vui lòng nhập đầy đủ từ vựng');
+                return false;
+            }
+
+            if (images.some(image => !image)) {
+                alert('Vui lòng chọn đầy đủ hình ảnh');
+                return false;
+            }
+
+            return true;
+        }
+
+        function validateClassification() {
+            const nouns = $('#classificationForm textarea[name="nouns"]').val();
+            const verbs = $('#classificationForm textarea[name="verbs"]').val();
+            const adjectives = $('#classificationForm textarea[name="adjectives"]').val();
+
+            if (!nouns.trim() && !verbs.trim() && !adjectives.trim()) {
+                alert('Vui lòng nhập ít nhất một loại từ');
+                return false;
+            }
+
+            return true;
+        }
+
+        function validateFillBlank() {
+            const question = $('#fillBlankForm textarea[name="question_text"]').val();
+            const correctWord = $('#fillBlankForm input[name="correct_word"]').val();
+
+            if (!question.trim()) {
+                alert('Vui lòng nhập câu hỏi');
+                return false;
+            }
+
+            if (!question.includes('___')) {
+                alert('Câu hỏi phải có ít nhất một chỗ trống (___)');
+                return false;
+            }
+
+            if (!correctWord.trim()) {
+                alert('Vui lòng nhập từ đúng');
+                return false;
+            }
+
+            return true;
+        }
+
+        function validateArrangement() {
+            const sentence = $('#arrangementForm input[name="correct_sentence"]').val();
+
+            if (!sentence.trim()) {
+                alert('Vui lòng nhập câu đúng');
+                return false;
+            }
+
+            if (sentence.split(' ').filter(word => word.length > 0).length < 2) {
+                alert('Câu phải có ít nhất 2 từ');
+                return false;
+            }
+
+            return true;
+        }
+
+        function validateImageWord() {
+            const image = $('#imageWordForm input[name="media_url"]')[0].files[0];
+            const correctWord = $('#imageWordForm input[name="correct_word"]').val();
+
+            if (!image) {
+                alert('Vui lòng chọn hình ảnh');
+                return false;
+            }
+
+            if (!correctWord.trim()) {
+                alert('Vui lòng nhập từ đúng');
+                return false;
+            }
+
+            if (correctWord.length < 2) {
+                alert('Từ phải có ít nhất 2 ký tự');
+                return false;
+            }
+
+            return true;
+        }
+
+        // Utility functions
+        function resetAllForms() {
+            $('form').each(function() {
+                this.reset();
+            });
+            hideAllForms();
             $('.question-type-card').removeClass('active');
-            $('#questionFormContainer').hide();
-            $('#questionTypeSection').hide();
             selectedQuestionType = '';
+            $('.preview').remove();
+            $('#scrambledWords').html('');
+            $('#letterBoxes').html('');
+        }
+
+        // Debug function
+        function debugFormVisibility() {
+            $('.question-form-container').each(function() {
+                console.log($(this).attr('id'), $(this).is(':visible'));
+            });
         }
     </script>
 @endsection

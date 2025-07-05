@@ -9,7 +9,7 @@ class Question extends Model
 {
     protected $fillable = [
         'questions_id',
-        'contents_id',
+        'lesson_part_id',
         'question_text',
         'question_type',
         'media_url',

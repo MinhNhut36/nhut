@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Models;
+
 use App\Enum\enrollment;
 use Illuminate\Database\Eloquent\Model;
 
@@ -18,7 +19,7 @@ class CourseEnrollment extends Model
     protected $casts = [
         'status' => enrollment::class,
     ];
-    
+
     //định nghĩa các quan hệ với các model khác
     public function student()
     {
@@ -26,6 +27,12 @@ class CourseEnrollment extends Model
     }
     public function course()
     {
-        return $this->belongsTo(Course::class, 'assigned_course_id','course_id');
+        return $this->belongsTo(Course::class, 'assigned_course_id', 'course_id');
+    }
+
+    //atrang thêm
+    public function examResult()
+    {
+        return $this->hasOne(ExamResult::class, 'student_id', 'student_id');
     }
 }

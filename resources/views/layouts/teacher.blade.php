@@ -203,6 +203,7 @@
         .main-content {
             flex: 1;
             position: relative;
+            margin-top: var(--header-height);
         }
 
         .content-container {
@@ -286,6 +287,263 @@
         ::-webkit-scrollbar-thumb:hover {
             background: rgba(255, 255, 255, 0.5);
         }
+
+        /* Sidebar */
+
+        /* Sidebar Container */
+        .sidebar {
+            position: fixed;
+            top: 89px;
+            /* Điều chỉnh theo chiều cao header */
+            left: 0;
+            width: 280px;
+            height: calc(100vh - 89px);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: var(--shadow-lg);
+            transform: translateX(0);
+            transition: var(--transition);
+            z-index: 999;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .sidebar.collapsed {
+            width: 70px;
+            transform: translateX(0);
+        }
+
+        .sidebar.hidden {
+            transform: translateX(-100%);
+        }
+
+        /* Sidebar Header */
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sidebar-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .sidebar-header:hover::before {
+            left: 100%;
+        }
+
+        .sidebar-header h5 {
+            margin: 0;
+            font-weight: 600;
+            font-size: 1.1rem;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            transition: var(--transition);
+        }
+
+        .sidebar.collapsed .sidebar-header h5 {
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+
+        /* Sidebar Navigation */
+        .sidebar-nav {
+            padding: 1rem 0;
+        }
+
+        .sidebar-nav .nav {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .sidebar-nav .nav-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-link {
+            display: flex !important;
+            align-items: center;
+            padding: 1rem 1.5rem !important;
+            color: var(--text-dark) !important;
+            text-decoration: none !important;
+            font-weight: 500 !important;
+            font-size: 0.95rem !important;
+            transition: var(--transition) !important;
+            position: relative;
+            overflow: hidden;
+            border-radius: 0 !important;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color), var(--primary-light));
+            transition: width 0.3s ease;
+            z-index: -1;
+        }
+
+        .sidebar-link:hover::before {
+            width: 100%;
+        }
+
+        .sidebar-link:hover {
+            color: white !important;
+            transform: translateX(5px);
+            border-left-color: var(--accent-color);
+            background: transparent !important;
+        }
+
+        .sidebar-link.active {
+            background: linear-gradient(90deg, var(--primary-color), var(--primary-light)) !important;
+            color: white !important;
+            border-left-color: var(--accent-color);
+            transform: translateX(5px);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+
+        .sidebar-link i {
+            font-size: 1.2rem;
+            margin-right: 1rem;
+            width: 20px;
+            text-align: center;
+            transition: var(--transition);
+        }
+
+        .sidebar-link span {
+            transition: var(--transition);
+            white-space: nowrap;
+        }
+
+        /* Collapsed Sidebar Styles */
+        .sidebar.collapsed .sidebar-link {
+            padding: 1rem 0.75rem !important;
+            justify-content: center;
+        }
+
+        .sidebar.collapsed .sidebar-link i {
+            margin-right: 0;
+            font-size: 1.4rem;
+        }
+
+        .sidebar.collapsed .sidebar-link span {
+            display: none;
+        }
+
+        .sidebar.collapsed .sidebar-link:hover span {
+            display: block;
+            position: absolute;
+            left: 70px;
+            background: var(--text-dark);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            box-shadow: var(--shadow-lg);
+            white-space: nowrap;
+            z-index: 1001;
+            font-size: 0.9rem;
+        }
+
+        .sidebar.collapsed .sidebar-link:hover span::before {
+            content: '';
+            position: absolute;
+            left: -5px;
+            top: 50%;
+            transform: translateY(-50%);
+            border: 5px solid transparent;
+            border-right-color: var(--text-dark);
+        }
+
+        /* Main Content Adjustment */
+        .main-content {
+            transition: var(--transition);
+        }
+
+        .sidebar.collapsed~.main-content {
+            margin-left: 70px;
+        }
+
+        .sidebar.hidden~.main-content {
+            margin-left: 0;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                width: 280px;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0 !important;
+            }
+
+            .sidebar-toggle {
+                display: block;
+            }
+
+            /* Overlay for mobile */
+            .sidebar-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 998;
+                opacity: 0;
+                visibility: hidden;
+                transition: var(--transition);
+            }
+
+            .sidebar-overlay.active {
+                opacity: 1;
+                visibility: visible;
+            }
+        }
+
+        @media (min-width: 769px) {
+            .sidebar-toggle {
+                display: block;
+            }
+        }
+
+        /* Custom Scrollbar for Sidebar */
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sidebar::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 3px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 0, 0, 0.3);
+        }
     </style>
 </head>
 
@@ -295,8 +553,7 @@
     <header class="header sticky-top">
         <nav class="header-content">
             <div class="logo-container">
-                <img src="https://englishcenter.caothang.edu.vn/templates/img/logo.png"
-                    alt="Logo" class="logo">
+                <img src="https://englishcenter.caothang.edu.vn/templates/img/logo.png" alt="Logo" class="logo">
                 <span class="brand-text"></span>
             </div>
 
@@ -305,7 +562,7 @@
                     <i class="fas fa-user-tie"></i>
                     <span>Thông tin giáo viên</span>
                 </a>
-                <a href="#" class="btn nav-button text-dark">
+                <a href="{{ route('teacher.coursesopening') }}" class="btn nav-button text-dark">
                     <i class="fas fa-graduation-cap"></i>
                     <span>Khóa học</span>
                 </a>
@@ -320,6 +577,9 @@
             </div>
         </nav>
     </header>
+
+    @yield('sidebar')
+
 
     <!-- MAIN CONTENT -->
     <main class="main-content">
@@ -387,6 +647,132 @@
                 document.body.style.transform = 'scale(1)';
             }, 200);
         }
+
+
+
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebar = document.getElementById('sidebar');
+            const sidebarOverlay = document.getElementById('sidebarOverlay');
+            const sidebarLinks = document.querySelectorAll('.sidebar-link');
+
+
+            // Lấy trạng thái sidebar từ localStorage
+            const sidebarState = localStorage.getItem('sidebarState') || 'open';
+            const isMobile = window.innerWidth <= 768;
+
+            // Khởi tạo trạng thái sidebar
+            if (isMobile) {
+                sidebar.classList.add('hidden');
+                toggleIcon.className = 'fas fa-bars';
+            } else {
+                if (sidebarState === 'collapsed') {
+                    sidebar.classList.add('collapsed');
+                    toggleIcon.className = 'fas fa-chevron-right';
+                } else {
+                    sidebar.classList.remove('collapsed', 'hidden');
+                    toggleIcon.className = 'fas fa-chevron-left';
+                }
+            }
+
+
+
+            // Đóng sidebar khi click overlay (mobile)
+            sidebarOverlay.addEventListener('click', function() {
+                sidebar.classList.add('hidden');
+                sidebar.classList.remove('open');
+                sidebarOverlay.classList.remove('active');
+                toggleIcon.className = 'fas fa-bars';
+            });
+
+            // Xử lý active link
+            const currentPath = window.location.pathname;
+            sidebarLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === currentPath) {
+                    link.classList.add('active');
+                }
+            });
+
+            // Lưu active link khi click
+            sidebarLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    // Nếu là link thật (có href), không prevent default
+                    if (this.getAttribute('href') !== '#') {
+                        // Remove active from all links
+                        sidebarLinks.forEach(l => l.classList.remove('active'));
+                        // Add active to clicked link
+                        this.classList.add('active');
+
+                        // Đóng sidebar trên mobile sau khi click
+                        if (window.innerWidth <= 768) {
+                            setTimeout(() => {
+                                sidebar.classList.add('hidden');
+                                sidebar.classList.remove('open');
+                                sidebarOverlay.classList.remove('active');
+                                toggleIcon.className = 'fas fa-bars';
+                            }, 200);
+                        }
+                    }
+                });
+            });
+
+            // Xử lý responsive
+            window.addEventListener('resize', function() {
+                const isMobile = window.innerWidth <= 768;
+
+                if (isMobile) {
+                    // Chuyển sang mobile
+                    if (!sidebar.classList.contains('hidden')) {
+                        sidebar.classList.add('hidden');
+                        sidebar.classList.remove('collapsed', 'open');
+                        sidebarOverlay.classList.remove('active');
+                        toggleIcon.className = 'fas fa-bars';
+                    }
+                } else {
+                    // Chuyển sang desktop
+                    sidebar.classList.remove('hidden', 'open');
+                    sidebarOverlay.classList.remove('active');
+
+                    const savedState = localStorage.getItem('sidebarState') || 'open';
+                    if (savedState === 'collapsed') {
+                        sidebar.classList.add('collapsed');
+                        toggleIcon.className = 'fas fa-chevron-right';
+                    } else {
+                        sidebar.classList.remove('collapsed');
+                        toggleIcon.className = 'fas fa-chevron-left';
+                    }
+                }
+            });
+
+            // Smooth hover effects
+            sidebarLinks.forEach(link => {
+                link.addEventListener('mouseenter', function() {
+                    if (!this.classList.contains('active')) {
+                        this.style.transform = 'translateX(5px)';
+                    }
+                });
+
+                link.addEventListener('mouseleave', function() {
+                    if (!this.classList.contains('active')) {
+                        this.style.transform = 'translateX(0)';
+                    }
+                });
+            });
+
+            // Keyboard navigation
+            document.addEventListener('keydown', function(e) {
+                // ESC để đóng sidebar trên mobile
+                if (e.key === 'Escape' && window.innerWidth <= 768) {
+                    if (!sidebar.classList.contains('hidden')) {
+                        sidebar.classList.add('hidden');
+                        sidebar.classList.remove('open');
+                        sidebarOverlay.classList.remove('active');
+                        toggleIcon.className = 'fas fa-bars';
+                    }
+                }
+            });
+        });
     </script>
 
 </body>

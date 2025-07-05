@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('class_posts', function (Blueprint $table) {
             $table->id('post_id');
             $table->foreignId('course_id')
-                  ->constrained('courses', 'course_id')
-                  ->onDelete('cascade');
+                ->constrained('courses', 'course_id')
+                ->onDelete('cascade');
             $table->unsignedBigInteger('teacher_id'); // ID của teacher (chỉ teacher mới tạo được post)
             $table->string('title'); // Tiêu đề bài viết
             $table->longText('content'); // Nội dung bài viết

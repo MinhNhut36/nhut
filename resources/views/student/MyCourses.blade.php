@@ -2,28 +2,6 @@
 @section('title', 'CÁC KHÓA ĐANG HỌC')
 @section('styles')
     <style>
-        .card-status-studying {
-            background-color: #d1fae5;
-            color: #065f46;
-            padding: 4px 12px;
-            font-weight: 600;
-            font-size: 0.9rem;
-            border-radius: 9999px;
-        }
-
-        .custom-btn {
-            background-color: #4f46e5;
-            color: white;
-            font-weight: 800;
-            text-transform: uppercase;
-            font-size: 1.1rem;
-            transition: background-color 0.3s;
-        }
-
-        .custom-btn:hover {
-            background-color: #4338ca;
-        }
-
         .filter-btn-group {
             margin-top: 24px;
             display: flex;
@@ -180,7 +158,7 @@
                                     <span class="fw-semibold">
                                         <i class="fas fa-info-circle me-1"></i>Trạng thái:
                                     </span>
-                                    <span class="{{ $MyCourse->status->getStatus() }}">
+                                    <span class=" {{$MyCourse->status->getStatus() }}">
                                         {{ $MyCourse->status->getEnrollment() }}
                                     </span>
                                 </li>
@@ -248,31 +226,6 @@
 
 @section('js')
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Add hover effects to cards
-            const courseCards = document.querySelectorAll('.course-card');
-            courseCards.forEach(card => {
-                card.addEventListener('mouseenter', function() {
-                    this.style.transform = 'translateY(-4px)';
-                });
-
-                card.addEventListener('mouseleave', function() {
-                    this.style.transform = 'translateY(0)';
-                });
-            });
-
-            // Add click animation to buttons
-            const courseBtns = document.querySelectorAll('.course-btn');
-            courseBtns.forEach(btn => {
-                btn.addEventListener('click', function(e) {
-                    this.style.transform = 'scale(0.98)';
-                    setTimeout(() => {
-                        this.style.transform = 'scale(1)';
-                    }, 150);
-                });
-            });
-        });
-
         // Show success message if available
         @if (session('success'))
             // Create and show toast notification

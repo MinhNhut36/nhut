@@ -8,7 +8,6 @@ Route::prefix('teacher')->name('teacher.')->middleware(['web', 'teacher'])->grou
 
     Route::get('/CoursesOpening', [TeacherController::class, 'CoursesOpening'])->name('coursesopening');
 
-    Route::get('/CoursesCompleted', [TeacherController::class, 'CoursesCompleted'])->name('coursescompleted');
 
     Route::get('/home/AssignedCoursesList/{courseId}', [TeacherController::class, 'CourseDetails'])->name('coursedetails');
 

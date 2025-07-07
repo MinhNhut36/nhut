@@ -31,6 +31,7 @@
             --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
             --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
             --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --header-height: 80px;
         }
 
         * {
@@ -50,6 +51,8 @@
             flex-direction: column;
             line-height: 1.6;
             overflow-x: hidden;
+            /* Thêm padding-top để tránh content bị che bởi header */
+            padding-top: var(--header-height);
         }
 
         @keyframes gradientShift {
@@ -57,17 +60,28 @@
             50% { background-position: 100% 50%; }
         }
 
-        /* Header */
+        /* Header - Cố định hoàn toàn */
         .header {
-            background: rgba(255, 255, 255, 0.95);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.98);
             backdrop-filter: blur(20px);
             border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: var(--shadow-sm);
-            position: sticky;
-            top: 0;
+            box-shadow: var(--shadow-md);
             z-index: 1000;
             width: 100%;
-            min-height: 60px;
+            height: var(--header-height);
+            transition: var(--transition);
+            will-change: transform;
+        }
+
+        /* Header scroll effect */
+        .header.scrolled {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(25px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
         }
 
         .header-content {
@@ -79,6 +93,8 @@
             margin: 0 auto;
             gap: 8px;
             flex-wrap: wrap;
+            z-index: 999;
+            height: 100%;
         }
 
         .logo-container {
@@ -442,10 +458,15 @@
             flex: 1;
             position: relative;
             width: 100%;
+            /* Loại bỏ padding-top vì đã thêm vào body */
         }
 
         /* Responsive Design */
         @media (min-width: 768px) {
+            :root {
+                --header-height: 90px;
+            }
+            
             .brand-text {
                 display: block;
             }
@@ -495,6 +516,10 @@
         }
 
         @media (max-width: 576px) {
+            :root {
+                --header-height: 70px;
+            }
+            
             .header-content {
                 padding: 0.5rem 0.75rem;
             }
@@ -548,6 +573,10 @@
         }
 
         @media (max-width: 480px) {
+            :root {
+                --header-height: 65px;
+            }
+            
             .header-content {
                 padding: 0.5rem;
             }
@@ -595,6 +624,11 @@
         /* Prevent horizontal scroll */
         html, body {
             overflow-x: hidden;
+        }
+
+        /* Smooth scrolling */
+        html {
+            scroll-behavior: smooth;
         }
     </style>
 </head>
@@ -651,7 +685,7 @@
     </div>
 
     <!-- HEADER -->
-    <header class="header sticky-top">
+    <header class="header" id="header">
         <nav class="header-content">
             <div class="logo-container">
                 <img src="https://englishcenter.caothang.edu.vn/templates/img/logo.png" alt="Logo" class="logo">
@@ -703,6 +737,23 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Header scroll effect
+            const header = document.getElementById('header');
+            let lastScrollTop = 0;
+            
+            window.addEventListener('scroll', function() {
+                const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                
+                // Thêm class scrolled khi scroll xuống
+                if (scrollTop > 50) {
+                    header.classList.add('scrolled');
+                } else {
+                    header.classList.remove('scrolled');
+                }
+                
+                lastScrollTop = scrollTop;
+            });
+
             // Tab management
             const buttons = document.querySelectorAll('#student-tabs a');
             const activeRoute = localStorage.getItem('activeTabRoute');

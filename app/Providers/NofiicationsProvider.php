@@ -23,7 +23,7 @@ class NofiicationsProvider extends ServiceProvider
     public function boot(): void
     {
         // Gửi thông báo đến layout student
-        View::composer('layouts.student', function ($view) {
+        View::composer(['layouts.student', 'layouts.teacher'], function ($view) {
             $student = Auth::guard('student')->user();
 
             $notifications = Notification::all();

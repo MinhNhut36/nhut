@@ -1,123 +1,16 @@
 @extends('layouts.teacher')
 
-@section('sidebar')
-    @include('layouts.SidebarTeacher')
-@endsection
-
 @section('styles')
     <style>
         .members-container {
-            padding: 0;
-        }
-
-        .page-header {
-            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
-            color: white;
-            padding: 2rem;
-            border-radius: var(--border-radius);
-            margin-bottom: 2rem;
-            box-shadow: var(--shadow-lg);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .page-header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 200px;
-            height: 200px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-            transform: translate(50%, -50%);
-        }
-
-        .page-header h2 {
-            margin: 0;
-            font-weight: 600;
-            font-size: 1.8rem;
-            position: relative;
-            z-index: 1;
-        }
-
-        .page-header p {
-            margin: 0.5rem 0 0 0;
-            opacity: 0.9;
-            position: relative;
-            z-index: 1;
-        }
-
-        .members-stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 8px;
-        }
-
-        .stat-card {
+            width: 90%;
+            margin: 0 auto;
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(20px);
-            padding: 1.5rem;
-            border-radius: var(--border-radius);
-            text-align: center;
-            box-shadow: var(--shadow-md);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
             border: 1px solid rgba(255, 255, 255, 0.2);
-            transition: var(--transition);
-            position: relative;
             overflow: hidden;
-        }
-
-        .stat-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-            transition: left 0.5s;
-        }
-
-        .stat-card:hover::before {
-            left: 100%;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-lg);
-        }
-
-        .stat-icon {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
-            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .stat-number {
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--text-dark);
-            margin-bottom: 0.5rem;
-        }
-
-        .stat-label {
-            color: var(--text-light);
-            font-size: 0.9rem;
-            font-weight: 500;
-        }
-
-        .search-section {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            padding: 1rem;
-            border-radius: var(--border-radius);
-            margin-bottom: 2rem;
-            box-shadow: var(--shadow-md);
-            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .search-controls {
@@ -126,6 +19,10 @@
             gap: 1rem;
             align-items: center;
             justify-content: space-between;
+            padding: 1.5rem;
+            background: rgba(248, 250, 252, 0.8);
+            border-radius: 15px;
+            margin-bottom: 1rem;
         }
 
         .search-input-group {
@@ -138,66 +35,61 @@
         .search-input {
             flex: 1;
             padding: 0.75rem 1rem;
-            border: 2px solid var(--border-color);
-            border-radius: 25px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
             font-size: 0.95rem;
-            transition: var(--transition);
-            background: white;
+            transition: border-color 0.3s ease;
         }
 
         .search-input:focus {
             outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
         }
 
         .btn-search {
             padding: 0.75rem 1.5rem;
-            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+            background: linear-gradient(135deg, #3b82f6, #60a5fa);
             color: white;
             border: none;
-            border-radius: 25px;
+            border-radius: 8px;
             font-weight: 500;
-            transition: var(--transition);
-            box-shadow: var(--shadow-sm);
+            transition: all 0.3s ease;
         }
 
         .btn-search:hover {
             transform: translateY(-1px);
-            box-shadow: var(--shadow-md);
-            background: linear-gradient(135deg, var(--primary-dark), var(--primary-color));
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
         }
 
         .filter-select {
             padding: 0.75rem 1rem;
-            border: 2px solid var(--border-color);
-            border-radius: 25px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
             background: white;
             font-size: 0.95rem;
-            transition: var(--transition);
+            transition: border-color 0.3s ease;
             min-width: 150px;
         }
 
         .filter-select:focus {
             outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
         }
 
         .members-table-container {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border-radius: var(--border-radius);
+            background: white;
+            border-radius: 15px;
             overflow: hidden;
-            box-shadow: var(--shadow-lg);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            margin: 1rem 0;
         }
 
         .table-header {
-            background: linear-gradient(135deg, var(--text-dark), #374151);
+            background: linear-gradient(135deg, #374151, #4b5563);
             color: white;
-            padding: 1rem 1.5rem;
-            font-weight: 600;
+            padding: 1.5rem 2rem;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -205,139 +97,213 @@
 
         .members-table {
             width: 100%;
+            border-collapse: collapse;
             margin: 0;
         }
 
         .members-table th {
-            background: rgba(248, 250, 252, 0.8);
-            color: var(--text-dark);
+            background: #f8fafc;
+            color: #374151;
             font-weight: 600;
             padding: 1rem 1.5rem;
-            border: none;
-            font-size: 0.9rem;
-            position: sticky;
-            top: 0;
-            z-index: 10;
+            text-align: center;
+            border-bottom: 2px solid #e5e7eb;
         }
 
         .members-table td {
             padding: 1rem 1.5rem;
-            border-bottom: 1px solid var(--border-color);
+            text-align: center;
+            border-bottom: 1px solid #e5e7eb;
             vertical-align: middle;
-            transition: var(--transition);
         }
 
         .members-table tbody tr:hover {
-            background: rgba(14, 165, 233, 0.05);
-            transform: scale(1.001);
+            background: rgba(59, 130, 246, 0.05);
         }
 
-        .student-avatar {
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 600;
-            font-size: 1.1rem;
-            margin-right: 1rem;
-            box-shadow: var(--shadow-sm);
-            flex-shrink: 0;
+        .members-table tbody tr:nth-child(even) {
+            background: rgba(248, 250, 252, 0.5);
         }
 
-        .student-info {
-            display: flex;
-            align-items: center;
+        .input-grade {
+            border: 2px solid #e5e7eb;
+            border-radius: 6px;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            background: white;
+            text-align: center;
+            width: 80px;
         }
 
-        .student-details h6 {
-            margin: 0;
-            font-weight: 600;
-            color: var(--text-dark);
-            font-size: 1rem;
+        .input-grade:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
         }
 
-        .student-details .student-id {
-            color: var(--text-light);
-            font-size: 0.85rem;
-            margin-top: 0.2rem;
+        .input-grade:disabled {
+            background: #f3f4f6;
+            border-color: #d1d5db;
+            cursor: not-allowed;
         }
 
         .status-badge {
-            padding: 0.4rem 1rem;
-            border-radius: 20px;
+            padding: 0.4rem 0.8rem;
+            border-radius: 12px;
             font-size: 0.8rem;
             font-weight: 500;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
         }
 
         .status-active {
             background: rgba(16, 185, 129, 0.1);
             color: #059669;
-            border: 1px solid rgba(16, 185, 129, 0.2);
         }
 
         .status-inactive {
             background: rgba(239, 68, 68, 0.1);
             color: #dc2626;
-            border: 1px solid rgba(239, 68, 68, 0.2);
         }
 
-        .action-buttons {
-            display: flex;
-            gap: 0.5rem;
-            justify-content: center;
+        .badge-male {
+            background: rgba(59, 130, 246, 0.1);
+            color: #2563eb;
         }
 
-        .btn-view,
-        .btn-edit {
-            padding: 0.6rem 1rem;
-            border-radius: 0.5rem;
-            color: #fff;
+        .badge-female {
+            background: rgba(236, 72, 153, 0.1);
+            color: #be185d;
+        }
+
+        .btn-warning,
+        .btn-success {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
             font-weight: 600;
-            font-size: 0.9rem;
-            text-transform: uppercase;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            border: 2px solid transparent;
+            border: none;
         }
 
-        /* View */
-        .btn-view {
-            background: linear-gradient(135deg, #2563eb, #3b82f6);
-            border-color: rgba(59, 130, 246, 0.8);
+        .btn-warning {
+            background: linear-gradient(135deg, #f59e0b, #fbbf24);
+            color: white;
         }
 
-        .btn-view:hover {
-            background: linear-gradient(135deg, #1e40af, #2563eb);
-            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
-            transform: translateY(-2px);
+        .btn-success {
+            background: linear-gradient(135deg, #10b981, #34d399);
+            color: white;
         }
 
-        /* Edit */
-        .btn-edit {
-            background: linear-gradient(135deg, #d97706, #f59e0b);
-            border-color: rgba(249, 115, 22, 0.8);
+        .btn-warning:hover,
+        .btn-success:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
 
-        .btn-edit:hover {
-            background: linear-gradient(135deg, #b45309, #d97706);
-            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
-            transform: translateY(-2px);
+        .alert {
+            border-radius: 8px;
+            padding: 1rem 1.5rem;
+            margin: 1rem 0;
+            border: none;
         }
 
-        .btn-action:hover {
-            transform: translateY(-1px) scale(1.05);
-            box-shadow: var(--shadow-md);
+        .alert-success {
+            background: rgba(16, 185, 129, 0.1);
+            color: #059669;
+            border-left: 4px solid #10b981;
         }
 
+        /* Course Navigation */
+        .course-navigation-wrapper {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+        }
+
+        .course-navigation-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+            color: white;
+            padding: 1.5rem 2rem;
+            position: relative;
+        }
+
+        .course-info-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .course-info-icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .course-name {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .course-code {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.8);
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            display: inline-block;
+            margin-top: 0.25rem;
+        }
+
+        .nav-tabs-wrapper {
+            display: flex;
+            background: white;
+        }
+
+        .nav-tab {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem 1.5rem;
+            text-decoration: none;
+            color: #6b7280;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+        }
+
+        .nav-tab:hover {
+            color: #3b82f6;
+            background: rgba(59, 130, 246, 0.05);
+        }
+
+        .nav-tab.active {
+            color: #3b82f6;
+            border-bottom-color: #3b82f6;
+            background: rgba(59, 130, 246, 0.05);
+        }
+
+        /* Responsive */
         @media (max-width: 768px) {
+            .members-container {
+                width: 95%;
+                border-radius: 15px;
+            }
+
             .search-controls {
                 flex-direction: column;
                 align-items: stretch;
+                gap: 1rem;
             }
 
             .search-input-group {
@@ -353,140 +319,215 @@
                 min-width: 700px;
             }
 
-            .student-info {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 0.5rem;
+            .course-navigation-header {
+                padding: 1rem 1.5rem;
             }
 
-            .action-buttons {
-                flex-direction: column;
+            .nav-tab {
+                padding: 0.75rem 1rem;
+                font-size: 0.9rem;
+            }
+
+            .nav-tab-text {
+                display: none;
             }
         }
     </style>
 @endsection
 
 @section('content')
-    <div class="members-container">
-        <div class="page-header">
-            <h2><i class="fas fa-users me-2"></i>Quản lý điểm sinh viên</h2>
+    <div class="container-fluid py-4">
+        <!-- Course Navigation Bar -->
+        <div class="course-navigation-wrapper">
+            <div class="course-navigation-header">
+                <div class="course-info-section">
+                    <div class="course-info-icon">
+                        <i class="fas fa-book"></i>
+                    </div>
+                    <div class="course-info-details">
+                        <h4 class="course-name">{{ $course->course_name ?? 'Khóa học' }}</h4>
+                    </div>
+                </div>
+            </div>
+
+            <nav class="course-navigation-tabs">
+                <div class="nav-tabs-wrapper">
+                    <a href="{{ route('teacher.boards', $course->course_id) }}"
+                        class="nav-tab {{ request()->routeIs('teacher.boards') ? 'active' : '' }}">
+                        <i class="fas fa-bullhorn"></i>
+                        <span class="nav-tab-text">Bảng tin</span>
+                    </a>
+
+                    <a href="{{ route('teacher.coursemembers', $course->course_id) }}"
+                        class="nav-tab {{ request()->routeIs('teacher.coursemembers') ? 'active' : '' }}">
+                        <i class="fas fa-users"></i>
+                        <span class="nav-tab-text">Quản lý sinh viên</span>
+                    </a>
+
+                    <a href="{{ route('teacher.grade', $course->course_id) }}"
+                        class="nav-tab {{ request()->routeIs('teacher.grade') ? 'active' : '' }}">
+                        <i class="fas fa-chart-line"></i>
+                        <span class="nav-tab-text">Quản lý điểm</span>
+                    </a>
+                </div>
+            </nav>
         </div>
-
-        <form method="GET" action="{{ route('teacher.grade', $course->course_id) }}">
-            <div class="search-controls">
-                <div class="search-input-group">
-                    <input type="text" name="search" class="search-input" placeholder="Tìm kiếm..."
-                        value="{{ request('search') }}">
-                    <button class="btn-search" type="submit">
-                        <i class="fas fa-search me-1"></i> Tìm kiếm
-                    </button>
-                </div>
-                <div class="d-flex gap-2 align-items-center">
-                    <select class="filter-select" name="status" onchange="this.form.submit()">
-                        <option value="">Tất cả trạng thái</option>
-                        <option value="1" {{ request('status') == '1' ? 'selected' : '' }}> Đang hoạt động</option>
-                        <option value="0" {{ request('status') == '0' ? 'selected' : '' }}>Không hoạt động</option>
-                    </select>
-                    <select class="filter-select" name="gender" onchange="this.form.submit()">
-                        <option value="">Tất cả giới tính</option>
-                        <option value="1" {{ request('gender') == '1' ? 'selected' : '' }}>Nam</option>
-                        <option value="0" {{ request('gender') == '0' ? 'selected' : '' }}>Nữ</option>
-                    </select>
-                </div>
-            </div>
-        </form>
-
-        <div class="members-table-container mt-2">
-            <div class="table-header">
-                <h5 class="mb-0"><i class="fas fa-list me-2"></i>Danh sách sinh viên</h5>
-                <span class="badge bg-primary">{{ $studentgrades->count() }} sinh viên</span>
-            </div>
-
-            <div class="text-end mb-3">
-                <button type="button" id="enable-edit" class="btn btn-warning">Sửa điểm</button>
-            </div>
-
-            <form method="POST" action="{{ route('teacher.updategrade', $course->course_id) }}">
-                @csrf
-                <div class="table-responsive">
-                    <table class="table members-table">
-                        <thead>
-                            <tr>
-                                <th>Họ tên</th>
-                                <th>Email</th>
-                                <th>Nghe</th>
-                                <th>Nói</th>
-                                <th>Viết</th>
-                                <th>Đọc</th>
-                                <th>Ngày cập nhật điểm</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($studentgrades as $studentgrade)
-                                <tr>
-                                    <td>{{ $studentgrade->student->fullname }}</td>
-                                    <td>{{ $studentgrade->student->email }}</td>
-                                    <input type="hidden"
-                                        name="grades[{{ $studentgrade->student->student_id }}][student_id]"
-                                        value="{{ $studentgrade->student->student_id }}">
-
-                                    <td><input type="number" step="0.1" min="0" max="10"
-                                            class="form-control input-grade"
-                                            name="grades[{{ $studentgrade->student->student_id }}][listening_score]"
-                                            value="{{ $studentgrade->examResult->listening_score ?? '' }}" disabled></td>
-                                    <td><input type="number" step="0.1" min="0" max="10"
-                                            class="form-control input-grade"
-                                            name="grades[{{ $studentgrade->student->student_id }}][speaking_score]"
-                                            value="{{ $studentgrade->examResult->speaking_score ?? '' }}" disabled></td>
-                                    <td><input type="number" step="0.1" min="0" max="10"
-                                            class="form-control input-grade"
-                                            name="grades[{{ $studentgrade->student->student_id }}][writing_score]"
-                                            value="{{ $studentgrade->examResult->writing_score ?? '' }}" disabled></td>
-                                    <td><input type="number" step="0.1" min="0" max="10"
-                                            class="form-control input-grade"
-                                            name="grades[{{ $studentgrade->student->student_id }}][reading_score]"
-                                            value="{{ $studentgrade->examResult->reading_score ?? '' }}" disabled></td>
-                                    <td><input type="date" class="form-control input-grade"
-                                            name="grades[{{ $studentgrade->student->student_id }}][exam_date]"
-                                            value="{{ $studentgrade->examResult->exam_date ?? '' }}" disabled></td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-                <div class="text-end">
-                    <button type="submit" id="save-all" class="btn btn-success mt-3" style="display:none">Lưu tất
-                        cả</button>
+        @include('partials.alerts')
+        <!-- Main Content -->
+        <div class="members-container">
+            <!-- Search Form -->
+            <form method="GET" action="{{ route('teacher.grade', $course->course_id) }}">
+                <div class="search-controls">
+                    <div class="search-input-group">
+                        <input type="text" name="search" class="search-input" placeholder="Tìm kiếm sinh viên..."
+                            value="{{ request('search') }}">
+                        <button class="btn-search" type="submit">
+                            <i class="fas fa-search me-1"></i> Tìm kiếm
+                        </button>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <select class="filter-select" name="gender" onchange="this.form.submit()">
+                            <option value="">Tất cả giới tính</option>
+                            <option value="1" {{ request('gender') == '1' ? 'selected' : '' }}>Nam</option>
+                            <option value="0" {{ request('gender') == '0' ? 'selected' : '' }}>Nữ</option>
+                        </select>
+                    </div>
                 </div>
             </form>
-        </div>
 
-        @if (session('success'))
-            <div class="alert alert-success mt-3">
-                {{ session('success') }}
+            <!-- Grade Table -->
+            <div class="members-table-container">
+                <div class="table-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-line me-2"></i>Quản lý điểm số
+                    </h5>
+                    <span class="badge bg-primary">{{ $studentgrades->count() }} sinh viên</span>
+                </div>
+
+                <div class="p-3 text-end">
+                    <button type="button" id="enable-edit" class="btn btn-warning">
+                        <i class="fas fa-edit me-1"></i> Chỉnh sửa điểm
+                    </button>
+                </div>
+
+                <form method="POST" action="{{ route('teacher.updategrade', $course->course_id) }}">
+                    @csrf
+                    <div class="table-responsive">
+                        <table class="table members-table">
+                            <thead>
+                                <tr>
+                                    <th>Họ tên</th>
+                                    <th>Email</th>
+                                    <th>Giới tính</th>
+                                    <th>Nghe</th>
+                                    <th>Nói</th>
+                                    <th>Viết</th>
+                                    <th>Đọc</th>
+                                    <th>Ngày cập nhật</th>
+                                    <th>Kết quả</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($studentgrades as $studentgrade)
+                                    <tr>
+                                        <td class="fw-bold">
+                                            <div>{{ $studentgrade->student->fullname }}</div>
+                                            <div class="text-muted small">MSSV: {{ $studentgrade->student->student_id }}
+                                            </div>
+                                        </td>
+                                        <td>{{ $studentgrade->student->email }}</td>
+                                        <td>
+                                            <span
+                                                class="status-badge {{ $studentgrade->student->gender->value == 1 ? 'badge-male' : 'badge-female' }}">
+                                                {{ $studentgrade->student->gender->value == 1 ? 'Nam' : 'Nữ' }}
+                                            </span>
+                                        </td>
+
+                                        <input type="hidden"
+                                            name="grades[{{ $studentgrade->student->student_id }}][student_id]"
+                                            value="{{ $studentgrade->student->student_id }}">
+
+                                        <td>
+                                            <input type="number" step="0.1" min="0" max="10"
+                                                class="input-grade"
+                                                name="grades[{{ $studentgrade->student->student_id }}][listening_score]"
+                                                value="{{ $studentgrade->examResult->listening_score ?? '' }}" disabled>
+                                        </td>
+                                        <td>
+                                            <input type="number" step="0.1" min="0" max="10"
+                                                class="input-grade"
+                                                name="grades[{{ $studentgrade->student->student_id }}][speaking_score]"
+                                                value="{{ $studentgrade->examResult->speaking_score ?? '' }}" disabled>
+                                        </td>
+                                        <td>
+                                            <input type="number" step="0.1" min="0" max="10"
+                                                class="input-grade"
+                                                name="grades[{{ $studentgrade->student->student_id }}][writing_score]"
+                                                value="{{ $studentgrade->examResult->writing_score ?? '' }}" disabled>
+                                        </td>
+                                        <td>
+                                            <input type="number" step="0.1" min="0" max="10"
+                                                class="input-grade"
+                                                name="grades[{{ $studentgrade->student->student_id }}][reading_score]"
+                                                value="{{ $studentgrade->examResult->reading_score ?? '' }}" disabled>
+                                        </td>
+                                        <td>
+                                            <input type="text" class="input-grade" style="width: 130px;"
+                                                name="grades[{{ $studentgrade->student->student_id }}][exam_date]"
+                                                value="{{ optional($studentgrade->examResult)->exam_date ? \Carbon\Carbon::parse($studentgrade->examResult->exam_date)->format('d/m/Y') : '' }}"
+                                                readonly>
+                                        </td>
+                                        <td>
+                                            <span
+                                                class="badge {{ $studentgrade->examResult->overall_status == 1 ? 'text-bg-success' : 'text-bg-danger' }}">
+                                                {{ $studentgrade->examResult->overall_status == 1 ? 'Đạt' : 'Không đạt' }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="p-3 text-end">
+                        <button type="submit" id="save-all" class="btn btn-success" style="display:none">
+                            <i class="fas fa-save me-1"></i> Lưu tất cả
+                        </button>
+                    </div>
+                </form>
             </div>
-        @endif
+        </div>
     </div>
 @endsection
 
 @section('js')
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const form = document.querySelector('form');
             const enableBtn = document.getElementById('enable-edit');
             const saveBtn = document.getElementById('save-all');
             const inputs = document.querySelectorAll('.input-grade');
 
             enableBtn.addEventListener('click', function() {
-                inputs.forEach(input => input.disabled = false);
+                // Enable all inputs
+                inputs.forEach(input => {
+                    input.disabled = false;
+                });
+
+                // Update button states
                 enableBtn.disabled = true;
-                enableBtn.textContent = 'Đang chỉnh sửa';
-                enableBtn.classList.replace('btn-warning', 'btn-secondary');
+                enableBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Đang chỉnh sửa...';
+                enableBtn.classList.remove('btn-warning');
+                enableBtn.classList.add('btn-secondary');
+
+                // Show save button
                 saveBtn.style.display = 'inline-block';
             });
 
-            form.addEventListener('submit', function() {
-                inputs.forEach(input => input.disabled = false);
+            // Re-enable inputs before form submission
+            document.querySelector('form[method="POST"]').addEventListener('submit', function() {
+                inputs.forEach(input => {
+                    input.disabled = false;
+                });
             });
         });
     </script>

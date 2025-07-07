@@ -25,23 +25,23 @@
             --primary-color: #0ea5e9;
             --primary-light: #38bdf8;
             --primary-dark: #0284c7;
-            --accent-color: #10b981;
             --text-dark: #1f2937;
             --text-light: #6b7280;
-            --bg-light: #f8fafc;
-            --bg-white: #ffffff;
-            --border-color: #e5e7eb;
             --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
             --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
             --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            --border-radius: 12px;
             --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --header-height: 80px;
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
         }
 
         body {
@@ -54,538 +54,688 @@
             display: flex;
             flex-direction: column;
             line-height: 1.6;
+            overflow-x: hidden;
+            padding-top: var(--header-height);
         }
 
         @keyframes gradientShift {
-            0% {
+            0%, 100% {
                 background-position: 0% 50%;
             }
-
             50% {
                 background-position: 100% 50%;
             }
-
-            100% {
-                background-position: 0% 50%;
-            }
         }
 
-        /* Modern Header */
+        /* Header */
         .header {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: var(--shadow-sm);
-            position: sticky;
+            box-shadow: var(--shadow-md);
+            position: fixed;
             top: 0;
+            left: 0;
+            right: 0;
             z-index: 1000;
+            width: 100%;
+            height: var(--header-height);
+            transition: var(--transition);
+        }
+
+        .header.scrolled {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            box-shadow: var(--shadow-lg);
         }
 
         .header-content {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 1rem 0;
+            padding: 0.75rem 1rem;
             max-width: 100%;
             margin: 0 auto;
-            padding-left: 1rem;
-            padding-right: 1rem;
+            gap: 8px;
+            flex-wrap: wrap;
+            height: 100%;
         }
 
         .logo-container {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 8px;
+            flex-shrink: 0;
         }
 
         .logo {
-            height: 48px;
-            width: 100%;
+            height: 40px;
+            width: auto;
             object-fit: contain;
-            border-radius: 8px;
+            border-radius: 6px;
             box-shadow: var(--shadow-sm);
         }
 
         .brand-text {
             font-weight: 600;
-            font-size: 1.1rem;
+            font-size: 1rem;
             color: var(--text-dark);
             display: none;
         }
 
-        /* Navigation Tabs */
+        /* Navigation */
         .nav-tabs-container {
             display: flex;
-            gap: 8px;
+            gap: 4px;
             background: rgba(255, 255, 255, 0.1);
-            padding: 6px;
-            border-radius: 50px;
+            padding: 4px;
+            border-radius: 25px;
             backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            order: 3;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .nav-tabs-container::-webkit-scrollbar {
+            display: none;
         }
 
         .nav-button {
             display: flex !important;
             align-items: center;
-            gap: 8px;
-            padding: 10px 20px !important;
+            gap: 6px;
+            padding: 8px 12px !important;
             text-decoration: none !important;
             color: var(--text-light) !important;
             font-weight: 500 !important;
-            font-size: 0.9rem !important;
-            border-radius: 25px !important;
+            font-size: 0.8rem !important;
+            border-radius: 20px !important;
             transition: var(--transition) !important;
-            position: relative;
-            overflow: hidden;
             border: none !important;
             background: transparent !important;
-        }
-
-        .nav-button::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-            transition: left 0.5s;
-        }
-
-        .nav-button:hover::before {
-            left: 100%;
+            white-space: nowrap;
+            flex-shrink: 0;
         }
 
         .nav-button:hover {
             color: var(--primary-color) !important;
             transform: translateY(-1px) !important;
-            background: transparent !important;
-            border: none !important;
         }
 
         .nav-button.active {
             background: linear-gradient(135deg, var(--primary-color), var(--primary-light)) !important;
             color: white !important;
             box-shadow: var(--shadow-md) !important;
-            transform: translateY(-1px) !important;
-            border: none !important;
         }
 
         .nav-button i {
-            font-size: 1rem;
+            font-size: 0.9rem;
+        }
+
+        /* Header Actions */
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            order: 2;
+            flex-shrink: 0;
+        }
+
+        .notification-btn {
+            position: relative;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light)) !important;
+            color: white !important;
+            border: none !important;
+            border-radius: 50% !important;
+            width: 40px !important;
+            height: 40px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            font-size: 1.1rem !important;
+            cursor: pointer !important;
+            transition: var(--transition) !important;
+            box-shadow: var(--shadow-md) !important;
+            flex-shrink: 0;
+        }
+
+        .notification-btn:hover {
+            transform: scale(1.1) !important;
+            box-shadow: var(--shadow-lg) !important;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            background: #ef4444;
+            color: white;
+            font-size: 0.65rem;
+            padding: 2px 5px;
+            border-radius: 8px;
+            font-weight: 600;
+            min-width: 16px;
+            text-align: center;
         }
 
         /* Logout Button */
         .btn-logout {
             display: flex !important;
             align-items: center;
-            gap: 8px;
-            padding: 10px 20px !important;
+            gap: 6px;
+            padding: 8px 12px !important;
             background: linear-gradient(135deg, #ef4444, #dc2626) !important;
             color: white !important;
             text-decoration: none !important;
-            border-radius: 25px !important;
+            border-radius: 20px !important;
             font-weight: 500 !important;
-            font-size: 0.9rem !important;
+            font-size: 0.8rem !important;
             transition: var(--transition) !important;
             box-shadow: var(--shadow-sm) !important;
             border: none !important;
+            white-space: nowrap;
+            flex-shrink: 0;
         }
 
         .btn-logout:hover {
-            transform: translateY(-2px) !important;
+            transform: translateY(-1px) !important;
             box-shadow: var(--shadow-lg) !important;
             background: linear-gradient(135deg, #dc2626, #b91c1c) !important;
             color: white !important;
-            border: none !important;
+        }
+
+        .btn-logout i {
+            font-size: 0.9rem;
+        }
+
+        /* Notification Sidebar */
+        .notification-sidebar {
+            position: fixed;
+            top: var(--header-height);
+            right: -100%;
+            width: 350px;
+            height: calc(100vh - var(--header-height));
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light)) !important;
+            color: white;
+            box-shadow: -5px 0 20px rgba(0, 0, 0, 0.3);
+            transition: right 0.3s ease;
+            z-index: 999;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .notification-sidebar.active {
+            right: 0;
+        }
+
+        .notification-overlay {
+            position: fixed;
+            top: var(--header-height);
+            left: 0;
+            width: 100%;
+            height: calc(100vh - var(--header-height));
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 998;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .notification-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .notification-header-sidebar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .notification-header-sidebar h4 {
+            margin: 0;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .notification-close {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            font-size: 1.3rem;
+            cursor: pointer;
+            padding: 8px;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .notification-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: rotate(90deg);
+        }
+
+        .notifications-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+        }
+
+        .notification-item {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 12px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .notification-item:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateX(-5px);
+        }
+
+        .notification-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background: linear-gradient(to bottom, #ff6b6b, #feca57);
+            border-radius: 0 2px 2px 0;
+        }
+
+        .notification-wrapper {
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .notification-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            font-size: 1.1rem;
+            color: #fff;
+            flex-shrink: 0;
+        }
+
+        .notification-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .notification-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+            gap: 10px;
+        }
+
+        .notification-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #fff;
+            margin: 0;
+            flex: 1;
+            word-break: break-word;
+        }
+
+        .notification-date {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.7);
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+
+        .notification-message {
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.4;
+            margin: 0;
+            font-size: 0.9rem;
+            word-wrap: break-word;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .notification-message.expanded {
+            display: block;
+            -webkit-line-clamp: unset;
+        }
+
+        .read-more-btn {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.8rem;
+            cursor: pointer;
+            margin-top: 6px;
+            padding: 0;
+            text-decoration: underline;
+            transition: color 0.3s ease;
+        }
+
+        .read-more-btn:hover {
+            color: white;
+        }
+
+        .no-notifications {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.7);
+            padding: 30px 15px;
+            font-style: italic;
+        }
+
+        .no-notifications i {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            opacity: 0.5;
         }
 
         /* Main Content */
         .main-content {
             flex: 1;
             position: relative;
-            margin-top: var(--header-height);
-        }
-
-        .content-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 1rem;
-        }
-
-        /* Content Cards */
-        .content-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border-radius: var(--border-radius);
-            padding: 2rem;
-            margin-bottom: 2rem;
-            box-shadow: var(--shadow-lg);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            transition: var(--transition);
-        }
-
-        .content-card:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-lg);
+            width: 100%;
+            min-height: calc(100vh - var(--header-height));
         }
 
         /* Responsive Design */
         @media (min-width: 768px) {
+            :root {
+                --header-height: 90px;
+            }
+
             .brand-text {
                 display: block;
             }
 
             .header-content {
-                padding-left: 2rem;
-                padding-right: 2rem;
+                padding: 1rem 2rem;
+                flex-wrap: nowrap;
             }
 
-            .content-container {
-                padding: 0 2rem;
-            }
-        }
-
-        @media (max-width: 767px) {
             .nav-tabs-container {
-                flex-wrap: wrap;
-                gap: 4px;
+                order: 2;
+                width: auto;
+                gap: 8px;
+                padding: 6px;
             }
 
             .nav-button {
-                padding: 8px 12px !important;
-                font-size: 0.8rem !important;
+                padding: 10px 20px !important;
+                font-size: 0.9rem !important;
+                gap: 8px;
+            }
+
+            .btn-logout {
+                padding: 10px 20px !important;
+                font-size: 0.9rem !important;
+                gap: 8px;
+            }
+
+            .header-actions {
+                order: 3;
+                gap: 12px;
+            }
+
+            .notification-btn {
+                width: 45px !important;
+                height: 45px !important;
+                font-size: 1.2rem !important;
+            }
+
+            .notification-sidebar {
+                width: 450px;
+            }
+
+            .logo {
+                height: 48px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            :root {
+                --header-height: 70px;
+            }
+
+            .header-content {
+                padding: 0.5rem 0.75rem;
+            }
+
+            .nav-tabs-container {
+                margin: 0 -0.75rem;
+                padding: 4px 0.75rem;
+                border-radius: 0;
             }
 
             .nav-button span {
                 display: none;
             }
 
-            .btn-logout {
-                padding: 8px 12px !important;
-                font-size: 0.8rem !important;
-            }
-
             .btn-logout span {
                 display: none;
             }
-        }
 
-        /* Custom scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 255, 255, 0.5);
-        }
-
-        /* Sidebar */
-
-        /* Sidebar Container */
-        .sidebar {
-            position: fixed;
-            top: 89px;
-            /* Điều chỉnh theo chiều cao header */
-            left: 0;
-            width: 280px;
-            height: calc(100vh - 89px);
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border-right: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: var(--shadow-lg);
-            transform: translateX(0);
-            transition: var(--transition);
-            z-index: 999;
-            overflow-y: auto;
-            overflow-x: hidden;
-        }
-
-        .sidebar.collapsed {
-            width: 70px;
-            transform: translateX(0);
-        }
-
-        .sidebar.hidden {
-            transform: translateX(-100%);
-        }
-
-        /* Sidebar Header */
-        .sidebar-header {
-            padding: 1.5rem;
-            border-bottom: 1px solid var(--border-color);
-            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
-            color: white;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .sidebar-header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            transition: left 0.5s;
-        }
-
-        .sidebar-header:hover::before {
-            left: 100%;
-        }
-
-        .sidebar-header h5 {
-            margin: 0;
-            font-weight: 600;
-            font-size: 1.1rem;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-            transition: var(--transition);
-        }
-
-        .sidebar.collapsed .sidebar-header h5 {
-            opacity: 0;
-            transform: translateX(-20px);
-        }
-
-        /* Sidebar Navigation */
-        .sidebar-nav {
-            padding: 1rem 0;
-        }
-
-        .sidebar-nav .nav {
-            list-style: none;
-            margin: 0;
-            padding: 0;
-        }
-
-        .sidebar-nav .nav-item {
-            margin-bottom: 0.5rem;
-        }
-
-        .sidebar-link {
-            display: flex !important;
-            align-items: center;
-            padding: 1rem 1.5rem !important;
-            color: var(--text-dark) !important;
-            text-decoration: none !important;
-            font-weight: 500 !important;
-            font-size: 0.95rem !important;
-            transition: var(--transition) !important;
-            position: relative;
-            overflow: hidden;
-            border-radius: 0 !important;
-            border-left: 3px solid transparent;
-        }
-
-        .sidebar-link::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 0;
-            height: 100%;
-            background: linear-gradient(90deg, var(--primary-color), var(--primary-light));
-            transition: width 0.3s ease;
-            z-index: -1;
-        }
-
-        .sidebar-link:hover::before {
-            width: 100%;
-        }
-
-        .sidebar-link:hover {
-            color: white !important;
-            transform: translateX(5px);
-            border-left-color: var(--accent-color);
-            background: transparent !important;
-        }
-
-        .sidebar-link.active {
-            background: linear-gradient(90deg, var(--primary-color), var(--primary-light)) !important;
-            color: white !important;
-            border-left-color: var(--accent-color);
-            transform: translateX(5px);
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
-        }
-
-        .sidebar-link i {
-            font-size: 1.2rem;
-            margin-right: 1rem;
-            width: 20px;
-            text-align: center;
-            transition: var(--transition);
-        }
-
-        .sidebar-link span {
-            transition: var(--transition);
-            white-space: nowrap;
-        }
-
-        /* Collapsed Sidebar Styles */
-        .sidebar.collapsed .sidebar-link {
-            padding: 1rem 0.75rem !important;
-            justify-content: center;
-        }
-
-        .sidebar.collapsed .sidebar-link i {
-            margin-right: 0;
-            font-size: 1.4rem;
-        }
-
-        .sidebar.collapsed .sidebar-link span {
-            display: none;
-        }
-
-        .sidebar.collapsed .sidebar-link:hover span {
-            display: block;
-            position: absolute;
-            left: 70px;
-            background: var(--text-dark);
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            box-shadow: var(--shadow-lg);
-            white-space: nowrap;
-            z-index: 1001;
-            font-size: 0.9rem;
-        }
-
-        .sidebar.collapsed .sidebar-link:hover span::before {
-            content: '';
-            position: absolute;
-            left: -5px;
-            top: 50%;
-            transform: translateY(-50%);
-            border: 5px solid transparent;
-            border-right-color: var(--text-dark);
-        }
-
-        /* Main Content Adjustment */
-        .main-content {
-            transition: var(--transition);
-        }
-
-        .sidebar.collapsed~.main-content {
-            margin-left: 70px;
-        }
-
-        .sidebar.hidden~.main-content {
-            margin-left: 0;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .sidebar {
-                transform: translateX(-100%);
-                width: 280px;
+            .notification-sidebar {
+                width: 100vw;
+                right: -100vw;
             }
 
-            .sidebar.open {
-                transform: translateX(0);
+            .notification-header-sidebar {
+                padding: 12px 15px;
             }
 
-            .main-content {
-                margin-left: 0 !important;
+            .notification-header-sidebar h4 {
+                font-size: 1.1rem;
             }
 
-            .sidebar-toggle {
-                display: block;
+            .notifications-container {
+                padding: 12px;
             }
 
-            /* Overlay for mobile */
-            .sidebar-overlay {
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(0, 0, 0, 0.5);
-                z-index: 998;
-                opacity: 0;
-                visibility: hidden;
-                transition: var(--transition);
+            .notification-item {
+                padding: 12px;
             }
 
-            .sidebar-overlay.active {
-                opacity: 1;
-                visibility: visible;
+            .notification-date {
+                font-size: 0.75rem;
+            }
+
+            .notification-title {
+                font-size: 0.95rem;
+            }
+
+            .notification-message {
+                font-size: 0.85rem;
             }
         }
 
-        @media (min-width: 769px) {
-            .sidebar-toggle {
-                display: block;
+        @media (max-width: 480px) {
+            :root {
+                --header-height: 65px;
+            }
+
+            .header-content {
+                padding: 0.5rem;
+            }
+
+            .nav-tabs-container {
+                margin: 0 -0.5rem;
+                padding: 4px 0.5rem;
+            }
+
+            .nav-button {
+                padding: 6px 8px !important;
+                font-size: 0.75rem !important;
+            }
+
+            .btn-logout {
+                padding: 6px 8px !important;
+                font-size: 0.75rem !important;
+            }
+
+            .notification-btn {
+                width: 36px !important;
+                height: 36px !important;
+                font-size: 1rem !important;
+            }
+
+            .logo {
+                height: 36px;
             }
         }
 
-        /* Custom Scrollbar for Sidebar */
-        .sidebar::-webkit-scrollbar {
+        /* Scrollbar */
+        .notifications-container::-webkit-scrollbar {
             width: 6px;
         }
 
-        .sidebar::-webkit-scrollbar-track {
+        .notifications-container::-webkit-scrollbar-track {
             background: rgba(255, 255, 255, 0.1);
         }
 
-        .sidebar::-webkit-scrollbar-thumb {
-            background: rgba(0, 0, 0, 0.2);
+        .notifications-container::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
             border-radius: 3px;
         }
 
-        .sidebar::-webkit-scrollbar-thumb:hover {
-            background: rgba(0, 0, 0, 0.3);
+        /* Prevent horizontal scroll */
+        html,
+        body {
+            overflow-x: hidden;
+        }
+
+        /* Smooth scrolling for anchor links */
+        @supports (scroll-behavior: smooth) {
+            html {
+                scroll-behavior: smooth;
+            }
         }
     </style>
 </head>
 
 <body class="d-flex flex-column min-vh-100">
 
+    <!-- Notification Overlay -->
+    <div class="notification-overlay" id="notificationOverlay"></div>
+
+    <!-- Notification Sidebar -->
+    <div class="notification-sidebar" id="notificationSidebar">
+        <div class="notification-header-sidebar">
+            <h4><i class="fas fa-bell me-2"></i>Thông báo</h4>
+            <button class="notification-close" id="notificationClose">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <div class="notifications-container">
+            @if (isset($notifications) && count($notifications) > 0)
+                <div class="notifications-list">
+                    @foreach ($notifications as $notification)
+                        <div class="notification-item">
+                            <div class="notification-wrapper">
+                                <div class="notification-icon">
+                                    <i class="fas fa-bullhorn"></i>
+                                </div>
+                                <div class="notification-content">
+                                    <div class="notification-header">
+                                        <h6 class="notification-title">{{ $notification->title }}</h6>
+                                        <span class="notification-date">
+                                            <i class="far fa-calendar-alt"></i>
+                                            {{ \Carbon\Carbon::parse($notification->notification_date)->format('d/m/Y H:i') }}
+                                        </span>
+                                    </div>
+                                    <p class="notification-message" data-full-text="{{ $notification->message }}">
+                                        {!! Str::limit($notification->message, 150) !!}
+                                    </p>
+                                    @if (strlen($notification->message) > 150)
+                                        <button class="read-more-btn" onclick="toggleMessage(this)">Đọc thêm</button>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            @else
+                <div class="no-notifications">
+                    <i class="fas fa-bell-slash"></i>
+                    <p class="mb-0">Chưa có thông báo nào từ Ban Quản Trị</p>
+                </div>
+            @endif
+        </div>
+    </div>
+    @yield('sidebar')
+
     <!-- HEADER -->
-    <header class="header sticky-top">
+    <header class="header" id="header">
         <nav class="header-content">
             <div class="logo-container">
                 <img src="https://englishcenter.caothang.edu.vn/templates/img/logo.png" alt="Logo" class="logo">
                 <span class="brand-text"></span>
             </div>
 
-            <div class="nav-tabs-container" id="teacher-tabs">
-                <a href="{{ route('teacher.home') }}" class="btn nav-button text-dark">
-                    <i class="fas fa-user-tie"></i>
-                    <span>Thông tin giáo viên</span>
-                </a>
-                <a href="{{ route('teacher.coursesopening') }}" class="btn nav-button text-dark">
-                    <i class="fas fa-graduation-cap"></i>
-                    <span>Khóa học</span>
-                </a>
-            </div>
-
-            <div>
+            <div class="header-actions">
+                <!-- Notification Button -->
+                <button class="notification-btn" id="notificationBtn">
+                    <i class="fas fa-bell"></i>
+                    @if (isset($notifications) && count($notifications) > 0)
+                        <span class="notification-badge">{{ count($notifications) }}</span>
+                    @endif
+                </button>
+                <!-- Logout Button -->
                 <a href="{{ route('login') }}" class="btn btn-outline-dark d-flex align-items-center gap-2 btn-logout"
                     onclick="clearActiveTabs()">
                     <i class="fas fa-sign-out-alt"></i>
                     <span>Đăng xuất</span>
                 </a>
             </div>
+
+            <div class="nav-tabs-container" id="student-tabs">
+                <a href="{{ route('teacher.home') }}" class="btn nav-button text-dark">
+                    <i class="fas fa-user"></i>
+                    <span>Thông tin giáo viên</span>
+                </a>
+                <a href="{{ route('teacher.coursesopening') }}" class="btn nav-button text-dark">
+                    <i class="fas fa-book"></i>
+                    <span>Khóa Học</span>
+                </a>
+            </div>
         </nav>
     </header>
 
-    @yield('sidebar')
-
-
     <!-- MAIN CONTENT -->
     <main class="main-content">
-        <div class="container">
-            @yield('content')
-        </div>
+        @yield('content')
     </main>
 
     <!-- Bootstrap JS -->
@@ -594,10 +744,39 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const buttons = document.querySelectorAll('#teacher-tabs a');
-
-            // Lấy route đã lưu
-            const activeRoute = localStorage.getItem('activeTeacherTab');
+            // Header scroll effect
+            const header = document.getElementById('header');
+            let lastScrollTop = 0;
+            
+            function handleScroll() {
+                const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                
+                if (scrollTop > 50) {
+                    header.classList.add('scrolled');
+                } else {
+                    header.classList.remove('scrolled');
+                }
+                
+                lastScrollTop = scrollTop;
+            }
+            
+            // Throttle scroll event for better performance
+            let ticking = false;
+            function updateScrollState() {
+                if (!ticking) {
+                    requestAnimationFrame(function() {
+                        handleScroll();
+                        ticking = false;
+                    });
+                    ticking = true;
+                }
+            }
+            
+            window.addEventListener('scroll', updateScrollState, { passive: true });
+            
+            // Tab management
+            const buttons = document.querySelectorAll('#student-tabs a');
+            const activeRoute = localStorage.getItem('activeTabRoute');
             let matched = false;
 
             buttons.forEach(btn => {
@@ -609,170 +788,92 @@
                 }
             });
 
-            // Nếu không có tab nào được lưu (lần đầu vào) thì active tab đầu tiên
             if (!matched && buttons.length > 0) {
                 buttons[0].classList.add('active');
-                localStorage.setItem('activeTeacherTab', buttons[0].getAttribute('href'));
+                localStorage.setItem('activeTabRoute', buttons[0].getAttribute('href'));
             }
 
-            // Gán sự kiện click để cập nhật active và lưu vào localStorage
             buttons.forEach(btn => {
                 btn.addEventListener('click', function() {
-                    // Remove active class from all buttons
-                    buttons.forEach(b => b.classList.remove('active'));
-
-                    // Add active class to clicked button
-                    this.classList.add('active');
-
-                    // Save to localStorage
-                    localStorage.setItem('activeTeacherTab', this.getAttribute('href'));
+                    localStorage.setItem('activeTabRoute', this.getAttribute('href'));
                 });
             });
 
-            // Add smooth scrolling
-            document.documentElement.style.scrollBehavior = 'smooth';
+            // Notification sidebar
+            const notificationBtn = document.getElementById('notificationBtn');
+            const notificationSidebar = document.getElementById('notificationSidebar');
+            const notificationOverlay = document.getElementById('notificationOverlay');
+            const notificationClose = document.getElementById('notificationClose');
+
+            function openNotificationSidebar() {
+                notificationSidebar.classList.add('active');
+                notificationOverlay.classList.add('active');
+                notificationBtn.classList.add('active');
+                notificationBtn.querySelector('i').className = 'fas fa-times';
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeNotificationSidebar() {
+                notificationSidebar.classList.remove('active');
+                notificationOverlay.classList.remove('active');
+                notificationBtn.classList.remove('active');
+                notificationBtn.querySelector('i').className = 'fas fa-bell';
+                document.body.style.overflow = 'auto';
+            }
+
+            notificationBtn.addEventListener('click', function() {
+                if (notificationSidebar.classList.contains('active')) {
+                    closeNotificationSidebar();
+                } else {
+                    openNotificationSidebar();
+                }
+            });
+
+            notificationClose.addEventListener('click', closeNotificationSidebar);
+            notificationOverlay.addEventListener('click', closeNotificationSidebar);
+
+            document.addEventListener('keydown', function(event) {
+                if (event.key === 'Escape' && notificationSidebar.classList.contains('active')) {
+                    closeNotificationSidebar();
+                }
+            });
+
+            notificationSidebar.addEventListener('click', function(event) {
+                event.stopPropagation();
+            });
+
+            // Prevent double-tap zoom on mobile
+            let lastTouchEnd = 0;
+            document.addEventListener('touchend', function(event) {
+                const now = (new Date()).getTime();
+                if (now - lastTouchEnd <= 300) {
+                    event.preventDefault();
+                }
+                lastTouchEnd = now;
+            }, false);
         });
 
         function clearActiveTabs() {
-            localStorage.removeItem('activeTabRoute'); // student
-            localStorage.removeItem('activeTeacherTab'); // teacher
-            localStorage.removeItem('activeDropdownItem'); // Dropdown
-
-            // Add logout animation
-            document.body.style.opacity = '0.8';
-            document.body.style.transform = 'scale(0.98)';
-
-            setTimeout(() => {
-                document.body.style.opacity = '1';
-                document.body.style.transform = 'scale(1)';
-            }, 200);
+            localStorage.removeItem('activeTabRoute');
+            localStorage.removeItem('activeTeacherTab');
+            localStorage.removeItem('activeDropdownItem');
         }
 
+        function toggleMessage(button) {
+            const message = button.previousElementSibling;
+            const fullText = message.getAttribute('data-full-text');
+            const isExpanded = message.classList.contains('expanded');
 
-
-
-        document.addEventListener('DOMContentLoaded', function() {
-            const sidebar = document.getElementById('sidebar');
-            const sidebarOverlay = document.getElementById('sidebarOverlay');
-            const sidebarLinks = document.querySelectorAll('.sidebar-link');
-
-
-            // Lấy trạng thái sidebar từ localStorage
-            const sidebarState = localStorage.getItem('sidebarState') || 'open';
-            const isMobile = window.innerWidth <= 768;
-
-            // Khởi tạo trạng thái sidebar
-            if (isMobile) {
-                sidebar.classList.add('hidden');
-                toggleIcon.className = 'fas fa-bars';
+            if (isExpanded) {
+                message.classList.remove('expanded');
+                message.textContent = fullText.substring(0, 150) + '...';
+                button.textContent = 'Đọc thêm';
             } else {
-                if (sidebarState === 'collapsed') {
-                    sidebar.classList.add('collapsed');
-                    toggleIcon.className = 'fas fa-chevron-right';
-                } else {
-                    sidebar.classList.remove('collapsed', 'hidden');
-                    toggleIcon.className = 'fas fa-chevron-left';
-                }
+                message.classList.add('expanded');
+                message.textContent = fullText;
+                button.textContent = 'Thu gọn';
             }
-
-
-
-            // Đóng sidebar khi click overlay (mobile)
-            sidebarOverlay.addEventListener('click', function() {
-                sidebar.classList.add('hidden');
-                sidebar.classList.remove('open');
-                sidebarOverlay.classList.remove('active');
-                toggleIcon.className = 'fas fa-bars';
-            });
-
-            // Xử lý active link
-            const currentPath = window.location.pathname;
-            sidebarLinks.forEach(link => {
-                link.classList.remove('active');
-                if (link.getAttribute('href') === currentPath) {
-                    link.classList.add('active');
-                }
-            });
-
-            // Lưu active link khi click
-            sidebarLinks.forEach(link => {
-                link.addEventListener('click', function(e) {
-                    // Nếu là link thật (có href), không prevent default
-                    if (this.getAttribute('href') !== '#') {
-                        // Remove active from all links
-                        sidebarLinks.forEach(l => l.classList.remove('active'));
-                        // Add active to clicked link
-                        this.classList.add('active');
-
-                        // Đóng sidebar trên mobile sau khi click
-                        if (window.innerWidth <= 768) {
-                            setTimeout(() => {
-                                sidebar.classList.add('hidden');
-                                sidebar.classList.remove('open');
-                                sidebarOverlay.classList.remove('active');
-                                toggleIcon.className = 'fas fa-bars';
-                            }, 200);
-                        }
-                    }
-                });
-            });
-
-            // Xử lý responsive
-            window.addEventListener('resize', function() {
-                const isMobile = window.innerWidth <= 768;
-
-                if (isMobile) {
-                    // Chuyển sang mobile
-                    if (!sidebar.classList.contains('hidden')) {
-                        sidebar.classList.add('hidden');
-                        sidebar.classList.remove('collapsed', 'open');
-                        sidebarOverlay.classList.remove('active');
-                        toggleIcon.className = 'fas fa-bars';
-                    }
-                } else {
-                    // Chuyển sang desktop
-                    sidebar.classList.remove('hidden', 'open');
-                    sidebarOverlay.classList.remove('active');
-
-                    const savedState = localStorage.getItem('sidebarState') || 'open';
-                    if (savedState === 'collapsed') {
-                        sidebar.classList.add('collapsed');
-                        toggleIcon.className = 'fas fa-chevron-right';
-                    } else {
-                        sidebar.classList.remove('collapsed');
-                        toggleIcon.className = 'fas fa-chevron-left';
-                    }
-                }
-            });
-
-            // Smooth hover effects
-            sidebarLinks.forEach(link => {
-                link.addEventListener('mouseenter', function() {
-                    if (!this.classList.contains('active')) {
-                        this.style.transform = 'translateX(5px)';
-                    }
-                });
-
-                link.addEventListener('mouseleave', function() {
-                    if (!this.classList.contains('active')) {
-                        this.style.transform = 'translateX(0)';
-                    }
-                });
-            });
-
-            // Keyboard navigation
-            document.addEventListener('keydown', function(e) {
-                // ESC để đóng sidebar trên mobile
-                if (e.key === 'Escape' && window.innerWidth <= 768) {
-                    if (!sidebar.classList.contains('hidden')) {
-                        sidebar.classList.add('hidden');
-                        sidebar.classList.remove('open');
-                        sidebarOverlay.classList.remove('active');
-                        toggleIcon.className = 'fas fa-bars';
-                    }
-                }
-            });
-        });
+        }
     </script>
 
 </body>

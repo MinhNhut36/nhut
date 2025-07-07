@@ -133,8 +133,7 @@
                     </div>
                 </div>
                 <div class="col-md-9">
-                    <h2 class="mb-2">{{ $teacher->fullname ?? 'Nguyễn Văn A' }}</h2>
-                    <p class="mb-1 fs-5">Mã sinh viên: <strong>{{ $teacher->teacher_id ?? 'SV001234' }}</strong></p>
+                    <h2 class="mb-2">{{ $teacher->fullname ?? 'Lỗi' }}</h2>
                     <p class="mb-0 opacity-75">
                         <i class="fas fa-envelope me-2"></i>{{ $teacher->email ?? 'nguyenvana@student.edu.vn' }}
                     </p>
@@ -193,20 +192,7 @@
                         <h5 class="section-title mb-0">
                             <i class="fas fa-chart-line me-2 text-success"></i>Thông báo
                         </h5>
-                        @forelse ($notifications as $notification)
-                            <div class="card mb-3">
-                                <div class="card-header">
-                                    <strong>{{ $notification->title }}</strong>
-                                    <span
-                                        class="float-end">{{ \Carbon\Carbon::parse($notification->notification_date)->format('d/m/Y H:i') }}</span>
-                                </div>
-                                <div class="card-body">
-                                    <p>{{ $notification->message }}</p>
-                                </div>
-                            </div>
-                        @empty
-                            <p>Không có thông báo nào.</p>
-                        @endforelse
+     
                     </div>
                     <div class="card-body">
                     </div>

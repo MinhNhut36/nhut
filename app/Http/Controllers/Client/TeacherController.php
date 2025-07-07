@@ -52,8 +52,7 @@ class TeacherController extends Controller
     public function home()
     {
         $teacher = Auth::guard('teacher')->user();
-        $notifications = Notification::orderBy('notification_date', 'desc')->get();
-        return view('teacher.home')->with('teacher', $teacher)->with('notifications', $notifications);
+        return view('teacher.home')->with('teacher', $teacher);
     }
     // hiển thị thông tin của admin
     public function AdminHome()
@@ -175,7 +174,7 @@ class TeacherController extends Controller
             });
         }
 
-        $members = $query->paginate(2)->appends($request->all());
+        $members = $query->paginate(1)->appends($request->all());
         if ($members->currentPage() > $members->lastPage()) {
             return redirect()->route('admin.teacherlist', ['page' => $members->lastPage()]);
         }
@@ -273,6 +272,7 @@ class TeacherController extends Controller
     // Quản lý điểm của sinh viên cho một khóa học
     public function CourseGrade(Request $request, $courseId)
     {
+
         $teacher = Auth::guard('teacher')->user();
 
         // Kiểm tra và lấy khóa học
@@ -307,7 +307,7 @@ class TeacherController extends Controller
 
         // Lấy danh sách sinh viên (gồm điểm nếu có)
         $studentgrades = $query->get();
-
+        
         return view('teacher.CourseGrade')
             ->with('studentgrades', $studentgrades)
             ->with('course', $course);
@@ -317,6 +317,7 @@ class TeacherController extends Controller
     // Cập nhật điểm của các sinh viên cùng 1 lúc
     public function updateGrade(UpdateScoreRequest $request, $courseId)
     {
+ 
         $grades = $request->input('grades', []);
 
         foreach ($grades as $studentId => $data) {
@@ -343,6 +344,7 @@ class TeacherController extends Controller
 
             if (!in_array(null, $scores, true)) {
                 $exam->overall_status = collect($scores)->every(fn($s) => $s >= 5) ? 1 : 0;
+              
             } else {
                 $exam->overall_status = 0;
             }

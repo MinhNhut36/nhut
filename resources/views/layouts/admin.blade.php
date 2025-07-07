@@ -333,6 +333,10 @@
 
                 <!-- Navigation Controls -->
                 <div class="nav-controls">
+                    <a href="{{ route('admin.home') }}" class="nav-button notification-button">
+                        <i class="fas fa-bell me-2"></i>
+                        <span> Quản lý Thông báo</span>
+                    </a>
                     <!-- Dropdown Quản lý thông tin -->
                     <div class="nav-dropdown dropdown">
                         <button class="nav-button dropdown-toggle" type="button" id="dropdownThongTin"
@@ -341,7 +345,6 @@
                                 <i class="fas fa-users-cog me-2"></i>
                                 Quản lý thông tin
                             </span>
-                            <i class="fas fa-chevron-down"></i>
                         </button>
                         <ul class="dropdown-menu" aria-labelledby="dropdownThongTin">
                             <li>
@@ -367,11 +370,10 @@
                                 <i class="fas fa-book-open me-2"></i>
                                 Quản lý khóa học
                             </span>
-                            <i class="fas fa-chevron-down"></i>
                         </button>
                         <ul class="dropdown-menu" aria-labelledby="dropdownKhoaHoc">
                             <li>
-                                <a class="dropdown-item" href="{{route('admin.level.lessons')}}" data-id="list-kh">
+                                <a class="dropdown-item" href="{{ route('admin.level.lessons') }}" data-id="list-kh">
                                     <i class="fas fa-list"></i>
                                     Danh sách các câu hỏi
                                 </a>
@@ -409,10 +411,33 @@
         document.addEventListener('DOMContentLoaded', function() {
             const dropdownItems = document.querySelectorAll('.dropdown-item');
             const navButtons = document.querySelectorAll('.nav-button');
+            const notificationButton = document.querySelector('.notification-button');
 
             // Load active state from localStorage
             const activeDropdownItemId = localStorage.getItem('activeDropdownItem');
-            if (activeDropdownItemId) {
+            const activeNotification = localStorage.getItem('activeNotification');
+
+            // Nếu không có item nào được chọn hoặc người dùng chọn thông báo, active button thông báo
+            if (!activeDropdownItemId || activeNotification === 'true') {
+                if (notificationButton) {
+                    notificationButton.classList.add('active');
+                    localStorage.setItem('activeNotification', 'true');
+                }
+                // Remove active từ dropdown items
+                dropdownItems.forEach(item => item.classList.remove('active'));
+                navButtons.forEach(btn => {
+                    if (!btn.classList.contains('notification-button')) {
+                        btn.classList.remove('active');
+                    }
+                });
+            } else {
+                // Remove active từ notification button
+                if (notificationButton) {
+                    notificationButton.classList.remove('active');
+                }
+                localStorage.removeItem('activeNotification');
+
+                // Set active cho dropdown item đã chọn
                 dropdownItems.forEach(item => {
                     if (item.dataset.id === activeDropdownItemId) {
                         item.classList.add('active');
@@ -427,6 +452,33 @@
                 });
             }
 
+            // Handle notification button click
+            if (notificationButton) {
+                notificationButton.addEventListener('click', function(e) {
+                    // Add loading state
+                    this.classList.add('loading');
+
+                    // Save active state
+                    localStorage.setItem('activeNotification', 'true');
+                    localStorage.removeItem('activeDropdownItem');
+
+                    // Update active states
+                    dropdownItems.forEach(i => i.classList.remove('active'));
+                    navButtons.forEach(btn => {
+                        if (!btn.classList.contains('notification-button')) {
+                            btn.classList.remove('active');
+                        }
+                    });
+
+                    this.classList.add('active');
+
+                    // Remove loading state after navigation
+                    setTimeout(() => {
+                        this.classList.remove('loading');
+                    }, 1000);
+                });
+            }
+
             // Handle dropdown item clicks
             dropdownItems.forEach(item => {
                 item.addEventListener('click', function(e) {
@@ -438,6 +490,7 @@
 
                     // Save active state
                     localStorage.setItem('activeDropdownItem', this.dataset.id);
+                    localStorage.removeItem('activeNotification');
 
                     // Update active states
                     dropdownItems.forEach(i => i.classList.remove('active'));
@@ -458,11 +511,12 @@
             });
         });
 
-        // Clear active tabs function (unchanged functionality)
+        // Clear active tabs function - updated to include notification
         function clearActiveTabs() {
             localStorage.removeItem('activeTabRoute');
             localStorage.removeItem('activeTeacherTab');
             localStorage.removeItem('activeDropdownItem');
+            localStorage.removeItem('activeNotification');
         }
 
         // Add smooth scroll behavior
@@ -481,7 +535,6 @@
             }
         });
     </script>
-
     @yield('js')
 </body>
 

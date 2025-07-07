@@ -4,7 +4,10 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AdminController;
 
 Route::middleware(['web', 'admin'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/home', 'App\Http\Controllers\Client\TeacherController@AdminHome')->name('home');
+    Route::get('/home', [AdminController::class, 'AdminHome'])->name('home');
+    Route::post('/notifications/store', [AdminController::class, 'AddNotification'])->name('notifications.store');
+    Route::delete('/notifications/{id}', [AdminController::class, 'DeleteNotification'])->name('admin.notifications.destroy');
+
     //Route dành cho quản lý sinh viên
     Route::get('/studentlist', [AdminController::class, 'GetStudentList'])->name('studentlist');
 

@@ -54,12 +54,7 @@ class TeacherController extends Controller
         $teacher = Auth::guard('teacher')->user();
         return view('teacher.home')->with('teacher', $teacher);
     }
-    // hiển thị thông tin của admin
-    public function AdminHome()
-    {
-        $admin = Auth::user();
-        return view('admin.home')->with('admin', $admin);
-    }
+
 
     // hiển thị danh sách các khóa học đã được phân công cho giáo viên
     //Danh sách các khóa học đang mở lớp

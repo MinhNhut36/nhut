@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\Student;
 use Illuminate\Http\Request;
@@ -22,9 +23,44 @@ use App\Http\Requests\UpdateLessonRequest;
 use App\Http\Requests\UpdateLessonPartRequest;
 use App\Models\Question;
 use App\Models\Answer;
+use App\Models\Notification;
+use App\Http\Requests\NotificationRequest;
 
 class AdminController extends Controller
 {
+    // hiển thị thông tin của admin
+    public function AdminHome(Request $request)
+    {
+        $admin = Auth::user();
+        $notifications = Notification::orderBy('created_at', 'desc')->paginate(12); 
+        $CoutNotifications = Notification::count();
+        // Nếu trang yêu cầu lớn hơn trang tối đa, chuyển hướng về trang cuối
+        if ($request->page > $notifications->lastPage()) {
+            return redirect()->route('admin.home', ['page' => $notifications->lastPage()]);
+        }
+
+        return view('admin.home')->with('admin', $admin)->with('notifications', $notifications)->with('CoutNotifications', $CoutNotifications);
+    }
+    //THêm thông báo
+    public function AddNotification(NotificationRequest $request)
+    {
+        $admin_id = Auth::user()->admin_id;
+        Notification::create([
+            'admin_id' => $admin_id,
+            'title' => $request->title,
+            'message' => $request->message,
+            'notification_date' => now(),
+        ]);
+
+        return redirect()->back()->with('success', 'Thông báo đã được thêm thành công!');
+    }
+    //Xóa thông báo
+    public function DeleteNotification($id)
+    {
+        $notification = Notification::findOrFail($id);
+        $notification->delete();
+        return redirect()->back()->with('success', 'Thông báo đã được xóa thành công!');
+    }
     //Lấy ra danh sách sinh viên có kết hợp tìm kiếm
     public function GetStudentList(Request $request)
     {
@@ -471,7 +507,7 @@ class AdminController extends Controller
 
     private function handleClassification(Request $request)
     {
-         dd($request);
+        dd($request);
         $classificationData = [
             'nouns' => preg_split('/\r\n|\r|\n/', $request->nouns ?? ''),
             'verbs' => preg_split('/\r\n|\r|\n/', $request->verbs ?? ''),
@@ -516,7 +552,7 @@ class AdminController extends Controller
 
     private function handleArrangement(Request $request)
     {
-         dd($request);
+        dd($request);
         $words = explode(' ', $request->correct_sentence);
         shuffle($words);
 

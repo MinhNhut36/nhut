@@ -26,7 +26,7 @@ class NofiicationsProvider extends ServiceProvider
         View::composer(['layouts.student', 'layouts.teacher'], function ($view) {
             $student = Auth::guard('student')->user();
 
-            $notifications = Notification::all();
+            $notifications = Notification::orderBy('created_at', 'desc')->get();
 
             $view->with('notifications', $notifications);
         });

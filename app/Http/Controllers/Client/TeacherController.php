@@ -302,7 +302,7 @@ class TeacherController extends Controller
 
         // Lấy danh sách sinh viên (gồm điểm nếu có)
         $studentgrades = $query->get();
-        
+
         return view('teacher.CourseGrade')
             ->with('studentgrades', $studentgrades)
             ->with('course', $course);
@@ -339,7 +339,6 @@ class TeacherController extends Controller
 
             if (!in_array(null, $scores, true)) {
                 $exam->overall_status = collect($scores)->every(fn($s) => $s >= 5) ? 1 : 0;
-              
             } else {
                 $exam->overall_status = 0;
             }

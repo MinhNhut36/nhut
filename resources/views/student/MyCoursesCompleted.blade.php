@@ -20,28 +20,6 @@
             border-radius: 9999px;
         }
 
-        .card-status-completed {
-            background-color: #3B82F6;
-            color: #FFFFFF;
-            padding: 4px 12px;
-            font-weight: 600;
-            font-size: 0.9rem;
-            border-radius: 9999px;
-        }
-
-        .custom-btn {
-            background-color: #4f46e5;
-            color: white;
-            font-weight: 800;
-            text-transform: uppercase;
-            font-size: 1.1rem;
-            transition: background-color 0.3s;
-        }
-
-        .custom-btn:hover {
-            background-color: #4338ca;
-        }
-
         .filter-btn-group {
             margin-top: 24px;
             display: flex;
@@ -61,8 +39,7 @@
             text-decoration: none;
         }
 
-        .filter-btn.active,
-        .filter-btn:active {
+        .filter-btn.active {
             background: #1DA9F5;
             color: #fff;
         }
@@ -99,7 +76,7 @@
 
         .completed-course-card:hover {
             transform: translateY(-4px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15) !important;
         }
 
         .course-title {
@@ -115,12 +92,19 @@
             position: absolute;
             top: 15px;
             right: 15px;
-            background: linear-gradient(135deg, #10B981, #059669);
             color: white;
             padding: 4px 8px;
             border-radius: 12px;
             font-size: 0.75rem;
             font-weight: 600;
+        }
+
+        .completion-badge.passed {
+            background: linear-gradient(135deg, #10B981, #059669);
+        }
+
+        .completion-badge.failed {
+            background: linear-gradient(135deg, #EF4444, #DC2626);
         }
 
         .course-stats {
@@ -156,39 +140,68 @@
             font-size: 0.875rem;
         }
 
-        .review-btn {
-            background: linear-gradient(135deg, #6366f1, #8b5cf6);
-            border: none;
-            color: white;
-            font-weight: 600;
-            padding: 10px 20px;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-            width: 100%;
+        .score-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 12px;
         }
 
-        .review-btn:hover {
-            background: linear-gradient(135deg, #4f46e5, #7c3aed);
-            transform: translateY(-1px);
-            color: white;
-        }
-
-        .certificate-btn {
-            background: linear-gradient(135deg, #f59e0b, #d97706);
-            border: none;
-            color: white;
-            font-weight: 600;
-            padding: 8px 16px;
+        .score-item {
+            background: white;
+            padding: 8px 12px;
             border-radius: 6px;
-            transition: all 0.3s ease;
-            width: 100%;
-            margin-top: 8px;
+            text-align: center;
+            border: 1px solid #e2e8f0;
         }
 
-        .certificate-btn:hover {
-            background: linear-gradient(135deg, #d97706, #b45309);
-            transform: translateY(-1px);
+        .score-label {
+            font-size: 0.75rem;
+            color: #64748b;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .score-value {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .score-value.excellent {
+            color: #10B981;
+        }
+
+        .score-value.good {
+            color: #3B82F6;
+        }
+
+        .score-value.average {
+            color: #F59E0B;
+        }
+
+        .score-value.poor {
+            color: #EF4444;
+        }
+
+        .overall-score {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
             color: white;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            margin-top: 12px;
+        }
+
+        .overall-score-label {
+            font-size: 0.875rem;
+            opacity: 0.9;
+            margin-bottom: 4px;
+        }
+
+        .overall-score-value {
+            font-size: 1.5rem;
+            font-weight: 700;
         }
 
         .empty-state {
@@ -218,32 +231,11 @@
             margin-right: auto;
         }
 
-        .progress-ring {
-            width: 60px;
-            height: 60px;
-            position: absolute;
-            top: -10px;
-            right: -10px;
-        }
-
-        .progress-ring circle {
-            fill: none;
-            stroke: #e2e8f0;
-            stroke-width: 4;
-        }
-
-        .progress-ring .progress {
-            stroke: #10B981;
-            stroke-linecap: round;
-            transform: rotate(-90deg);
-            transform-origin: 50% 50%;
-        }
-
         @media (max-width: 768px) {
             .filter-btn-group {
                 margin-bottom: 16px;
             }
-            
+
             .filter-btn {
                 padding: 6px 16px;
                 font-size: 0.9rem;
@@ -253,6 +245,10 @@
                 position: static;
                 display: inline-block;
                 margin-bottom: 10px;
+            }
+
+            .score-grid {
+                grid-template-columns: 1fr;
             }
         }
 
@@ -266,50 +262,43 @@
 @endsection
 
 @section('content')
+    @php
+        use Carbon\Carbon;
+    @endphp
     <div class="container" style="max-width: 80%;">
         <div class="filter-btn-group">
             <a href="{{ route('student.myCourses') }}"
-                class="filter-btn {{ request()->routeIs('student.myCourses') ? 'active' : '' }}"
-                id="btn-studying">
-                </i>Đang học
+                class="filter-btn {{ request()->routeIs('student.myCourses') ? 'active' : '' }}" id="btn-studying">
+                Đang học
             </a>
             <a href="{{ route('student.MyCoursesCompleted') }}"
-                class="filter-btn {{ request()->routeIs('student.MyCoursesCompleted') ? 'active' : '' }}"
-                id="btn-completed">
-                </i>Đã hoàn thành
+                class="filter-btn {{ request()->routeIs('student.MyCoursesCompleted') ? 'active' : '' }}" id="btn-completed">
+                Đã hoàn thành
             </a>
         </div>
         <div class="row g-4">
-            @forelse ($enrollment as $MyCourse)
+            @forelse ($examResults as $examResult)
                 <div class="col-lg-4 col-md-6 col-sm-12 mb-4">
                     <div class="card completed-course-card h-100 border-0 shadow rounded-4">
-                        <div class="completion-badge">
-                            <i class="fas fa-check-circle me-1"></i>Hoàn thành
+                        <div class="completion-badge {{ $examResult->overall_status == 1 ? 'passed' : 'failed' }}">
+                            <i
+                                class="fas fa-{{ $examResult->overall_status == 1 ? 'check-circle' : 'times-circle' }} me-1"></i>
+                            {{ $examResult->overall_status == 1 ? 'Đã qua' : 'Chưa qua' }}
                         </div>
-                        
+
                         <div class="card-body position-relative">
                             <h6 class="course-title fw-bold text-primary mb-3">
-                                {{ $MyCourse->course->course_name }}
+                                {{ $examResult->course->course_name }}
                             </h6>
 
                             <div class="course-stats">
                                 <div class="stat-item">
                                     <span class="stat-label">
-                                        <i class="fas fa-calendar-start me-2 text-primary"></i>
-                                        Ngày bắt đầu
+                                        <i class="fas fa-calendar-alt me-2 text-primary"></i>
+                                        Ngày thi
                                     </span>
                                     <span class="stat-value">
-                                        {{ \Carbon\Carbon::parse($MyCourse->registration_date)->format('d/m/Y') }}
-                                    </span>
-                                </div>
-                                
-                                <div class="stat-item">
-                                    <span class="stat-label">
-                                        <i class="fas fa-calendar-check me-2 text-success"></i>
-                                        Ngày hoàn thành
-                                    </span>
-                                    <span class="stat-value">
-                                        {{ \Carbon\Carbon::parse($MyCourse->updated_at)->format('d/m/Y') }}
+                                        {{ \Carbon\Carbon::parse($examResult->exam_date)->format('d/m/Y') }}
                                     </span>
                                 </div>
 
@@ -318,15 +307,24 @@
                                         <i class="fas fa-layer-group me-2 text-info"></i>
                                         Trình độ
                                     </span>
-                                    <span class="stat-value">{{ $MyCourse->course->level }}</span>
+                                    <span class="stat-value">{{ $examResult->course->level }}</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">
+                                        <i class="fas fa-calendar-alt me-2 text-primary"></i> {{-- icon lịch --}}
+                                        Ngày bắt đầu
+                                    </span>
+                                    <span class="stat-value">
+                                        {{ Carbon::parse($examResult->course->starts_date)->format('d/m/Y') }}
+                                    </span>
                                 </div>
 
                                 <div class="stat-item">
                                     <span class="stat-label">
-                                        <i class="fas fa-clock me-2 text-warning"></i>
-                                        Buổi học
+                                        <i class="fas fa-book me-2 text-warning"></i>
+                                        Khóa học
                                     </span>
-                                    <span class="stat-value">{{ $MyCourse->course->description }}</span>
+                                    <span class="stat-value">{{ $examResult->course->year }}</span>
                                 </div>
 
                                 <div class="stat-item">
@@ -334,9 +332,50 @@
                                         <i class="fas fa-medal me-2"></i>
                                         Kết quả
                                     </span>
-                                    <span class="badge {{ $MyCourse->status->getStatus() }} px-3 py-1">
-                                        {{ $MyCourse->status->getEnrollment() }}
+                                    <span
+                                        class="badge {{ $examResult->overall_status == 1 ? 'card-status-pass' : 'card-status-fail' }}">
+                                        {{ $examResult->overall_status == 1 ? 'Đạt' : 'Không đạt' }}
                                     </span>
+                                </div>
+                            </div>
+
+                            {{-- Hiển thị điểm số chi tiết --}}
+                            <div class="score-grid">
+                                <div class="score-item">
+                                    <div class="score-label">Listening</div>
+                                    <div
+                                        class="score-value {{ $examResult->listening_score >= 7 ? 'excellent' : ($examResult->listening_score >= 6 ? 'good' : ($examResult->listening_score >= 5 ? 'average' : 'poor')) }}">
+                                        {{ $examResult->listening_score }}
+                                    </div>
+                                </div>
+                                <div class="score-item">
+                                    <div class="score-label">Reading</div>
+                                    <div
+                                        class="score-value {{ $examResult->reading_score >= 7 ? 'excellent' : ($examResult->reading_score >= 6 ? 'good' : ($examResult->reading_score >= 5 ? 'average' : 'poor')) }}">
+                                        {{ $examResult->reading_score }}
+                                    </div>
+                                </div>
+                                <div class="score-item">
+                                    <div class="score-label">Speaking</div>
+                                    <div
+                                        class="score-value {{ $examResult->speaking_score >= 7 ? 'excellent' : ($examResult->speaking_score >= 6 ? 'good' : ($examResult->speaking_score >= 5 ? 'average' : 'poor')) }}">
+                                        {{ $examResult->speaking_score }}
+                                    </div>
+                                </div>
+                                <div class="score-item">
+                                    <div class="score-label">Writing</div>
+                                    <div
+                                        class="score-value {{ $examResult->writing_score >= 7 ? 'excellent' : ($examResult->writing_score >= 6 ? 'good' : ($examResult->writing_score >= 5 ? 'average' : 'poor')) }}">
+                                        {{ $examResult->writing_score }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- Điểm tổng kết --}}
+                            <div class="overall-score">
+                                <div class="overall-score-label">Điểm trung bình</div>
+                                <div class="overall-score-value">
+                                    {{ number_format(($examResult->listening_score + $examResult->reading_score + $examResult->speaking_score + $examResult->writing_score) / 4, 1) }}
                                 </div>
                             </div>
                         </div>
@@ -349,11 +388,11 @@
                             <i class="fas fa-graduation-cap"></i>
                         </div>
                         <h3 class="empty-state-title">
-                            Chưa có khóa học nào đã hoàn thành
+                            Chưa có kết quả thi nào
                         </h3>
                         <p class="empty-state-description">
-                            Hãy hoàn thành các khóa học đang học để xem chúng xuất hiện ở đây. 
-                            Bạn sẽ có thể xem lại nội dung và tải chứng chỉ khi hoàn thành khóa học.
+                            Bạn chưa có kết quả thi nào được ghi nhận.
+                            Hãy tham gia các kỳ thi để xem kết quả ở đây.
                         </p>
                         <a href="{{ route('student.myCourses') }}" class="btn btn-primary btn-lg">
                             <i class="fas fa-arrow-left me-2"></i>Quay lại khóa học đang học
@@ -363,11 +402,11 @@
             @endforelse
         </div>
 
-        <!-- Pagination if needed -->
-        @if(method_exists($enrollment, 'links'))
+        {{-- Pagination --}}
+        @if (method_exists($examResults, 'links'))
             <div class="row mt-4">
                 <div class="col-12 d-flex justify-content-center">
-                    {{ $enrollment->links('pagination::bootstrap-5') }}
+                    {{ $examResults->links('pagination::bootstrap-5') }}
                 </div>
             </div>
         @endif
@@ -375,106 +414,10 @@
 @endsection
 
 @section('js')
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Add hover effects to completed course cards
-        const courseCards = document.querySelectorAll('.completed-course-card');
-        courseCards.forEach(card => {
-            card.addEventListener('mouseenter', function() {
-                this.style.transform = 'translateY(-6px)';
-            });
-            
-            card.addEventListener('mouseleave', function() {
-                this.style.transform = 'translateY(0)';
-            });
-        });
-
-        // Add click effects to buttons
-        const buttons = document.querySelectorAll('.review-btn, .certificate-btn');
-        buttons.forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                // Add ripple effect
-                const ripple = document.createElement('span');
-                const rect = this.getBoundingClientRect();
-                const size = Math.max(rect.width, rect.height);
-                const x = e.clientX - rect.left - size / 2;
-                const y = e.clientY - rect.top - size / 2;
-                
-                ripple.style.cssText = `
-                    position: absolute;
-                    width: ${size}px;
-                    height: ${size}px;
-                    left: ${x}px;
-                    top: ${y}px;
-                    background: rgba(255,255,255,0.3);
-                    border-radius: 50%;
-                    transform: scale(0);
-                    animation: ripple 0.6s ease-out;
-                    pointer-events: none;
-                `;
-                
-                this.style.position = 'relative';
-                this.style.overflow = 'hidden';
-                this.appendChild(ripple);
-                
-                setTimeout(() => {
-                    ripple.remove();
-                }, 600);
-            });
-        });
-
-        // Certificate download handling
-        const certificateBtns = document.querySelectorAll('.certificate-btn');
-        certificateBtns.forEach(btn => {
-            btn.addEventListener('click', function() {
-                // Show loading state
-                const originalText = this.innerHTML;
-                this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Đang tải...';
-                this.disabled = true;
-                
-                // Simulate download process
-                setTimeout(() => {
-                    this.innerHTML = '<i class="fas fa-check me-2"></i>Đã tải!';
-                    
-                    setTimeout(() => {
-                        this.innerHTML = originalText;
-                        this.disabled = false;
-                    }, 2000);
-                }, 1500);
-            });
-        });
-
-        // Review lesson handling
-        const reviewBtns = document.querySelectorAll('.review-btn');
-        reviewBtns.forEach(btn => {
-            btn.addEventListener('click', function() {
-                // Add clicked effect
-                this.style.transform = 'scale(0.98)';
-                setTimeout(() => {
-                    this.style.transform = 'scale(1)';
-                }, 150);
-                
-                // Here you would typically redirect to the lesson review page
-                console.log('Reviewing lesson...');
-            });
-        });
-
-        // Add CSS for ripple animation
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes ripple {
-                to {
-                    transform: scale(4);
-                    opacity: 0;
-                }
-            }
-        `;
-        document.head.appendChild(style);
-    });
-
-    // Show success message if available
-    @if(session('success'))
-        const toastHTML = `
+    <script>
+        // Show success message if available
+        @if (session('success'))
+            const toastHTML = `
             <div class="toast position-fixed top-0 end-0 m-3" role="alert" style="z-index: 9999;">
                 <div class="toast-header bg-success text-white">
                     <i class="fas fa-check-circle me-2"></i>
@@ -486,15 +429,15 @@
                 </div>
             </div>
         `;
-        
-        document.body.insertAdjacentHTML('beforeend', toastHTML);
-        const toast = document.querySelector('.toast:last-child');
-        const bsToast = new bootstrap.Toast(toast);
-        bsToast.show();
-        
-        toast.addEventListener('hidden.bs.toast', function() {
-            this.remove();
-        });
-    @endif
-</script>
+
+            document.body.insertAdjacentHTML('beforeend', toastHTML);
+            const toast = document.querySelector('.toast:last-child');
+            const bsToast = new bootstrap.Toast(toast);
+            bsToast.show();
+
+            toast.addEventListener('hidden.bs.toast', function() {
+                this.remove();
+            });
+        @endif
+    </script>
 @endsection

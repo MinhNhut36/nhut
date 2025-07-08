@@ -248,7 +248,7 @@ class AdminController extends Controller
             $query->whereYear('created_at', $request->year);
         }
 
-        $courses = $query->orderByRaw("FIELD(status, 'Chờ xác thực', 'Đang mở lớp', 'Đã hoàn thành')")->paginate(4)->appends($request->all());
+        $courses = $query->orderByRaw("FIELD(status, 'Chờ xác thực', 'Đang mở lớp', 'Đã hoàn thành')")->paginate(10)->appends($request->all());
 
         if ($courses->currentPage() > $courses->lastPage()) {
             return redirect()->route('admin.courses', ['page' => $courses->lastPage()]);

@@ -527,9 +527,6 @@
                                 data-bs-target="#addStudentModal">
                                 <i class="fas fa-plus"></i> Thêm sinh viên
                             </button>
-                            <button type="button" class="btn btn-outline-secondary">
-                                <i class="fas fa-download"></i> Xuất Excel
-                            </button>
                         </div>
                     </div>
                 </form>

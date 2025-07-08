@@ -20,6 +20,7 @@ use App\Models\Notification;
 use App\Models\StudentAnswer;
 use App\Models\StudentProgress;
 use Illuminate\Support\Facades\Log;
+use App\Models\ExamResult;
 
 class StudentController extends Controller
 {
@@ -121,9 +122,12 @@ class StudentController extends Controller
     public function CoursesCompleted()
     {
         $student = Auth::guard('student')->user();
-        $MyCourses = CourseEnrollment::with('course')->where('student_id', $student->student_id)->whereIn('status', [2, 3])->paginate(10);
-        
-        return view('student.MyCoursesCompleted')->with('enrollment', $MyCourses);
+        $ExamResults = ExamResult::with('course')
+            ->where('student_id', $student->student_id)
+            ->orderByDesc('exam_date')
+            ->paginate(10);
+
+        return view('student.MyCoursesCompleted')->with('examResults', $ExamResults);
     }
 
     //danh sách bài học thuộc lesson
@@ -148,6 +152,8 @@ class StudentController extends Controller
             ->where('level', $level)
             ->orderBy('order_index')
             ->get();
+
+        
         return view('student.Studying', compact('lessonParts'));
     }
 

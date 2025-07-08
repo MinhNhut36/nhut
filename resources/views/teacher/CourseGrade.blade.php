@@ -429,11 +429,13 @@
                             </thead>
                             <tbody>
                                 @foreach ($studentgrades as $studentgrade)
+                                    @php
+                                        $studentId = $studentgrade->student->student_id;
+                                    @endphp
                                     <tr>
                                         <td class="fw-bold">
                                             <div>{{ $studentgrade->student->fullname }}</div>
-                                            <div class="text-muted small">MSSV: {{ $studentgrade->student->student_id }}
-                                            </div>
+                                            <div class="text-muted small">MSSV: {{ $studentId }}</div>
                                         </td>
                                         <td>{{ $studentgrade->student->email }}</td>
                                         <td>
@@ -443,45 +445,79 @@
                                             </span>
                                         </td>
 
-                                        <input type="hidden"
-                                            name="grades[{{ $studentgrade->student->student_id }}][student_id]"
-                                            value="{{ $studentgrade->student->student_id }}">
+                                        <input type="hidden" name="grades[{{ $studentId }}][student_id]"
+                                            value="{{ $studentId }}">
 
+                                        {{-- Nghe --}}
                                         <td>
                                             <input type="number" step="0.1" min="0" max="10"
-                                                class="input-grade"
-                                                name="grades[{{ $studentgrade->student->student_id }}][listening_score]"
-                                                value="{{ $studentgrade->examResult->listening_score ?? '' }}" disabled>
+                                                class="input-grade @error("grades.$studentId.listening_score") is-invalid @enderror"
+                                                name="grades[{{ $studentId }}][listening_score]"
+                                                value="{{ old("grades.$studentId.listening_score", $studentgrade->examResult->listening_score ?? '0') }}"
+                                                disabled>
+                                            @error("grades.$studentId.listening_score")
+                                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                                            @enderror
                                         </td>
+
+                                        {{-- Nói --}}
                                         <td>
                                             <input type="number" step="0.1" min="0" max="10"
-                                                class="input-grade"
-                                                name="grades[{{ $studentgrade->student->student_id }}][speaking_score]"
-                                                value="{{ $studentgrade->examResult->speaking_score ?? '' }}" disabled>
+                                                class="input-grade @error("grades.$studentId.speaking_score") is-invalid @enderror"
+                                                name="grades[{{ $studentId }}][speaking_score]"
+                                                value="{{ old("grades.$studentId.speaking_score", $studentgrade->examResult->speaking_score ?? '0') }}"
+                                                disabled>
+                                            @error("grades.$studentId.speaking_score")
+                                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                                            @enderror
                                         </td>
+
+                                        {{-- Viết --}}
                                         <td>
                                             <input type="number" step="0.1" min="0" max="10"
-                                                class="input-grade"
-                                                name="grades[{{ $studentgrade->student->student_id }}][writing_score]"
-                                                value="{{ $studentgrade->examResult->writing_score ?? '' }}" disabled>
+                                                class="input-grade @error("grades.$studentId.writing_score") is-invalid @enderror"
+                                                name="grades[{{ $studentId }}][writing_score]"
+                                                value="{{ old("grades.$studentId.writing_score", $studentgrade->examResult->writing_score ?? '0') }}"
+                                                disabled>
+                                            @error("grades.$studentId.writing_score")
+                                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                                            @enderror
                                         </td>
+
+                                        {{-- Đọc --}}
                                         <td>
                                             <input type="number" step="0.1" min="0" max="10"
-                                                class="input-grade"
-                                                name="grades[{{ $studentgrade->student->student_id }}][reading_score]"
-                                                value="{{ $studentgrade->examResult->reading_score ?? '' }}" disabled>
+                                                class="input-grade @error("grades.$studentId.reading_score") is-invalid @enderror"
+                                                name="grades[{{ $studentId }}][reading_score]"
+                                                value="{{ old("grades.$studentId.reading_score", $studentgrade->examResult->reading_score ?? '0') }}"
+                                                disabled>
+                                            @error("grades.$studentId.reading_score")
+                                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                                            @enderror
                                         </td>
+
+                                        {{-- Ngày thi --}}
                                         <td>
-                                            <input type="text" class="input-grade" style="width: 130px;"
-                                                name="grades[{{ $studentgrade->student->student_id }}][exam_date]"
-                                                value="{{ optional($studentgrade->examResult)->exam_date ? \Carbon\Carbon::parse($studentgrade->examResult->exam_date)->format('d/m/Y') : '' }}"
+                                            <input type="text"
+                                                class="input-grade @error("grades.$studentId.exam_date") is-invalid @enderror"
+                                                style="width: 130px;" name="grades[{{ $studentId }}][exam_date]"
+                                                value="{{ old("grades.$studentId.exam_date", optional($studentgrade->examResult)->exam_date ? \Carbon\Carbon::parse($studentgrade->examResult->exam_date)->format('d/m/Y') : '') }}"
                                                 readonly>
+                                            @error("grades.$studentId.exam_date")
+                                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                                            @enderror
                                         </td>
+
+                                        {{-- Kết quả --}}
                                         <td>
-                                            <span
-                                                class="badge {{ $studentgrade->examResult->overall_status == 1 ? 'text-bg-success' : 'text-bg-danger' }}">
-                                                {{ $studentgrade->examResult->overall_status == 1 ? 'Đạt' : 'Không đạt' }}
-                                            </span>
+                                            @if ($studentgrade->examResult)
+                                                <span
+                                                    class="badge {{ $studentgrade->examResult->overall_status == 1 ? 'text-bg-success' : 'text-bg-danger' }}">
+                                                    {{ $studentgrade->examResult->overall_status == 1 ? 'Đạt' : 'Không đạt' }}
+                                                </span>
+                                            @else
+                                                <span class="badge text-bg-secondary">Chưa thi</span>
+                                            @endif
                                         </td>
                                     </tr>
                                 @endforeach
@@ -495,6 +531,7 @@
                         </button>
                     </div>
                 </form>
+
             </div>
         </div>
     </div>

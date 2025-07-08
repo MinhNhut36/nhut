@@ -331,7 +331,7 @@
                                     
                                     @if ($status?->completion_status !== null)
                                         <div class="progress-status">
-                                            <strong>Tiến độ:</strong>
+                                            <strong>Kết quả:</strong>
                                             <span class="status-badge {{ $status->completion_status ? 'status-pass' : 'status-fail' }}">
                                                 <i class="fas {{ $status->completion_status ? 'fa-check-circle' : 'fa-times-circle' }}"></i>
                                                 {{ $status->completion_status ? 'Đạt' : 'Không đạt' }}
@@ -339,7 +339,7 @@
                                         </div>
                                     @else
                                         <div class="progress-status">
-                                            <strong>Tiến độ:</strong>
+                                            <strong>Kết quả:</strong>
                                             <span class="status-badge status-pending">
                                                 <i class="fas fa-clock"></i>
                                                 Chưa làm bài

@@ -16,8 +16,6 @@ class UpdateScoreRequest extends FormRequest
 
     /**
      * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
@@ -33,37 +31,34 @@ class UpdateScoreRequest extends FormRequest
     }
 
     /**
-     * Configure the validator instance.
+     * Custom error messages.
      */
-    public function withValidator($validator)
+    public function messages(): array
     {
-        $validator->after(function ($validator) {
-            foreach ($this->input('grades', []) as $index => $data) {
-                // Collect scores
-                $scores = [
-                    $data['listening_score'] ?? null,
-                    $data['speaking_score']  ?? null,
-                    $data['writing_score']   ?? null,
-                    $data['reading_score']   ?? null,
-                ];
-                $filledCount = collect($scores)->filter(fn($s) => $s !== null && $s !== '')->count();
+        return [
+            'grades.required' => 'Dữ liệu điểm là bắt buộc.',
+            'grades.array' => 'Dữ liệu điểm phải là mảng.',
 
-                // If partially filled, require all four
-                if ($filledCount > 0 && $filledCount < 4) {
-                    $validator->errors()->add(
-                        "grades.$index.listening_score",
-                        'Nếu nhập một kỹ năng, cần nhập đủ cả 4 kỹ năng (Nghe, Nói, Viết, Đọc).'
-                    );
-                }
+            'grades.*.student_id.required' => 'Thiếu mã số sinh viên.',
+            'grades.*.student_id.exists' => 'Mã số sinh viên không tồn tại.',
 
-                // If all four filled, require exam_date
-                if ($filledCount === 4 && empty($data['exam_date'])) {
-                    $validator->errors()->add(
-                        "grades.$index.exam_date",
-                        'Vui lòng nhập ngày thi nếu đã nhập đủ 4 kỹ năng.'
-                    );
-                }
-            }
-        });
+            'grades.*.listening_score.numeric' => 'Điểm nghe phải là số.',
+            'grades.*.listening_score.min' => 'Điểm nghe phải từ 0 đến 10.',
+            'grades.*.listening_score.max' => 'Điểm nghe phải từ 0 đến 10.',
+
+            'grades.*.speaking_score.numeric' => 'Điểm nói phải là số.',
+            'grades.*.speaking_score.min' => 'Điểm nói phải từ 0 đến 10.',
+            'grades.*.speaking_score.max' => 'Điểm nói phải từ 0 đến 10.',
+
+            'grades.*.writing_score.numeric' => 'Điểm viết phải là số.',
+            'grades.*.writing_score.min' => 'Điểm viết phải từ 0 đến 10.',
+            'grades.*.writing_score.max' => 'Điểm viết phải từ 0 đến 10.',
+
+            'grades.*.reading_score.numeric' => 'Điểm đọc phải là số.',
+            'grades.*.reading_score.min' => 'Điểm đọc phải từ 0 đến 10.',
+            'grades.*.reading_score.max' => 'Điểm đọc phải từ 0 đến 10.',
+
+            'grades.*.exam_date.date' => 'Ngày thi không hợp lệ.',
+        ];
     }
 }

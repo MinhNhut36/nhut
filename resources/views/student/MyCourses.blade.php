@@ -111,6 +111,17 @@
                 text-align: center;
             }
         }
+
+        .card-status-studying {
+            background-color: #0ea5e9;
+            /* màu xanh da trời */
+            color: white;
+            font-weight: 500;
+            font-size: 0.8rem;
+            padding: 6px 12px;
+            border-radius: 999px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
     </style>
 @endsection
 
@@ -158,7 +169,7 @@
                                     <span class="fw-semibold">
                                         <i class="fas fa-info-circle me-1"></i>Trạng thái:
                                     </span>
-                                    <span class=" {{$MyCourse->status->getStatus() }}">
+                                    <span class="badge {{$MyCourse->status->getStatus() }}">
                                         {{ $MyCourse->status->getEnrollment() }}
                                     </span>
                                 </li>

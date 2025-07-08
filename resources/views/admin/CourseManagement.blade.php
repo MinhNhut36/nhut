@@ -721,7 +721,7 @@
                                 <tr>
                                     <td>
                                         <div>
-                                            <strong>Khóa học trực tiếp {{ $course->course_name }}</strong>
+                                            <strong>{{ $course->course_name }}</strong>
                                             <br><small class="text-muted">{{ $course->description }}</small>
                                         </div>
                                     </td>

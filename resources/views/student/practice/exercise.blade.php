@@ -311,16 +311,6 @@
             }
         }
 
-        input.correct {
-            border: 2px solid green;
-            background: #d4edda;
-        }
-
-        input.incorrect {
-            border: 2px solid red;
-            background: #f8d7da;
-        }
-
         .fill-blank-input {
             width: 100%;
             padding: 12px;
@@ -328,6 +318,65 @@
             border: 2px solid #dee2e6;
             border-radius: 8px;
             margin-bottom: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .fill-blank-input.correct {
+            border-color: #4caf50;
+            background-color: #e8f5e8;
+        }
+
+        .fill-blank-input.incorrect {
+            border-color: #f44336;
+            background-color: #ffebee;
+        }
+
+        /* Thông báo validation */
+        .validation-message {
+            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+            border: 1px solid #ffc107;
+            color: #856404;
+            padding: 0.75rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            display: none;
+            animation: shake 0.5s ease-in-out;
+        }
+
+        .validation-message.show {
+            display: block;
+        }
+
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-5px);
+            }
+
+            75% {
+                transform: translateX(5px);
+            }
+        }
+
+        /* Hiển thị đáp án đúng */
+        .correct-answer {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: linear-gradient(135deg, #e8f5e8, #c8e6c9);
+            border: 1px solid #4caf50;
+            border-radius: 8px;
+            color: #2e7d32;
+            font-weight: 500;
+        }
+
+        .correct-answer strong {
+            color: #1b5e20;
         }
     </style>
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -345,7 +394,8 @@
         @php $total = $questions->count(); @endphp
 
         @foreach ($questions as $i => $question)
-            <div class="question-block" data-index="{{ $i }}" data-question-id="{{ $question->questions_id }}">
+            <div class="question-block" data-index="{{ $i }}"
+                data-question-id="{{ $question->questions_id }}">
                 <div class="question-counter">Câu {{ $i + 1 }} / {{ $totalQuestions }}</div>
                 <p class="question-text">{{ $question->question_text }}</p>
                 @if ($question->question_type == 'single_choice')
@@ -354,7 +404,8 @@
                             <li>
                                 <input type="radio" name="answer_{{ $question->questions_id }}"
                                     value="{{ $answer->answers_id }}"
-                                    id="q{{ $question->questions_id }}_a{{ $j }}">
+                                    id="q{{ $question->questions_id }}_a{{ $j }}"
+                                    data-is-correct="{{ $answer->is_correct ? 'true' : 'false' }}">
                                 <label for="q{{ $question->questions_id }}_a{{ $j }}" class="answer-btn">
                                     {{ chr(65 + $j) }}. {{ $answer->answer_text }}
                                 </label>
@@ -363,8 +414,15 @@
                     </ul>
                 @elseif ($question->question_type == 'fill_blank')
                     <input type="text" class="fill-blank-input" name="answer_{{ $question->questions_id }}"
-                        placeholder="Nhập câu trả lời..." style="width:100%; padding:12px; font-size:16px;">
+                        placeholder="Nhập câu trả lời..."
+                        data-correct-answer="{{ $question->answers->where('is_correct', true)->first()->answer_text ?? '' }}">
                 @endif
+
+                <!-- Thông báo validation -->
+                <div class="validation-message" id="validation-{{ $question->questions_id }}">
+                    <strong>⚠️ Vui lòng chọn một đáp án trước khi tiếp tục!</strong>
+                </div>
+
                 <div class="btn-group">
                     <button class="btn btn-prev" @if ($i === 0) disabled @endif>
                         ← Câu trước
@@ -392,7 +450,7 @@
         </div>
     </div>
 
-    <script>
+   <script>
         (function() {
             const blocks = document.querySelectorAll('.question-block');
             const progressBar = document.getElementById('progress-bar');
@@ -400,6 +458,7 @@
             const btnComplete = document.getElementById('btn-complete');
             const loading = document.getElementById('loading');
             let idx = 0;
+            let isSubmitted = false;
             const total = blocks.length;
 
             function updateProgress() {
@@ -418,18 +477,74 @@
                 loading.classList.add('active');
             }
 
+            // Kiểm tra câu hỏi hiện tại đã được trả lời chưa
+            function isCurrentQuestionAnswered() {
+                const currentBlock = blocks[idx];
+                const qid = currentBlock.getAttribute('data-question-id');
+
+                // Kiểm tra radio button (single_choice)
+                const radio = currentBlock.querySelector('input[type="radio"]:checked');
+                if (radio) return true;
+
+                // Kiểm tra text input (fill_blank)
+                const textInput = currentBlock.querySelector('input[type="text"]');
+                if (textInput && textInput.value.trim() !== '') return true;
+
+                return false;
+            }
+
+            // Kiểm tra câu hỏi cụ thể đã được trả lời chưa
+            function isQuestionAnswered(block) {
+                const radio = block.querySelector('input[type="radio"]:checked');
+                const textInput = block.querySelector('input[type="text"]');
+                
+                if (radio) return true;
+                if (textInput && textInput.value.trim() !== '') return true;
+                return false;
+            }
+
+            // Hiển thị thông báo validation
+            function showValidationMessage(questionId) {
+                const validationMsg = document.getElementById(`validation-${questionId}`);
+                if (validationMsg) {
+                    validationMsg.classList.add('show');
+                    setTimeout(() => {
+                        validationMsg.classList.remove('show');
+                    }, 3000);
+                }
+            }
+
+            // Tìm câu hỏi đầu tiên chưa được trả lời
+            function findFirstUnansweredQuestion() {
+                for (let i = 0; i < blocks.length; i++) {
+                    if (!isQuestionAnswered(blocks[i])) {
+                        return i;
+                    }
+                }
+                return -1; // Tất cả câu đã được trả lời
+            }
+
             // Hiển thị câu hỏi đầu tiên
             show(0);
 
-            // Next / Previous
+            // Next button với validation
             document.querySelectorAll('.btn-next').forEach(btn =>
                 btn.addEventListener('click', () => {
+                    if (!isSubmitted && !isCurrentQuestionAnswered()) {
+                        const currentBlock = blocks[idx];
+                        const qid = currentBlock.getAttribute('data-question-id');
+                        showValidationMessage(qid);
+                        return;
+                    }
+
                     if (idx < total - 1) {
                         idx++;
                         show(idx);
                     }
                 })
             );
+
+            // Previous button
             document.querySelectorAll('.btn-prev').forEach(btn =>
                 btn.addEventListener('click', () => {
                     if (idx > 0) {
@@ -439,18 +554,33 @@
                 })
             );
 
-            // Submit bài làm
+            // Submit bài làm với validation
             if (btnSubmit) {
                 btnSubmit.addEventListener('click', () => {
+                    // Tìm câu hỏi đầu tiên chưa được trả lời
+                    const firstUnansweredIndex = findFirstUnansweredQuestion();
+                    
+                    if (firstUnansweredIndex !== -1) {
+                        // Chuyển đến câu hỏi chưa trả lời đầu tiên
+                        idx = firstUnansweredIndex;
+                        show(idx);
+                        
+                        // Hiển thị thông báo validation cho câu hỏi đó
+                        const unansweredBlock = blocks[firstUnansweredIndex];
+                        const qid = unansweredBlock.getAttribute('data-question-id');
+                        showValidationMessage(qid);
+                        return;
+                    }
+
+                    // Nếu tất cả câu đã được trả lời, tiến hành submit
                     showLoading();
 
-                    // 1. Thu thập câu trả lời
+                    // Thu thập câu trả lời
                     const answers = {};
                     blocks.forEach(block => {
                         const qid = block.getAttribute('data-question-id');
                         if (!qid) return;
 
-                        // Kiểm tra có radio (single_choice) hay text input (fill_blank)
                         const radio = block.querySelector('input[type="radio"]:checked');
                         const text = block.querySelector('input[type="text"]');
 
@@ -461,7 +591,7 @@
                         }
                     });
 
-                    // 2. Gửi lên server
+                    // Gửi lên server
                     fetch(`/student/exercise/{{ $lessonPartId }}/submit`, {
                             method: 'POST',
                             headers: {
@@ -482,45 +612,61 @@
                                 return;
                             }
 
+                            isSubmitted = true;
                             const results = json.results;
 
-                            // 3. Hiển thị kết quả, highlight và feedback
+                            // Hiển thị kết quả
                             Object.entries(results).forEach(([qid, data]) => {
-                                // Tìm block theo data-question-id thay vì tìm theo input
-                                const block = document.querySelector(`.question-block[data-question-id="${qid}"]`);
-                                if (!block) {
-                                    console.warn(`Không tìm thấy block cho câu hỏi ${qid}`);
-                                    return;
-                                }
+                                const block = document.querySelector(
+                                    `.question-block[data-question-id="${qid}"]`);
+                                if (!block) return;
 
-                                // Nếu là single_choice
+                                // Xử lý single_choice
                                 const radios = block.querySelectorAll('input[type="radio"]');
                                 if (radios.length > 0) {
-                                    radios.forEach(opt => {
-                                        const label = block.querySelector(`label[for="${opt.id}"]`);
+                                    radios.forEach(radio => {
+                                        const label = block.querySelector(
+                                            `label[for="${radio.id}"]`);
                                         if (!label) return;
-                                        
-                                        opt.disabled = true;
+
+                                        radio.disabled = true;
                                         label.classList.remove('correct', 'incorrect');
-                                        
-                                        // Highlight câu trả lời đúng
-                                        if (parseInt(opt.value) === data.correct_answer) {
+
+                                        // Highlight đáp án đúng
+                                        if (radio.getAttribute('data-is-correct') ===
+                                            'true') {
                                             label.classList.add('correct');
                                         }
-                                        
-                                        // Highlight câu trả lời sai của user
-                                        if (data.your_answer && parseInt(opt.value) === data.your_answer && !data.is_correct) {
+
+                                        // Highlight đáp án sai của user
+                                        if (radio.checked && radio.getAttribute(
+                                                'data-is-correct') === 'false') {
                                             label.classList.add('incorrect');
                                         }
                                     });
                                 }
-                                // Nếu là fill_blank
+                                // Xử lý fill_blank
                                 else {
                                     const input = block.querySelector('input[type="text"]');
                                     if (input) {
                                         input.disabled = true;
                                         input.classList.remove('correct', 'incorrect');
-                                        input.classList.add(data.is_correct ? 'correct' : 'incorrect');
+                                        input.classList.add(data.is_correct ? 'correct' :
+                                            'incorrect');
+
+                                        // Hiển thị đáp án đúng nếu sai
+                                        if (!data.is_correct) {
+                                            const correctAnswer = input.getAttribute(
+                                                'data-correct-answer');
+                                            if (correctAnswer) {
+                                                const correctDiv = document.createElement('div');
+                                                correctDiv.className = 'correct-answer';
+                                                correctDiv.innerHTML =
+                                                    `<strong>Đáp án đúng:</strong> ${correctAnswer}`;
+                                                input.parentNode.insertBefore(correctDiv, input
+                                                    .nextSibling);
+                                            }
+                                        }
                                     }
                                 }
 
@@ -533,10 +679,11 @@
                                 }
                                 fb.classList.remove('correct', 'incorrect');
                                 fb.classList.add(data.is_correct ? 'correct' : 'incorrect');
-                                fb.innerHTML = data.feedback || (data.is_correct ? 'Chính xác!' : 'Sai rồi!');
+                                fb.innerHTML = data.feedback || (data.is_correct ? '✅ Chính xác!' :
+                                    '❌ Sai rồi!');
                             });
 
-                            // 4. Chuyển UI sang trạng thái đã nộp
+                            // Chuyển UI sang trạng thái đã nộp
                             btnSubmit.style.display = 'none';
                             btnComplete.style.display = 'inline-block';
 
@@ -552,15 +699,49 @@
                 });
             }
 
-            // Phím điều hướng
+            // Phím điều hướng với validation
             document.addEventListener('keydown', e => {
                 if (e.key === 'ArrowLeft' && idx > 0) {
                     idx--;
                     show(idx);
                 }
                 if (e.key === 'ArrowRight' && idx < total - 1) {
+                    if (!isSubmitted && !isCurrentQuestionAnswered()) {
+                        const currentBlock = blocks[idx];
+                        const qid = currentBlock.getAttribute('data-question-id');
+                        showValidationMessage(qid);
+                        return;
+                    }
                     idx++;
                     show(idx);
+                }
+            });
+
+            // Ẩn thông báo validation khi user chọn đáp án
+            document.addEventListener('change', (e) => {
+                if (e.target.type === 'radio' || e.target.type === 'text') {
+                    const block = e.target.closest('.question-block');
+                    if (block) {
+                        const qid = block.getAttribute('data-question-id');
+                        const validationMsg = document.getElementById(`validation-${qid}`);
+                        if (validationMsg) {
+                            validationMsg.classList.remove('show');
+                        }
+                    }
+                }
+            });
+
+            // Ẩn thông báo validation khi user nhập text
+            document.addEventListener('input', (e) => {
+                if (e.target.type === 'text') {
+                    const block = e.target.closest('.question-block');
+                    if (block) {
+                        const qid = block.getAttribute('data-question-id');
+                        const validationMsg = document.getElementById(`validation-${qid}`);
+                        if (validationMsg) {
+                            validationMsg.classList.remove('show');
+                        }
+                    }
                 }
             });
         })();

@@ -292,15 +292,15 @@
                             </h6>
 
                             <div class="course-stats">
-                                <div class="stat-item">
+                                {{-- <div class="stat-item">
                                     <span class="stat-label">
                                         <i class="fas fa-calendar-alt me-2 text-primary"></i>
-                                        Ngày thi
+                                        Ngày cập nhật diểm
                                     </span>
                                     <span class="stat-value">
                                         {{ \Carbon\Carbon::parse($examResult->exam_date)->format('d/m/Y') }}
                                     </span>
-                                </div>
+                                </div> --}}
 
                                 <div class="stat-item">
                                     <span class="stat-label">

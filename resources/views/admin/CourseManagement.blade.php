@@ -622,7 +622,7 @@
                         </div>
                         <div class="action-title">Phân công giảng dạy</div>
                         <div class="action-description">Phân công giảng viên cho khóa học</div>
-                        <a href="{{route('admin.assign.index')}}" class="btn-action">Phân công</a>
+                        <a href="{{ route('admin.assign.index') }}" class="btn-action">Phân công</a>
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-6 mb-3">
@@ -632,7 +632,7 @@
                         </div>
                         <div class="action-title">Quản lý trình độ</div>
                         <div class="action-description">Xem và quản lý các trình độ</div>
-                        <a href="{{route('admin.lesson')}}" class="btn-action">Xem tất cả</a>
+                        <a href="{{ route('admin.lesson') }}" class="btn-action">Xem tất cả</a>
                     </div>
                 </div>
             </div>
@@ -827,7 +827,7 @@
                                         Năm <span class="required">*</span>
                                     </label>
                                     <input type="number" class="form-control" id="courseYear" name="year"
-                                        inputmode="numeric" min="2020" value="{{ old('year') }}">
+                                        inputmode="numeric" min="{{ date('Y') }}" value="{{ old('year') }}">
                                     @error('year')
                                         <small class="text-danger auto-hide-error">{{ $message }}</small>
                                     @enderror
@@ -847,7 +847,7 @@
                                 <!-- Mô tả -->
                                 <div class="form-group">
                                     <label class="form-label">
-                                        Mô tả
+                                        Mô tả (lịch học, thời gian, địa điểm, v.v.) 
                                     </label>
                                     <textarea class="form-control" id="courseDescription" placeholder="Nhập mô tả về khóa học" name="description">{{ old('description') }}</textarea>
                                     @error('description')
@@ -1087,7 +1087,5 @@
                 }, 5000); // 5 giây
             });
         });
-
-
     </script>
 @endsection

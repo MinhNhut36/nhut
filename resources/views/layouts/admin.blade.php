@@ -79,7 +79,6 @@
         .logo-img {
             height: 48px;
             width: auto;
-            border-radius: 8px;
             transition: var(--transition);
         }
 
@@ -374,14 +373,15 @@
                         <ul class="dropdown-menu" aria-labelledby="dropdownKhoaHoc">
                             <li>
                                 <a class="dropdown-item" href="{{ route('admin.level.lessons') }}" data-id="list-kh">
-                                    <i class="fas fa-list"></i>
-                                    Danh sách các câu hỏi
+                                     <i class="fas fa-plus-circle"></i>
+                                    
+                                    Thêm các câu hỏi
                                 </a>
                             </li>
                             <li>
                                 <a class="dropdown-item" href="{{ route('admin.courses') }}" data-id="add-kh">
-                                    <i class="fas fa-plus-circle"></i>
-                                    Thêm khóa học
+                                   <i class="fas fa-list"></i>
+                                    khóa học
                                 </a>
                             </li>
                         </ul>

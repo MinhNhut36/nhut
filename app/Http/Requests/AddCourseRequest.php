@@ -19,12 +19,14 @@ class AddCourseRequest extends FormRequest
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
+
     public function rules(): array
     {
+        $currentYear = date('Y');
         return [
             'course_name' => ['required', 'string', 'max:255'],
             'level' => ['required', 'string'],
-            'year' => ['required', 'integer', 'min:2020'],
+            'year' => ['required', 'integer', 'min:' . $currentYear],
             'description' => ['nullable', 'string'],
             'starts_date' => ['required', 'date', 'after_or_equal:today'],
         ];
@@ -32,6 +34,7 @@ class AddCourseRequest extends FormRequest
 
     public function messages(): array
     {
+        $currentYear = date('Y');
         return [
             'course_name.required' => 'Vui lòng nhập tên khóa học.',
 
@@ -39,7 +42,7 @@ class AddCourseRequest extends FormRequest
 
             'year.required' => 'Vui lòng nhập năm.',
             'year.integer' => 'Năm phải là số nguyên.',
-            'year.min' => 'Năm phải từ 2020 trở đi.',
+            'year.min' => 'Năm phải từ ' . $currentYear . ' trở đi.',
 
             'description.string' => 'Mô tả phải là một chuỗi ký tự.',
 

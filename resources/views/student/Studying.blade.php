@@ -16,6 +16,102 @@
             margin: 0 auto;
         }
 
+        /* Navigation Bar Styles */
+        .nav-bar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: var(--border-radius);
+            padding: 1.5rem 2rem;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-bar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color), var(--primary-light));
+            background-size: 200% 200%;
+            animation: gradientMove 3s ease infinite;
+        }
+
+        .nav-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .nav-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .nav-btn {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 25px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .nav-btn:hover::before {
+            left: 100%;
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(14, 165, 233, 0.4);
+            color: white;
+            text-decoration: none;
+        }
+
+        .nav-btn i {
+            font-size: 1rem;
+        }
+
         .lesson-header {
             text-align: center;
             margin-bottom: 3rem;
@@ -245,6 +341,20 @@
                 width: 95%;
             }
             
+            .nav-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .nav-title {
+                font-size: 1.3rem;
+            }
+            
+            .nav-buttons {
+                width: 100%;
+                justify-content: center;
+            }
+            
             .lesson-header h1 {
                 font-size: 2rem;
             }
@@ -266,6 +376,20 @@
             
             .lesson-main {
                 padding: 1rem 0;
+            }
+            
+            .nav-bar {
+                padding: 1rem 1.5rem;
+            }
+            
+            .nav-buttons {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+            
+            .nav-btn {
+                width: 100%;
+                justify-content: center;
             }
             
             .lesson-actions {
@@ -292,6 +416,26 @@
 @section('content')
     <div class="lesson-main">
         <div class="content-container">
+            <!-- Navigation Bar -->
+            <div class="nav-bar">
+                <div class="nav-content">
+                    <div class="nav-title">
+                        <i class="fas fa-graduation-cap"></i>
+                        Học tập
+                    </div>
+                    <div class="nav-buttons">
+                        <a href="{{ route('student.lesson',$courseId) }}" class="nav-btn">
+                            <i class="fas fa-book-open"></i>
+                            Làm bài
+                        </a>
+                        <a href="{{ route('student.lesson.board',$courseId) }}" class="nav-btn">
+                            <i class="fas fa-bullhorn"></i>
+                            Bảng tin
+                        </a>
+                    </div>
+                </div>
+            </div>
+
             <!-- Header Section -->
             <div class="lesson-header">
                 <h1><i class="fas fa-book-open"></i> Danh Sách Bài Học</h1>

@@ -108,7 +108,6 @@
             height: 40px;
             width: auto;
             object-fit: contain;
-            border-radius: 6px;
             box-shadow: var(--shadow-sm);
         }
 

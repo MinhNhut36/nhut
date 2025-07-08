@@ -23,6 +23,8 @@ Route::prefix('teacher')->name('teacher.')->middleware(['web', 'teacher'])->grou
         Route::get('/board', [TeacherController::class, 'CourseBulletin'])->name('boards');
         Route::post('/posts', [TeacherController::class, 'StorePost'])->name('post'); // Đăng bài viết mới
         Route::post('/comment', [TeacherController::class, 'StoreComment'])->name('comment'); // Gửi bình luận cho một bài viết
+        Route::delete('/posts/delete/{postId}', [TeacherController::class, 'deletePost'])
+            ->name('posts.delete');
 
         // Course Grade
         Route::get('/grade', [TeacherController::class, 'CourseGrade'])->name('grade');

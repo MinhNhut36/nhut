@@ -242,7 +242,27 @@ class TeacherController extends Controller
 
         return redirect()->back()->with('success', 'Đăng bài viết thành công.');
     }
+    public function deletePost(int $courseId,int $postId)
+    {
+        $teacher = Auth::guard('teacher')->user();
+        // Tìm bài post theo ID và kiểm tra có thuộc giáo viên hiện tại không
+        $post = ClassPost::where('post_id', $postId)
+            ->where('teacher_id', $teacher->teacher_id)
+            ->where('course_id', $courseId)
+            ->first();
+      
+        if (!$post) {
+            return redirect()
+                ->route('teacher.boards', ['courseId' => $courseId])
+                ->with('error', 'Đây không phải là bài viết của bạn, bạn không thể xóa!!.');
+        }
 
+        $post->delete();
+
+        return redirect()
+            ->route('teacher.boards', ['courseId' => $courseId])
+            ->with('success', 'Bài viết đã được xóa thành công.');
+    }
     /**
      * Gửi phản hồi cho bài viết
      */
@@ -312,7 +332,7 @@ class TeacherController extends Controller
     // Cập nhật điểm của các sinh viên cùng 1 lúc
     public function updateGrade(UpdateScoreRequest $request, $courseId)
     {
- 
+
         $grades = $request->input('grades', []);
 
         foreach ($grades as $studentId => $data) {

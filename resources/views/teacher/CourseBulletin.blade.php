@@ -1,6 +1,5 @@
 @extends('layouts.teacher')
 
-
 @section('styles')
     <style>
         .container {
@@ -118,6 +117,9 @@
         .post-header {
             padding: 1.5rem 1.5rem 1rem;
             border-bottom: 1px solid rgba(229, 231, 235, 0.5);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .post-content {
@@ -162,6 +164,37 @@
             color: #6b7280;
             font-size: 0.875rem;
             margin: 0;
+        }
+
+        /* Delete Button */
+        .delete-btn {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            border: none;
+            border-radius: 8px;
+            padding: 0.5rem 0.75rem;
+            color: white;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+        }
+
+        .delete-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+        }
+
+        .post-actions {
+            display: flex;
+            gap: 0.5rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .post-card:hover .post-actions {
+            opacity: 1;
         }
 
         /* Comments Section */
@@ -213,6 +246,18 @@
             line-height: 1.5;
         }
 
+        .comment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .comment-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
         /* Reply Form */
         .reply-form {
             padding: 1rem 1.5rem;
@@ -242,64 +287,14 @@
             box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
         }
 
-        /* Responsive */
-        @media (max-width: 768px) {
-            .container {
-                padding: 1rem;
-            }
-
-            .page-header,
-            .post-form,
-            .post-card {
-                margin-left: 0;
-                margin-right: 0;
-            }
-
-            .page-header {
-                padding: 1.5rem;
-            }
-
-            .post-form {
-                padding: 1rem;
-            }
-
-            .d-flex.align-items-start.gap-3 {
-                flex-direction: column;
-                gap: 1rem !important;
-            }
-
-            .compose-avatar {
-                align-self: center;
-            }
-        }
-
-        /* Animations */
-        @keyframes slideInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .post-card {
-            animation: slideInUp 0.5s ease-out;
-        }
-
-        /* Course Navigation Styles */
+        /* Course Navigation */
         .course-navigation-wrapper {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
             border-radius: 20px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
             border: 1px solid rgba(255, 255, 255, 0.2);
             overflow: hidden;
-            position: relative;
         }
 
         .course-navigation-header {
@@ -349,33 +344,20 @@
         .course-name {
             font-size: 1.5rem;
             font-weight: 700;
-            margin: 0 0 5px 0;
+            margin: 0;
             color: white;
             text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .course-code {
-            font-size: 0.9rem;
-            color: rgba(255, 255, 255, 0.8);
-            font-weight: 500;
-            background: rgba(255, 255, 255, 0.1);
-            padding: 4px 12px;
-            border-radius: 12px;
-            display: inline-block;
         }
 
         .course-navigation-tabs {
             background: white;
             padding: 0;
-            position: relative;
         }
 
         .nav-tabs-wrapper {
             display: flex;
             gap: 0;
-            position: relative;
             overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
             scrollbar-width: none;
             -ms-overflow-style: none;
         }
@@ -399,7 +381,6 @@
             background: transparent;
             white-space: nowrap;
             flex-shrink: 0;
-            min-width: 0;
         }
 
         .nav-tab:hover {
@@ -444,19 +425,104 @@
             transition: all 0.3s ease;
         }
 
-        .content-area {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-radius: 20px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            min-height: 500px;
-            padding: 30px;
+        /* Modal */
+        .modal-content {
+            border-radius: 15px;
+            border: none;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
         }
 
-        /* Mobile Responsive */
+        .modal-header {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            border-radius: 15px 15px 0 0;
+            border: none;
+            padding: 1.5rem;
+        }
+
+        .modal-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+            color: #4b5563;
+            line-height: 1.6;
+        }
+
+        .modal-footer {
+            border: none;
+            padding: 1rem 1.5rem 1.5rem;
+            gap: 0.5rem;
+        }
+
+        .btn-secondary {
+            background: #6b7280;
+            border: none;
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background: #4b5563;
+            transform: translateY(-1px);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            border: none;
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-danger:hover {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            transform: translateY(-1px);
+        }
+
+        .btn-close {
+            filter: invert(1);
+        }
+
+        /* Responsive */
         @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .page-header,
+            .post-form,
+            .post-card {
+                margin-left: 0;
+                margin-right: 0;
+            }
+
+            .page-header {
+                padding: 1.5rem;
+            }
+
+            .post-form {
+                padding: 1rem;
+            }
+
+            .d-flex.align-items-start.gap-3 {
+                flex-direction: column;
+                gap: 1rem !important;
+            }
+
+            .compose-avatar {
+                align-self: center;
+            }
+
+            .post-actions {
+                opacity: 1;
+            }
+
             .course-navigation-header {
                 padding: 15px 20px;
             }
@@ -475,11 +541,6 @@
                 font-size: 1.2rem;
             }
 
-            .course-code {
-                font-size: 0.8rem;
-                padding: 3px 8px;
-            }
-
             .nav-tab {
                 padding: 15px 20px;
                 font-size: 0.9rem;
@@ -492,81 +553,26 @@
             .nav-tab-icon {
                 font-size: 1.2rem;
             }
-
-            .content-area {
-                padding: 20px;
-            }
         }
 
-        @media (max-width: 480px) {
-            .course-navigation-header {
-                padding: 12px 15px;
-            }
-
-            .course-info-section {
-                gap: 10px;
-            }
-
-            .course-info-icon {
-                width: 45px;
-                height: 45px;
-                font-size: 1.1rem;
-            }
-
-            .course-name {
-                font-size: 1.1rem;
-            }
-
-            .nav-tab {
-                padding: 12px 15px;
-            }
-
-            .content-area {
-                padding: 15px;
-            }
+        /* Animations */
+        .post-card {
+            animation: slideInUp 0.5s ease-out;
         }
 
-        /* Animation cho active tab */
-        @keyframes tabActivate {
-            0% {
-                transform: translateY(2px);
-                opacity: 0.8;
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
             }
 
-            100% {
-                transform: translateY(0);
+            to {
                 opacity: 1;
+                transform: translateY(0);
             }
-        }
-
-        .nav-tab.active {
-            animation: tabActivate 0.3s ease;
-        }
-
-        /* Hover effects */
-        .nav-tab::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            z-index: -1;
-        }
-
-        .nav-tab:hover::before {
-            opacity: 0.05;
-        }
-
-        .nav-tab.active::before {
-            opacity: 0.1;
         }
     </style>
 @endsection
-
 
 @section('content')
     <div class="container-fluid py-4">
@@ -612,6 +618,7 @@
             </nav>
         </div>
     </div>
+
     <div class="container py-4">
         <div class="page-header">
             <h2><i class="fas fa-bullhorn me-2"></i>Bảng tin khóa học</h2>
@@ -639,7 +646,7 @@
                 </div>
             </form>
         </div>
-
+        @include('partials.alerts')
         {{-- Danh sách bài viết --}}
         @foreach ($posts as $post)
             <div class="post-card">
@@ -653,6 +660,12 @@
                             <div class="author-name">{{ $post->teacher->fullname }}</div>
                             <div class="post-time">{{ $post->created_at->diffForHumans() }}</div>
                         </div>
+                    </div>
+                    <div class="post-actions">
+                        <button class="delete-btn" onclick="confirmDeletePost({{ $post->post_id }})">
+                            <i class="fas fa-trash-alt me-1"></i>
+                            Xóa
+                        </button>
                     </div>
                 </div>
 
@@ -676,8 +689,14 @@
                                         onerror="this.onerror=null;this.src='{{ asset('uploads/avatars/AvtMacDinh.jpg') }}';"
                                         class="comment-avatar" alt="Avatar">
                                     <div class="flex-grow-1">
-                                        <div class="comment-author">{{ $comment->author->fullname ?? 'Ẩn danh' }}</div>
-                                        <div class="comment-time">{{ $comment->created_at->format('H:i - d/m/Y') }}</div>
+                                        <div class="comment-header">
+                                            <div class="comment-info">
+                                                <div class="comment-author">{{ $comment->author->fullname ?? 'Ẩn danh' }}
+                                                </div>
+                                                <div class="comment-time">{{ $comment->created_at->format('H:i - d/m/Y') }}
+                                                </div>
+                                            </div>
+                                        </div>
                                         <div class="comment-content">{{ $comment->content }}</div>
                                     </div>
                                 </div>
@@ -705,45 +724,54 @@
             </div>
         @endforeach
     </div>
-@endsection
 
+    <!-- Delete Post Modal -->
+    <div class="modal fade" id="deletePostModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Xác nhận xóa bài viết
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-0">Bạn có chắc chắn muốn xóa bài viết này không? Hành động này không thể hoàn tác và sẽ
+                        xóa luôn tất cả các phản hồi.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <form id="deletePostForm" method="POST" style="display: inline;">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-danger">Xóa</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+@endsection
 
 @section('js')
     <script>
         // Auto-resize textarea
-        document.querySelectorAll('textarea').forEach(textarea => {
+        document.querySelectorAll('.reply-textarea').forEach(textarea => {
             textarea.addEventListener('input', function() {
                 this.style.height = 'auto';
                 this.style.height = this.scrollHeight + 'px';
             });
         });
 
-        // Form submission animation
-        document.querySelectorAll('form').forEach(form => {
-            form.addEventListener('submit', function() {
-                const submitBtn = this.querySelector('button[type="submit"]');
-                const originalHTML = submitBtn.innerHTML;
+        // Delete post confirmation
+        function confirmDeletePost(postId) {
+            const deleteForm = document.getElementById('deletePostForm');
+            const courseId = "{{ $course->course_id }}";
 
-                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-                submitBtn.disabled = true;
+            deleteForm.action = `/teacher/home/AssignedCoursesList/${courseId}/posts/delete/${postId}`;
 
-                // Re-enable after a short delay (remove this in actual implementation)
-                setTimeout(() => {
-                    submitBtn.innerHTML = originalHTML;
-                    submitBtn.disabled = false;
-                }, 2000);
-            });
-        });
-
-        // Smooth hover effects
-        document.querySelectorAll('.form-control').forEach(input => {
-            input.addEventListener('focus', function() {
-                this.parentElement.style.transform = 'scale(1.01)';
-            });
-
-            input.addEventListener('blur', function() {
-                this.parentElement.style.transform = 'scale(1)';
-            });
-        });
+            const deleteModal = new bootstrap.Modal(document.getElementById('deletePostModal'));
+            deleteModal.show();
+        }
     </script>
 @endsection

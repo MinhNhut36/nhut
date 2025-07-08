@@ -59,9 +59,12 @@
         }
 
         @keyframes gradientShift {
-            0%, 100% {
+
+            0%,
+            100% {
                 background-position: 0% 50%;
             }
+
             50% {
                 background-position: 100% 50%;
             }
@@ -747,21 +750,22 @@
             // Header scroll effect
             const header = document.getElementById('header');
             let lastScrollTop = 0;
-            
+
             function handleScroll() {
                 const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-                
+
                 if (scrollTop > 50) {
                     header.classList.add('scrolled');
                 } else {
                     header.classList.remove('scrolled');
                 }
-                
+
                 lastScrollTop = scrollTop;
             }
-            
+
             // Throttle scroll event for better performance
             let ticking = false;
+
             function updateScrollState() {
                 if (!ticking) {
                     requestAnimationFrame(function() {
@@ -771,9 +775,11 @@
                     ticking = true;
                 }
             }
-            
-            window.addEventListener('scroll', updateScrollState, { passive: true });
-            
+
+            window.addEventListener('scroll', updateScrollState, {
+                passive: true
+            });
+
             // Tab management
             const buttons = document.querySelectorAll('#student-tabs a');
             const activeRoute = localStorage.getItem('activeTabRoute');

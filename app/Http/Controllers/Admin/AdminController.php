@@ -25,6 +25,8 @@ use App\Models\Question;
 use App\Models\Answer;
 use App\Models\Notification;
 use App\Http\Requests\NotificationRequest;
+use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\DB;
 
 class AdminController extends Controller
 {
@@ -32,7 +34,7 @@ class AdminController extends Controller
     public function AdminHome(Request $request)
     {
         $admin = Auth::user();
-        $notifications = Notification::orderBy('created_at', 'desc')->paginate(12); 
+        $notifications = Notification::orderBy('created_at', 'desc')->paginate(12);
         $CoutNotifications = Notification::count();
         // Nếu trang yêu cầu lớn hơn trang tối đa, chuyển hướng về trang cuối
         if ($request->page > $notifications->lastPage()) {
@@ -278,11 +280,32 @@ class AdminController extends Controller
     // cập nhật thông tin khóa học
     public function CourseUpdate(EditCourseResquest $request, $id)
     {
-        $course = Course::findOrFail($id);
+        try {
+            DB::transaction(function () use ($request, $id) {
+                $course = Course::findOrFail($id);
+                $course->update($request->validated());
 
-        $course->update($request->validated());
+                $course->enrollments()
+                    ->where('status', '!=', 0)
+                    ->update(['status' => 0]);
+            });
 
-        return redirect()->back()->with('success', 'Cập nhật khóa học thành công!');
+            return redirect()
+                ->back()
+                ->with('success', 'Cập nhật khóa học thành công và đã đánh dấu hoàn thành cho các học viên.');
+        } catch (QueryException $e) {
+            // ghi log chi tiết lỗi để sau này trace
+            Log::error('CourseUpdate failed', [
+                'course_id' => $id,
+                'error'     => $e->getMessage(),
+            ]);
+
+            // đưa flash message rõ ràng cho người dùng
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('error', 'Đã có lỗi trong quá trình cập nhật, vui lòng thử lại hoặc liên hệ quản trị.');
+        }
     }
     // xóa khóa học 
     public function CourseDelete($id)
@@ -326,7 +349,7 @@ class AdminController extends Controller
         foreach ($assignments as $assignment) {
             $courseAssignments[$assignment->course_id][] = [
                 'teacher' => $assignment->teacher,
-                'position' => $assignment->role, // 'Main Teacher' hoặc 'Assistant Teacher'
+                'position' => $assignment->role, // 'giảng viên chính' hoặc 'trợ giảng'
             ];
         }
         return view('admin.TeachingAssignments', [

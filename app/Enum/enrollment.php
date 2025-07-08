@@ -4,8 +4,8 @@ namespace App\Enum;
 
 enum enrollment: int
 {
-    // chờ xác thực: 0 , đang học: 1, đạt:2, không đạt:3
-    case verifying = 0;
+    // đã hoàn thành: 0 , đang học: 1, đạt:2, không đạt:3
+    case completed = 0;
     case studying = 1;
     case pass = 2;
     case fail =3;
@@ -13,7 +13,7 @@ enum enrollment: int
     public function getEnrollment(): string
     {
         return match ($this) {
-            self::verifying => 'Chờ xác thực',
+            self::completed => 'Đã hoàn thành',
             self::studying => 'Đang học',
             self::pass => 'Đạt',
             self::fail => 'Không đạt',
@@ -23,7 +23,6 @@ enum enrollment: int
     public function getStatus(): string
     {
         return match ($this) {
-            self::verifying => 'card-status-verifying',
             self::studying => 'card-status-studying',
             self::pass => 'card-status-pass',
             self::fail => 'card-status-fail',

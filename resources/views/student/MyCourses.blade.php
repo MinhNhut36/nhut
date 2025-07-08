@@ -21,8 +21,7 @@
             text-decoration: none;
         }
 
-        .filter-btn.active,
-        .filter-btn:active {
+        .filter-btn.active {
             background: #1DA9F5;
             color: #fff;
         }
@@ -111,17 +110,6 @@
                 text-align: center;
             }
         }
-
-        .card-status-studying {
-            background-color: #0ea5e9;
-            /* màu xanh da trời */
-            color: white;
-            font-weight: 500;
-            font-size: 0.8rem;
-            padding: 6px 12px;
-            border-radius: 999px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        }
     </style>
 @endsection
 
@@ -129,11 +117,9 @@
     <div class="container" style="max-width: 80%;">
         <div class="filter-btn-group">
             <a href="{{ route('student.myCourses') }}"
-                class="filter-btn {{ request()->routeIs('student.myCourses') ? 'active' : '' }}" id="btn-studying">Đang
-                học</a>
+                class="filter-btn {{ request()->routeIs('student.myCourses') ? 'active' : '' }}">Đang học</a>
             <a href="{{ route('student.MyCoursesCompleted') }}"
-                class="filter-btn {{ request()->routeIs('student.MyCoursesCompleted') ? 'active' : '' }}"
-                id="btn-completed">Đã hoàn thành</a>
+                class="filter-btn {{ request()->routeIs('student.MyCoursesCompleted') ? 'active' : '' }}">Đã hoàn thành</a>
         </div>
 
         <div class="row g-4">
@@ -150,7 +136,7 @@
                                         <i class="fas fa-calendar-alt me-1"></i>Ngày bắt đầu:
                                     </span>
                                     <span class="fw-semibold">
-                                        {{ \Carbon\Carbon::parse($MyCourse->registration_date)->format('d/m/Y') }}
+                                        {{ \Carbon\Carbon::parse($MyCourse->course->starts_date)->format('d/m/Y') }}
                                     </span>
                                 </li>
                                 <li class="mb-2 d-flex justify-content-between">
@@ -224,7 +210,6 @@
             @endforelse
         </div>
 
-        <!-- Pagination if needed -->
         @if (method_exists($enrollment, 'links'))
             <div class="row mt-4">
                 <div class="col-12 d-flex justify-content-center">
@@ -237,9 +222,7 @@
 
 @section('js')
     <script>
-        // Show success message if available
         @if (session('success'))
-            // Create and show toast notification
             const toastHTML = `
             <div class="toast position-fixed top-0 end-0 m-3" role="alert" style="z-index: 9999;">
                 <div class="toast-header bg-success text-white">

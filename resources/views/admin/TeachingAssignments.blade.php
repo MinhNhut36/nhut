@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Phân công giáo viên - Admin Dashboard')
+@section('title', 'Phân công giảng dạy - Admin Dashboard')
 
 @section('styles')
     <style>
@@ -356,13 +356,13 @@
 
     <div class="course-assignment-container">
         <div class="page-header">
-            <h1><i class="fas fa-chalkboard-teacher me-3"></i>Phân công giáo viên</h1>
+            <h1><i class="fas fa-chalkboard-teacher me-3"></i>Phân công giảng dạy</h1>
         </div>
         @include('partials.alerts')
         <div id="courses-container">
             @forelse($unassignedCourses as $course)
                 @php
-                    // Lấy danh sách giáo viên đã phân công cho khóa học hiện tại
+                    // Lấy danh sách giảng viên đã phân công cho khóa học hiện tại
                     $courseTeachers = $courseAssignments[$course->course_id] ?? [];
                 @endphp
                 <div class="course-card" data-course-id="{{ $course->course_id }}">
@@ -378,7 +378,7 @@
                         </div>
                     </div>
 
-                    {{-- Form phân công giáo viên --}}
+                    {{-- Form Phân công giảng dạy --}}
                     <form action="{{ route('admin.course.assign-teacher') }}" method="POST" class="add-teacher-form">
                         @csrf
                         <input type="hidden" name="course_id" value="{{ $course->course_id }}">
@@ -386,11 +386,11 @@
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="teacher_id_{{ $course->course_id }}">
-                                    <i class="fas fa-user me-1"></i>Chọn giáo viên
+                                    <i class="fas fa-user me-1"></i>Chọn giảng viên
                                 </label>
                                 <select name="teacher_id" id="teacher_id_{{ $course->course_id }}" class="form-control"
                                     required>
-                                    <option value="">-- Chọn giáo viên --</option>
+                                    <option value="">-- Chọn giảng viên --</option>
                                     @foreach ($teachers as $teacher)
                                         <option value="{{ $teacher->teacher_id }}">
                                             {{ $teacher->fullname }} ({{ $teacher->email }})
@@ -412,13 +412,13 @@
 
                             <div class="form-group">
                                 <button type="submit" class="btn-custom btn-primary-custom">
-                                    <i class="fas fa-plus"></i>Thêm giáo viên
+                                    <i class="fas fa-plus"></i>Thêm giảng viên
                                 </button>
                             </div>
                         </div>
                     </form>
 
-                    {{-- Danh sách giáo viên đã phân công --}}
+                    {{-- Danh sách giảng viên đã phân công --}}
                     <div class="teachers-list">
                         @if (count($courseTeachers) > 0)
                             @foreach ($courseTeachers as $assignment)
@@ -463,7 +463,7 @@
 
                                         <form action="{{ route('admin.course.remove-teacher') }}" method="POST"
                                             style="display: inline;"
-                                            onsubmit="return confirm('Bạn có chắc chắn muốn xóa giáo viên này khỏi khóa học?')">
+                                            onsubmit="return confirm('Bạn có chắc chắn muốn xóa giảng viên này khỏi khóa học?')">
                                             @csrf
                                             @method('DELETE')
                                             <input type="hidden" name="course_id" value="{{ $course->course_id }}">
@@ -478,7 +478,7 @@
                             @endforeach
                         @else
                             <div class="empty-state">
-                                Chưa có giáo viên nào được phân công cho khóa học này
+                                Chưa có giảng viên nào được phân công cho khóa học này
                             </div>
                         @endif
                     </div>
@@ -545,7 +545,7 @@
                     });
 
                     if (alreadyAssigned && selectedTeacherId) {
-                        alert('Giáo viên này đã được phân công cho khóa học!');
+                        alert('giảng viên này đã được phân công cho khóa học!');
                         this.value = '';
                     }
                 });

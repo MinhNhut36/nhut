@@ -27,7 +27,7 @@ class AddCourseRequest extends FormRequest
             'course_name' => ['required', 'string', 'max:255'],
             'level' => ['required', 'string'],
             'year' => ['required', 'integer', 'min:' . $currentYear],
-            'description' => ['nullable', 'string'],
+            'description' => ['required', 'string'],
             'starts_date' => ['required', 'date', 'after_or_equal:today'],
         ];
     }
@@ -45,7 +45,7 @@ class AddCourseRequest extends FormRequest
             'year.min' => 'Năm phải từ ' . $currentYear . ' trở đi.',
 
             'description.string' => 'Mô tả phải là một chuỗi ký tự.',
-
+            'description.required' => 'Vui lòng nhập mô tả.',
             'starts_date.required' => 'Vui lòng chọn ngày bắt đầu.',
             'starts_date.after_or_equal' => 'Ngày bắt đầu không được nhỏ hơn ngày hôm nay.',
         ];

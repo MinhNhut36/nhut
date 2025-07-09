@@ -324,7 +324,7 @@
                                 @endif
                             </div>
 
-                            <a href="{{ route('student.DetailCourse', urlencode($lesson->level)) }}" class="course-button">
+                            <a href="{{ route('student.DetailCourse', $lesson->level) }}" class="course-button">
                                 <i class="fas fa-book-open"></i>
                                 <span>{{ $lesson->title }}</span>
                                 <i class="fas fa-arrow-right"></i>

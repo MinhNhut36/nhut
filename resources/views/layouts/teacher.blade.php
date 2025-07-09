@@ -726,7 +726,7 @@
             <div class="nav-tabs-container" id="student-tabs">
                 <a href="{{ route('teacher.home') }}" class="btn nav-button text-dark">
                     <i class="fas fa-user"></i>
-                    <span>Thông tin giáo viên</span>
+                    <span>Thông tin giảng viên</span>
                 </a>
                 <a href="{{ route('teacher.coursesopening') }}" class="btn nav-button text-dark">
                     <i class="fas fa-book"></i>

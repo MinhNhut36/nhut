@@ -175,12 +175,7 @@
                                 {{ isset($teacher->created_at) ? \Carbon\Carbon::parse($teacher->created_at)->format('d/m/Y H:i') : '01/09/2023 08:00' }}
                             </div>
                         </div>
-                        <div class="mb-0">
-                            <small class="text-muted">Cập nhật lần cuối</small>
-                            <div class="fw-semibold">
-                                {{ isset($teacher->updated_at) ? \Carbon\Carbon::parse($teacher->updated_at)->format('d/m/Y H:i') : '15/06/2025 14:30' }}
-                            </div>
-                        </div>
+                        
                     </div>
                 </div>
             </div>

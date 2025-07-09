@@ -174,7 +174,6 @@ class StudentController extends Controller
             ->where('status', 1)
             ->orderByDesc('created_at')
             ->get();
-
         return view('student.board')
             ->with('posts', $posts)
             ->with('courseId', $course_id)
@@ -195,7 +194,7 @@ class StudentController extends Controller
             'status' => 1, // Trạng thái bình luận
         ]);
 
-        return redirect()->back()->with('success', 'Phản hồi của bạn đã được gửi!')->with('courseId', $course_id);
+        return redirect()->back()->with('courseId', $course_id);
     }
     // Xóa bình luận của học sinh
     public function DeleteComment(ClassPostComment $comment)

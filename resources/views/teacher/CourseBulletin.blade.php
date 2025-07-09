@@ -623,7 +623,7 @@
         <div class="page-header">
             <h2><i class="fas fa-bullhorn me-2"></i>Bảng tin khóa học</h2>
         </div>
-
+        @include('partials.alerts')
         {{-- Form đăng bài viết mới --}}
         <div class="post-form">
             <form action="{{ route('teacher.post', $course->course_id) }}" method="POST" class="w-100">
@@ -646,7 +646,7 @@
                 </div>
             </form>
         </div>
-        @include('partials.alerts')
+
         {{-- Danh sách bài viết --}}
         @foreach ($posts as $post)
             <div class="post-card">

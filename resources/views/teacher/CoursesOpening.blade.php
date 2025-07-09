@@ -1,5 +1,5 @@
 @extends('layouts.teacher')
-@section('title', 'CÁC KHÓA ĐANG MỞ LỚP')
+@section('title', 'GIẢNG DẠY')
 
 @section('styles')
     <style>
@@ -443,7 +443,7 @@
                             </div>
 
                             <div class="course-footer">
-                                <a href="{{ route('teacher.coursedetails', $MyCourse->course->course_id) }}" 
+                                <a href="{{ route('teacher.boards', $MyCourse->course->course_id) }}" 
                                    class="enter-class-btn">
                                     <i class="fas fa-door-open me-2"></i>
                                     Vào lớp học

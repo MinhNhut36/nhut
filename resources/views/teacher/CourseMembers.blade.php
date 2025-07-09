@@ -654,6 +654,7 @@
             transform: translateY(-2px);
             box-shadow: var(--shadow-lg);
         }
+
         /* class giới tính */
         .gender-badge {
             padding: 4px 8px;
@@ -805,7 +806,7 @@
                                     </div>
                                 </td>
                                 <td>{{ $member->student->email }}</td>
-                                <td >
+                                <td>
                                     <span class="gender-badge {{ $member->student->gender->GetBadge() }}">
                                         {{ $member->student->gender->getLabel() }}
                                     </span>
@@ -826,10 +827,27 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="4" class="text-center py-4">
-                                    <div class="text-muted">
-                                        <i class="fas fa-users fa-2x mb-2"></i>
-                                        <p>Không có sinh viên nào được tìm thấy.</p>
+                                <td colspan="5" class="text-center">
+                                    <div class="empty-state">
+                                        @if (request('search') || request('status') !== null || request('gender') !== null)
+                                            <i class="fas fa-search"></i>
+                                            <h4>Không tìm thấy sinh viên</h4>
+                                            <p>Không có sinh viên nào phù hợp với từ khóa tìm kiếm
+                                                @if (request('search'))
+                                                    "<strong>{{ request('search') }}</strong>"
+                                                @endif
+                                                trong lớp này.
+                                            </p>
+                                            <a href="{{ route('teacher.grade', $course->course_id) }}"
+                                                class="btn-clear-search">
+                                                <i class="fas fa-times"></i>
+                                                Xóa bộ lọc
+                                            </a>
+                                        @else
+                                            <i class="fas fa-users"></i>
+                                            <h4>Chưa có sinh viên</h4>
+                                            <p>Lớp học này chưa có sinh viên nào tham gia.</p>
+                                        @endif
                                     </div>
                                 </td>
                             </tr>

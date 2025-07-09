@@ -542,7 +542,7 @@
                                                     <div class="comment-header">
                                                         <div class="comment-info">
                                                             <div class="comment-author">
-                                                                {{ $comment->student->fullname ?? 'Ẩn danh' }}
+                                                                {{ $comment->student->fullname ?? $comment->teacher->fullname }}
                                                             </div>
                                                             <div class="comment-time">
                                                                 {{ $comment->created_at->format('H:i - d/m/Y') }}
@@ -553,7 +553,7 @@
                                                             <div class="comment-actions">
                                                                 <form action="{{ route('student.lesson.board.comment.delete', $comment->comment_id) }}" 
                                                                       method="POST" 
-                                                                      onsubmit="return confirm('Bạn có chắc chắn muốn xóa comment này?')"
+                                                                      onsubmit="return confirm('Bạn có chắc chắn muốn xóa bình luận này?')"
                                                                       style="display: inline;">
                                                                     @csrf
                                                                     @method('DELETE')

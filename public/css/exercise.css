@@ -1245,3 +1245,10 @@
         font-size: 14px;
     }
 }
+.btn-submit, .btn-complete {
+    transition: opacity 0.3s ease;
+}
+
+.btn-submit.hidden, .btn-complete.hidden {
+    display: none !important;
+}

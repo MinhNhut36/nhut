@@ -249,7 +249,7 @@ class StudentController extends Controller
 
         // 5. Lấy danh sách câu hỏi dạng single_choice
         $questions = Question::with('answers')->where('lesson_part_id', $lessonPartId)
-            ->whereIn('question_type', ['single_choice', 'fill_blank', 'matching','arrangement'])
+            ->whereIn('question_type', ['single_choice', 'fill_blank', 'matching', 'arrangement'])
             ->orderBy('order_index')
             ->get();
 
@@ -310,6 +310,7 @@ class StudentController extends Controller
             $correctAnswer = null;
             $answerText = '';
             $feedback = '';
+            $wordResults = [];
 
             if ($questionType === 'single_choice') {
                 $correctAnswer = $question->answers->where('is_correct', 1)->first();
@@ -353,6 +354,37 @@ class StudentController extends Controller
                     : "❌ Bạn ghép đúng $correctPairs / $totalPairs cặp.";
 
                 $answerText = json_encode($answerValue);
+            } elseif ($questionType === 'arrangement' && is_array($answerValue)) {
+                $normalize = fn($w) => trim(mb_strtolower(str_replace('’', "'", $w)));
+
+                $correctAnswers = $question->answers->sortBy('order_index')->values();
+                $correctWords = $correctAnswers->pluck('answer_text')->map($normalize)->values();
+                $studentWords = collect($answerValue)->map($normalize)->values();
+
+                $correctMap = [];
+                $correctWordCount = 0;
+
+                for ($i = 0; $i < count($correctWords); $i++) {
+                    $expectedWord = $correctWords[$i];
+                    $studentWord = $studentWords[$i] ?? null;
+                    $answerId = $correctAnswers[$i]->answers_id;
+
+                    $isWordCorrect = $studentWord === $expectedWord;
+
+                    $wordResults[$answerId] = ['is_correct' => $isWordCorrect];
+                    $correctMap[] = $isWordCorrect;
+
+                    if ($isWordCorrect) {
+                        $correctWordCount++;
+                    }
+                }
+
+                $isCorrect = $correctWordCount === count($correctWords);
+                $feedback = $isCorrect
+                    ? '✅ Bạn đã sắp xếp chính xác câu!'
+                    : "❌ Bạn đã sắp đúng $correctWordCount / " . count($correctWords) . " từ.";
+
+                $answerText = implode(' ', $answerValue);
             }
 
             // Lưu câu trả lời của học sinh
@@ -378,9 +410,14 @@ class StudentController extends Controller
                 'is_correct'     => $isCorrect,
                 'feedback'       => $feedback,
             ];
+
+            // Gửi word_results nếu là arrangement
+            if ($questionType === 'arrangement') {
+                $results[$questionId]['word_results'] = $wordResults;
+            }
         }
 
-        // Tính tổng điểm sau khi duyệt xong tất cả câu hỏi
+        // Tính tổng điểm
         $finalScore = round($correctCount * $scorePerQuestion, 1);
 
         // Cập nhật bảng điểm
@@ -392,7 +429,6 @@ class StudentController extends Controller
 
         // Cập nhật tiến độ học
         $isCompleted = $finalScore >= 7;
-
         StudentProgress::updateOrCreate(
             ['score_id' => $scoreId],
             [

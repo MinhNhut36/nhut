@@ -174,19 +174,15 @@
                                 </li>
                             </ul>
                         </div>
+                        
                         <div class="card-footer bg-transparent border-top-0">
                             <a href="{{ route('student.lesson', $MyCourse->course->course_id) }}"
                                 class="btn course-btn w-100 text-white d-flex justify-content-between align-items-center">
-                                <span>
-                                    @if (request()->routeIs('student.myCourses'))
-                                        <i class="fas fa-play me-2"></i>Xem bài học
-                                    @else
-                                        <i class="fas fa-eye me-2"></i>Xem lại bài học
-                                    @endif
-                                </span>
+                                 <i class="fas fa-play me-2"></i>Xem bài học
                                 <i class="fas fa-arrow-right"></i>
                             </a>
                         </div>
+                        
                     </div>
                 </div>
             @empty

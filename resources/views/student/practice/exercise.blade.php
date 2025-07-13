@@ -69,7 +69,7 @@
                                 @foreach ($question->shuffled_images as $imageAnswer)
                                     <div class="image-drop-zone" data-match-key="{{ $imageAnswer->match_key }}"
                                         data-answer-id="{{ $imageAnswer->answers_id }}">
-                                        <img src="{{ $imageAnswer->media_url }}" alt="Matching image">
+                                        <img src="{{ asset($imageAnswer->media_url) }}" alt="Matching image">
                                         <div class="drop-text">Thả tên vào đây</div>
                                     </div>
                                 @endforeach

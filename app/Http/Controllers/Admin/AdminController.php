@@ -509,23 +509,45 @@ class AdminController extends Controller
 
     private function handleMatching(Request $request)
     {
-        dd($request);
         $pairs = [];
         foreach ($request->words as $i => $word) {
             $image = $request->file('images')[$i] ?? null;
-            $imagePath = $image ? $image->store('matching_images', 'public') : null;
-            $pairs[] = ['word' => $word, 'image' => $imagePath];
+            if ($image) {
+                $fileName = uniqid('match_') . '.' . $image->getClientOriginalExtension();
+                $image->move(public_path('uploads/matching_images'), $fileName);
+                $imagePath = 'uploads/matching_images/' . $fileName;
+            } else {
+                $imagePath = null;
+            }
+        
+            $pairs[] = [
+                'word' => $word,
+                'image' => $imagePath,
+            ];
+        }
+        $question = Question::create([
+            'lesson_part_id' => $request->lesson_part_id,
+            'question_type' => $request->question_type,
+            'question_text' => $request->question_text,
+            'order_index' => $request->order_index,
+        ]);
+        if($question)
+        {
+            foreach ($pairs as $index => $pair) {
+                $answer = Answer::create([
+                    'questions_id' => $question->questions_id,
+                    'match_key' => $pair['word'],
+                    'answer_text' => $pair['word'],
+                    'is_correct' => 1,
+                    'feedback' => 'Chính xác!',
+                    'media_url' => $pair['image'],
+                    'order_index' => $index + 1,
+                ]);
+            }
+            return back()->with('success', 'Tạo câu hỏi nối từ thành công!');
         }
 
-        Question::create([
-            'lesson_part_id' => $request->lesson_part_id,
-            'question_type' => 'matching',
-            'order_index' => $request->order_index,
-            'question_text' => $request->question_text,
-            'matching_pairs' => json_encode($pairs),
-        ]);
-
-        return back()->with('success', 'Tạo câu hỏi nối từ thành công!');
+        return back()->with('error', 'Tạo câu hỏi nối từ thất bại!');
     }
 
     private function handleClassification(Request $request)
@@ -575,25 +597,37 @@ class AdminController extends Controller
 
     private function handleArrangement(Request $request)
     {
-        dd($request);
         $words = explode(' ', $request->correct_sentence);
-        shuffle($words);
-
-        Question::create([
+        $question = Question::create([
             'lesson_part_id' => $request->lesson_part_id,
-            'question_type' => 'arrangement',
-            'order_index' => $request->order_index,
+            'question_type' => $request->question_type,
             'question_text' => $request->question_text,
-            'correct_answer' => $request->correct_sentence,
-            'options' => json_encode($words),
+            'order_index' => $request->order_index,
         ]);
 
-        return back()->with('success', 'Tạo câu hỏi sắp xếp câu thành công!');
+        if($question)
+        {
+            foreach ($words as $index => $word) 
+            {
+                $answer = Answer::create([
+                    'questions_id' => $question->questions_id,
+                    'match_key' => $word,
+                    'answer_text' => $word,
+                    'is_correct' => 1,
+                    'feedback' => 'Chính xác!',
+                    'media_url' => null, // tự xử lý
+                    'order_index' => $index + 1,
+                ]);
+            }
+            return back()->with('success', 'Tạo câu hỏi sắp xếp câu thành công!');
+        }
+
+        return back()->with('success', 'Tạo câu hỏi sắp xếp câu thất bại!');
     }
 
     private function handleImageWord(Request $request)
     {
-        dd($request);
+        dd($request->all());
         $mediaPath = $request->file('media_url')->store('image_word', 'public');
         $letters = str_split($request->correct_word);
         shuffle($letters);

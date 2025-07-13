@@ -62,7 +62,7 @@ class StudentController extends Controller
     public function ShowListCourses()
     {
         $lessons = Lesson::orderBy('order_index')->get();
-        return view('student.Courselist')
+        return view('student.CourseList')
             ->with('lessons', $lessons);
     }
 

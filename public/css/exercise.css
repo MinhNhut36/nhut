@@ -11,6 +11,7 @@
         }
 
         .container {
+            max-width: 1300px;
             margin: 0 auto;
             background: rgba(255, 255, 255, 0.95);
             border-radius: 20px;
@@ -663,6 +664,7 @@
         }
         /* Matching Game Styles */
 .matching-container {
+    
     display: flex;
     flex-direction: column;
     gap: 30px;

@@ -6,7 +6,6 @@ use Illuminate\Database\Seeder;
 use App\Models\StudentEvaluation;
 use App\Models\Student;
 use App\Models\ExamResult;
-use App\Models\StudentProgres;
 use App\Models\StudentProgress;
 use Carbon\Carbon;
 

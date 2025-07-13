@@ -9,376 +9,7 @@
     <!-- Favicon -->
     <link rel="icon" type="image/png"
         href="https://cdn.haitrieu.com/wp-content/uploads/2023/01/Logo-Truong-Cao-dang-Ky-thuat-Cao-Thang.png">
-    <style>
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            color: #333;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            padding: 2rem;
-            margin: 0;
-            min-height: 100vh;
-        }
-
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            backdrop-filter: blur(10px);
-            overflow: hidden;
-        }
-
-        .header {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            padding: 2rem;
-            text-align: center;
-            color: white;
-        }
-
-        .header h1 {
-            margin: 0;
-            font-size: 1.8rem;
-            font-weight: 600;
-        }
-
-        .progress-container {
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 50px;
-            height: 8px;
-            margin-top: 1rem;
-            overflow: hidden;
-        }
-
-        .progress-bar {
-            height: 100%;
-            background: linear-gradient(90deg, #ff6b6b, #ffd93d);
-            border-radius: 50px;
-            transition: width 0.3s ease;
-            width: 0%;
-        }
-
-        .question-block {
-            display: none;
-            padding: 2.5rem;
-            animation: fadeIn 0.5s ease-in-out;
-        }
-
-        .question-block.active {
-            display: block;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .question-counter {
-            display: inline-block;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            margin-bottom: 1.5rem;
-        }
-
-        .question-text {
-            font-size: 1.2rem;
-            margin-bottom: 2rem;
-            line-height: 1.6;
-            color: #2c3e50;
-            font-weight: 500;
-        }
-
-        .answers {
-            list-style: none;
-            padding: 0;
-            margin-bottom: 2rem;
-        }
-
-        .answers li {
-            margin-bottom: 1rem;
-        }
-
-        .answers input[type="radio"] {
-            display: none;
-        }
-
-        .answer-btn {
-            display: block;
-            width: 100%;
-            padding: 1rem 1.5rem;
-            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-            border: 2px solid #dee2e6;
-            border-radius: 15px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-align: left;
-            font-size: 1rem;
-            line-height: 1.5;
-            color: #495057;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .answer-btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            transition: left 0.5s;
-        }
-
-        .answer-btn:hover {
-            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
-            border-color: #2196f3;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(33, 150, 243, 0.3);
-        }
-
-        .answer-btn:hover::before {
-            left: 100%;
-        }
-
-        .answers input[type="radio"]:checked+.answer-btn {
-            background: linear-gradient(135deg, #4caf50, #45a049);
-            color: white;
-            border-color: #4caf50;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
-        }
-
-        .answers input[type="radio"]:disabled+.answer-btn {
-            cursor: not-allowed;
-            opacity: 0.7;
-        }
-
-        .btn {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: #fff;
-            border: none;
-            padding: 0.8rem 2rem;
-            margin: 0 0.5rem;
-            cursor: pointer;
-            border-radius: 25px;
-            font-size: 1rem;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-block;
-        }
-
-        .btn:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
-
-        .btn:disabled {
-            background: linear-gradient(135deg, #bbb, #999);
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-
-        .btn-submit {
-            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
-        }
-
-        .btn-submit:hover:not(:disabled) {
-            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
-        }
-
-        .btn-complete {
-            background: linear-gradient(135deg, #4caf50, #45a049);
-            display: none;
-        }
-
-        .btn-complete:hover {
-            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
-        }
-
-        .btn-group {
-            text-align: center;
-            margin-top: 2rem;
-            padding-top: 2rem;
-            border-top: 1px solid #e9ecef;
-        }
-
-        .feedback {
-            margin-top: 1.5rem;
-            padding: 1rem;
-            border-radius: 10px;
-            font-style: italic;
-            border: 1px solid #ddd;
-            background: #f8f9fa;
-            animation: slideDown 0.3s ease;
-        }
-
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .feedback.correct {
-            background: linear-gradient(135deg, #e8f5e8, #c8e6c9);
-            color: #2e7d32;
-            border-color: #4caf50;
-        }
-
-        .feedback.incorrect {
-            background: linear-gradient(135deg, #ffebee, #ffcdd2);
-            color: #c62828;
-            border-color: #f44336;
-        }
-
-        .answer-btn.correct {
-            background: linear-gradient(135deg, #4caf50, #45a049) !important;
-            color: white !important;
-            border-color: #4caf50 !important;
-        }
-
-        .answer-btn.incorrect {
-            background: linear-gradient(135deg, #f44336, #e53935) !important;
-            color: white !important;
-            border-color: #f44336 !important;
-        }
-
-        .loading {
-            display: none;
-            padding: 2.5rem;
-            text-align: center;
-        }
-
-        .loading.active {
-            display: block;
-        }
-
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #667eea;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 1rem;
-        }
-
-        @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-
-        @media (max-width: 768px) {
-            body {
-                padding: 1rem;
-            }
-
-            .question-block {
-                padding: 1.5rem;
-            }
-
-            .btn {
-                padding: 0.7rem 1.5rem;
-                margin: 0.25rem;
-                font-size: 0.9rem;
-            }
-        }
-
-        .fill-blank-input {
-            width: 100%;
-            padding: 12px;
-            font-size: 16px;
-            border: 2px solid #dee2e6;
-            border-radius: 8px;
-            margin-bottom: 1rem;
-            transition: border-color 0.3s ease;
-        }
-
-        .fill-blank-input.correct {
-            border-color: #4caf50;
-            background-color: #e8f5e8;
-        }
-
-        .fill-blank-input.incorrect {
-            border-color: #f44336;
-            background-color: #ffebee;
-        }
-
-        /* Thông báo validation */
-        .validation-message {
-            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
-            border: 1px solid #ffc107;
-            color: #856404;
-            padding: 0.75rem;
-            border-radius: 8px;
-            margin-top: 1rem;
-            font-size: 0.9rem;
-            display: none;
-            animation: shake 0.5s ease-in-out;
-        }
-
-        .validation-message.show {
-            display: block;
-        }
-
-        @keyframes shake {
-
-            0%,
-            100% {
-                transform: translateX(0);
-            }
-
-            25% {
-                transform: translateX(-5px);
-            }
-
-            75% {
-                transform: translateX(5px);
-            }
-        }
-
-        /* Hiển thị đáp án đúng */
-        .correct-answer {
-            margin-top: 1rem;
-            padding: 1rem;
-            background: linear-gradient(135deg, #e8f5e8, #c8e6c9);
-            border: 1px solid #4caf50;
-            border-radius: 8px;
-            color: #2e7d32;
-            font-weight: 500;
-        }
-
-        .correct-answer strong {
-            color: #1b5e20;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ asset('css/exercise.css') }}">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 
@@ -391,16 +22,16 @@
             </div>
         </div>
 
-        @php $total = $questions->count(); @endphp
+        @php $totalQuest = $questions->count(); @endphp
 
         @foreach ($questions as $i => $question)
             <div class="question-block" data-index="{{ $i }}"
                 data-question-id="{{ $question->questions_id }}">
-                <div class="question-counter">Câu {{ $i + 1 }} / {{ $totalQuestions }}</div>
+                <div class="question-counter">Câu {{ $i + 1 }} / {{ $totalQuest }}</div>
                 <p class="question-text">{{ $question->question_text }}</p>
                 @if ($question->question_type == 'single_choice')
                     <ul class="answers">
-                        @foreach ($question->answers as $j => $answer)
+                        @foreach ($question->shuffled_answers as $j => $answer)
                             <li>
                                 <input type="radio" name="answer_{{ $question->questions_id }}"
                                     value="{{ $answer->answers_id }}"
@@ -416,6 +47,79 @@
                     <input type="text" class="fill-blank-input" name="answer_{{ $question->questions_id }}"
                         placeholder="Nhập câu trả lời..."
                         data-correct-answer="{{ $question->answers->where('is_correct', true)->first()->answer_text ?? '' }}">
+                @elseif ($question->question_type == 'matching')
+                    <div class="matching-container" data-question-id="{{ $question->questions_id }}">
+                        {{-- Row 1: Text Items --}}
+                        <div class="matching-row">
+                            <div class="text-items-column">
+                                @foreach ($question->shuffled_texts as $textAnswer)
+                                    <div class="matching-item" draggable="true"
+                                        data-match-key="{{ $textAnswer->match_key }}"
+                                        data-answer-id="{{ $textAnswer->answers_id }}"
+                                        data-animal="{{ strtolower($textAnswer->answer_text) }}">
+                                        {{ $textAnswer->answer_text }}
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+
+                        {{-- Row 2: Image Items --}}
+                        <div class="matching-row">
+                            <div class="image-items-column">
+                                @foreach ($question->shuffled_images as $imageAnswer)
+                                    <div class="image-drop-zone" data-match-key="{{ $imageAnswer->match_key }}"
+                                        data-answer-id="{{ $imageAnswer->answers_id }}">
+                                        <img src="{{ $imageAnswer->media_url }}" alt="Matching image">
+                                        <div class="drop-text">Thả tên vào đây</div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="control-buttons">
+                        <button type="button" class="btn reset-btn reset-matching"
+                            onclick="resetMatching({{ $question->questions_id }})">
+                            🔄 Đặt lại
+                        </button>
+                    </div>
+                @elseif ($question->question_type == 'arrangement')
+                    <div class="arrangement-container" data-question-id="{{ $question->questions_id }}">
+                        {{-- Hình ảnh câu hỏi nếu có --}}
+                        @if ($question->media_url)
+                            <div class="question-image">
+                                <img src="{{ $question->media_url }}" alt="Hình ảnh câu hỏi" />
+                            </div>
+                        @endif
+
+                        <div class="arrangement-instruction">
+                            📝 Kéo thả hoặc click vào các từ để tạo thành câu hoàn chỉnh.
+                        </div>
+
+                        {{-- Khu vực tạo câu --}}
+                        <div class="sentence-builder" data-question-id="{{ $question->questions_id }}">
+                            <div class="sentence-builder-label">Câu của bạn:</div>
+                        </div>
+
+                        {{-- Khu vực chứa từ --}}
+                        <div class="words-pool" data-question-id="{{ $question->questions_id }}">
+                            <div class="words-pool-label">Click hoặc kéo các từ từ đây:</div>
+                            @foreach ($question->answers as $word)
+                                <div class="word-item clickable" draggable="true" data-word="{{ $word->answer_text }}"
+                                    data-match-key="{{ $word->match_key }}" data-order="{{ $word->order_index }}"
+                                    data-answer-id="{{ $word->answers_id }}">
+                                    {{ $word->answer_text }}
+                                </div>
+                            @endforeach
+                        </div>
+
+                        <div class="arrangement-controls">
+                            <button type="button" class="btn-reset-arrangement"
+                                onclick="resetArrangement({{ $question->questions_id }})">
+                                🔄 Đặt lại
+                            </button>
+                        </div>
+                    </div>
                 @endif
 
                 <!-- Thông báo validation -->
@@ -427,7 +131,7 @@
                     <button class="btn btn-prev" @if ($i === 0) disabled @endif>
                         ← Câu trước
                     </button>
-                    @if ($i < $total - 1)
+                    @if ($i < $totalQuest - 1)
                         <button class="btn btn-next">
                             Câu sau →
                         </button>
@@ -450,7 +154,215 @@
         </div>
     </div>
 
-   <script>
+
+
+</body>
+
+    <script>
+        // Hàm đặt lại matching
+        function resetMatching(questionId) {
+            const container = document.querySelector(`[data-question-id="${questionId}"]`);
+            if (!container) return;
+
+            const matchingContainer = container.querySelector('.matching-container');
+            if (!matchingContainer) return;
+
+            // Xử lý image-drop-zone format (từ file đầu tiên)
+            const imageDropZones = matchingContainer.querySelectorAll('.image-drop-zone');
+            if (imageDropZones.length > 0) {
+                const textItems = matchingContainer.querySelectorAll('.matching-item');
+
+                // Reset text items
+                textItems.forEach(item => {
+                    item.classList.remove('used', 'correct', 'incorrect');
+                    item.draggable = true;
+                });
+
+                // Reset drop zones
+                imageDropZones.forEach(zone => {
+                    zone.classList.remove('filled', 'correct', 'incorrect');
+                    const matchedText = zone.querySelector('.matched-text');
+                    if (matchedText) {
+                        matchedText.remove();
+                    }
+                    const dropText = zone.querySelector('.drop-text');
+                    if (dropText) {
+                        dropText.style.display = 'block';
+                    }
+                });
+            }
+
+            // Xử lý drop-zone format (từ file thứ hai)
+            const dropZones = matchingContainer.querySelectorAll('.drop-zone');
+            if (dropZones.length > 0) {
+                dropZones.forEach(zone => {
+                    const droppedItem = zone.querySelector('.matching-item');
+                    if (droppedItem) {
+                        // Trả item về cột text
+                        const textColumn = matchingContainer.querySelector('.text-items');
+                        if (textColumn) {
+                            textColumn.appendChild(droppedItem);
+                        }
+
+                        // Reset styles
+                        droppedItem.classList.remove('connected', 'correct', 'incorrect');
+                        zone.classList.remove('filled');
+                        const dropText = zone.querySelector('.drop-text');
+                        if (dropText) {
+                            dropText.style.display = 'block';
+                        }
+                    }
+                });
+            }
+
+            // Xóa feedback khác
+            const otherFeedback = container.querySelector('.matching-feedback');
+            if (otherFeedback) {
+                otherFeedback.remove();
+            }
+        }
+
+        // Khởi tạo Drag and Drop - Phiên bản gộp
+        function initDragAndDrop() {
+            const containers = document.querySelectorAll('.matching-container');
+
+            containers.forEach(container => {
+                // Xử lý text items drag events
+                const textItems = container.querySelectorAll('.matching-item');
+                textItems.forEach(item => {
+                    item.addEventListener('dragstart', function(e) {
+                        const data = {
+                            matchKey: this.dataset.matchKey,
+                            answerId: this.dataset.answerId,
+                            text: this.textContent.trim()
+                        };
+
+                        e.dataTransfer.setData('text/plain', JSON.stringify(data));
+                        e.dataTransfer.setData('answer-id', this.dataset.answerId);
+                        this.classList.add('dragging');
+                    });
+
+                    item.addEventListener('dragend', function() {
+                        this.classList.remove('dragging');
+                    });
+                });
+
+                // Xử lý image-drop-zone format
+                const imageDropZones = container.querySelectorAll('.image-drop-zone');
+                imageDropZones.forEach(zone => {
+                    zone.addEventListener('dragover', function(e) {
+                        e.preventDefault();
+                        this.classList.add('drag-over');
+                    });
+
+                    zone.addEventListener('dragleave', function() {
+                        this.classList.remove('drag-over');
+                    });
+
+                    zone.addEventListener('drop', function(e) {
+                        e.preventDefault();
+                        this.classList.remove('drag-over');
+
+                        const data = JSON.parse(e.dataTransfer.getData('text/plain'));
+                        const draggedItem = container.querySelector(
+                            `[data-answer-id="${data.answerId}"]`);
+
+                        if (!draggedItem) return;
+
+                        // Xóa matched text cũ nếu có
+                        const existingText = this.querySelector('.matched-text');
+                        if (existingText) {
+                            const oldMatchKey = existingText.dataset.matchKey;
+                            const oldItem = container.querySelector(
+                                `[data-match-key="${oldMatchKey}"]`);
+                            if (oldItem) {
+                                oldItem.classList.remove('used');
+                                oldItem.draggable = true;
+                            }
+                            existingText.remove();
+                        }
+
+                        // Thêm matched text mới
+                        const matchedText = document.createElement('div');
+                        matchedText.className = 'matched-text';
+                        matchedText.textContent = data.text;
+                        matchedText.dataset.matchKey = data.matchKey;
+                        this.appendChild(matchedText);
+
+                        // Ẩn drop text
+                        const dropText = this.querySelector('.drop-text');
+                        if (dropText) {
+                            dropText.style.display = 'none';
+                        }
+
+                        // Đánh dấu trạng thái
+                        this.classList.add('filled');
+                        draggedItem.classList.add('used');
+                        draggedItem.draggable = false;
+                    });
+                });
+
+                // Xử lý drop-zone format
+                const dropZones = container.querySelectorAll('.drop-zone');
+                dropZones.forEach(zone => {
+                    zone.addEventListener('dragover', function(e) {
+                        e.preventDefault();
+                        this.classList.add('drag-over');
+                    });
+
+                    zone.addEventListener('dragleave', function() {
+                        this.classList.remove('drag-over');
+                    });
+
+                    zone.addEventListener('drop', function(e) {
+                        e.preventDefault();
+                        this.classList.remove('drag-over');
+
+                        const draggedMatchKey = e.dataTransfer.getData('text/plain');
+                        const draggedAnswerId = e.dataTransfer.getData('answer-id');
+
+                        let draggedItem;
+                        try {
+                            const data = JSON.parse(draggedMatchKey);
+                            draggedItem = container.querySelector(
+                                `[data-answer-id="${data.answerId}"]`);
+                        } catch {
+                            draggedItem = container.querySelector(
+                                `[data-match-key="${draggedMatchKey}"][data-answer-id="${draggedAnswerId}"]`
+                            );
+                        }
+
+                        if (!draggedItem) return;
+
+                        // Kiểm tra xem drop zone đã có item chưa
+                        const existingItem = this.querySelector('.matching-item');
+                        if (existingItem) {
+                            // Trả item cũ về cột text
+                            const textColumn = container.querySelector('.text-items');
+                            if (textColumn) {
+                                textColumn.appendChild(existingItem);
+                            }
+                            existingItem.classList.remove('connected', 'correct', 'incorrect');
+                        }
+
+                        // Thêm item mới vào drop zone
+                        this.appendChild(draggedItem);
+                        this.classList.add('filled');
+
+                        const dropText = this.querySelector('.drop-text');
+                        if (dropText) {
+                            dropText.style.display = 'none';
+                        }
+
+                        // Kiểm tra đúng/sai
+                        const isCorrect = draggedItem.dataset.matchKey === this.dataset.matchKey;
+                        draggedItem.classList.add(isCorrect ? 'correct' : 'connected');
+                    });
+                });
+            });
+        }
+
+        // Main application logic
         (function() {
             const blocks = document.querySelectorAll('.question-block');
             const progressBar = document.getElementById('progress-bar');
@@ -463,43 +375,63 @@
 
             function updateProgress() {
                 const progress = ((idx + 1) / total) * 100;
-                progressBar.style.width = progress + '%';
+                if (progressBar) {
+                    progressBar.style.width = progress + '%';
+                }
             }
 
             function show(i) {
                 blocks.forEach((b, j) => b.classList.toggle('active', j === i));
-                loading.classList.remove('active');
+                if (loading) loading.classList.remove('active');
+                const statisticsView = document.getElementById('statistics-view');
+                if (statisticsView) {
+                    statisticsView.classList.remove('active');
+                }
                 updateProgress();
             }
 
             function showLoading() {
                 blocks.forEach(b => b.classList.remove('active'));
-                loading.classList.add('active');
+                const statisticsView = document.getElementById('statistics-view');
+                if (statisticsView) {
+                    statisticsView.classList.remove('active');
+                }
+                if (loading) loading.classList.add('active');
             }
 
             // Kiểm tra câu hỏi hiện tại đã được trả lời chưa
             function isCurrentQuestionAnswered() {
                 const currentBlock = blocks[idx];
-                const qid = currentBlock.getAttribute('data-question-id');
-
-                // Kiểm tra radio button (single_choice)
-                const radio = currentBlock.querySelector('input[type="radio"]:checked');
-                if (radio) return true;
-
-                // Kiểm tra text input (fill_blank)
-                const textInput = currentBlock.querySelector('input[type="text"]');
-                if (textInput && textInput.value.trim() !== '') return true;
-
-                return false;
+                return isQuestionAnswered(currentBlock);
             }
 
             // Kiểm tra câu hỏi cụ thể đã được trả lời chưa
             function isQuestionAnswered(block) {
+                // Kiểm tra radio button (single_choice)
                 const radio = block.querySelector('input[type="radio"]:checked');
-                const textInput = block.querySelector('input[type="text"]');
-                
                 if (radio) return true;
+
+                // Kiểm tra text input (fill_blank)
+                const textInput = block.querySelector('input[type="text"]');
                 if (textInput && textInput.value.trim() !== '') return true;
+
+                // Kiểm tra matching
+                const matchingContainer = block.querySelector('.matching-container');
+                if (matchingContainer) {
+                    const imageDropZones = matchingContainer.querySelectorAll('.image-drop-zone');
+                    const dropZones = matchingContainer.querySelectorAll('.drop-zone');
+
+                    if (imageDropZones.length > 0) {
+                        const filledZones = matchingContainer.querySelectorAll('.image-drop-zone.filled');
+                        return imageDropZones.length === filledZones.length;
+                    }
+
+                    if (dropZones.length > 0) {
+                        const filledZones = matchingContainer.querySelectorAll('.drop-zone.filled');
+                        return dropZones.length === filledZones.length;
+                    }
+                }
+
                 return false;
             }
 
@@ -521,11 +453,152 @@
                         return i;
                     }
                 }
-                return -1; // Tất cả câu đã được trả lời
+                return -1;
             }
 
-            // Hiển thị câu hỏi đầu tiên
-            show(0);
+            // Function tạo view thống kê
+            function createStatisticsView(correctCount, totalQuestions) {
+                const statisticsHTML = `
+            <div class="question-block statistics-view" id="statistics-view">
+                <div class="statistics-header">
+                    <h2>🎉 Kết quả bài làm</h2>
+                    <div class="score-summary">
+                        <div class="score-circle">
+                            <div class="score-number">${correctCount}/${totalQuestions}</div>
+                            <div class="score-label">Câu đúng</div>
+                        </div>
+                        <div class="score-percentage">
+                            <span class="percentage-number">${Math.round((correctCount / totalQuestions) * 100)}%</span>
+                            <span class="percentage-label">Điểm số</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="statistics-details">
+                    <div class="stat-item correct-stat">
+                        <div class="stat-icon">✅</div>
+                        <div class="stat-content">
+                            <div class="stat-number">${correctCount}</div>
+                            <div class="stat-label">Câu trả lời đúng</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-item incorrect-stat">
+                        <div class="stat-icon">❌</div>
+                        <div class="stat-content">
+                            <div class="stat-number">${totalQuestions - correctCount}</div>
+                            <div class="stat-label">Câu trả lời sai</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-item total-stat">
+                        <div class="stat-icon">📊</div>
+                        <div class="stat-content">
+                            <div class="stat-number">${totalQuestions}</div>
+                            <div class="stat-label">Tổng số câu</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="performance-message">
+                    ${getPerformanceMessage(correctCount, totalQuestions)}
+                </div>
+                
+                <div class="btn-group">
+                    <button class="btn btn-review" id="btn-review">
+                        📝 Xem lại bài làm
+                    </button>
+                    <a href="{{ route('student.lesson', ['course_id' => $courseId]) }}" class="btn btn-complete">
+                        🏁 Hoàn thành
+                    </a>
+                </div>
+            </div>
+        `;
+
+                const container = document.querySelector('.container');
+                if (container) {
+                    container.insertAdjacentHTML('beforeend', statisticsHTML);
+                }
+
+                const btnReview = document.getElementById('btn-review');
+                if (btnReview) {
+                    btnReview.addEventListener('click', () => {
+                        idx = 0;
+                        show(0);
+                    });
+                }
+            }
+
+            function showStatistics() {
+                blocks.forEach(b => b.classList.remove('active'));
+                if (loading) loading.classList.remove('active');
+                const statisticsView = document.getElementById('statistics-view');
+                if (statisticsView) {
+                    statisticsView.classList.add('active');
+                }
+                if (progressBar) {
+                    progressBar.style.width = '100%';
+                }
+            }
+
+            function getPerformanceMessage(correct, total) {
+                const percentage = (correct / total) * 100;
+
+                if (percentage >= 90) {
+                    return `
+                <div class="performance excellent">
+                    <div class="performance-icon">🌟</div>
+                    <div class="performance-text">
+                        <h3>Xuất sắc!</h3>
+                        <p>Bạn đã làm rất tốt! Hãy tiếp tục phát huy nhé!</p>
+                    </div>
+                </div>
+            `;
+                } else if (percentage >= 75) {
+                    return `
+                <div class="performance good">
+                    <div class="performance-icon">🎯</div>
+                    <div class="performance-text">
+                        <h3>Tốt!</h3>
+                        <p>Kết quả khá tốt, hãy cố gắng thêm một chút nữa!</p>
+                    </div>
+                </div>
+            `;
+                } else if (percentage >= 50) {
+                    return `
+                <div class="performance average">
+                    <div class="performance-icon">💪</div>
+                    <div class="performance-text">
+                        <h3>Cần cải thiện</h3>
+                        <p>Bạn cần ôn tập thêm để nắm vững kiến thức hơn.</p>
+                    </div>
+                </div>
+            `;
+                } else {
+                    return `
+                <div class="performance needs-work">
+                    <div class="performance-icon">📚</div>
+                    <div class="performance-text">
+                        <h3>Cần học thêm</h3>
+                        <p>Hãy xem lại bài học và luyện tập thêm nhé!</p>
+                    </div>
+                </div>
+            `;
+                }
+            }
+
+            // Khởi tạo ứng dụng
+            if (blocks.length > 0) {
+                show(0);
+            }
+
+            // Khởi tạo drag and drop
+            initDragAndDrop();
+
+            // Event listeners
+            document.addEventListener('DOMContentLoaded', function() {
+                initDragAndDrop();
+            });
 
             // Next button với validation
             document.querySelectorAll('.btn-next').forEach(btn =>
@@ -557,22 +630,17 @@
             // Submit bài làm với validation
             if (btnSubmit) {
                 btnSubmit.addEventListener('click', () => {
-                    // Tìm câu hỏi đầu tiên chưa được trả lời
                     const firstUnansweredIndex = findFirstUnansweredQuestion();
-                    
+
                     if (firstUnansweredIndex !== -1) {
-                        // Chuyển đến câu hỏi chưa trả lời đầu tiên
                         idx = firstUnansweredIndex;
                         show(idx);
-                        
-                        // Hiển thị thông báo validation cho câu hỏi đó
                         const unansweredBlock = blocks[firstUnansweredIndex];
                         const qid = unansweredBlock.getAttribute('data-question-id');
                         showValidationMessage(qid);
                         return;
                     }
 
-                    // Nếu tất cả câu đã được trả lời, tiến hành submit
                     showLoading();
 
                     // Thu thập câu trả lời
@@ -583,11 +651,42 @@
 
                         const radio = block.querySelector('input[type="radio"]:checked');
                         const text = block.querySelector('input[type="text"]');
+                        const matchingContainer = block.querySelector('.matching-container');
 
                         if (radio) {
                             answers[qid] = radio.value;
                         } else if (text) {
                             answers[qid] = text.value.trim() || null;
+                        } else if (matchingContainer) {
+                            // Thu thập kết quả matching
+                            const matches = {};
+
+                            // Kiểm tra image-drop-zone format
+                            const imageDropZones = matchingContainer.querySelectorAll(
+                                '.image-drop-zone.filled');
+                            if (imageDropZones.length > 0) {
+                                imageDropZones.forEach(zone => {
+                                    const matchedText = zone.querySelector('.matched-text');
+                                    if (matchedText) {
+                                        matches[matchedText.dataset.matchKey] = zone.dataset
+                                            .matchKey;
+                                    }
+                                });
+                            }
+
+                            // Kiểm tra drop-zone format
+                            const dropZones = matchingContainer.querySelectorAll('.drop-zone.filled');
+                            if (dropZones.length > 0) {
+                                dropZones.forEach(zone => {
+                                    const droppedItem = zone.querySelector('.matching-item');
+                                    if (droppedItem) {
+                                        matches[droppedItem.dataset.matchKey] = zone.dataset
+                                            .matchKey;
+                                    }
+                                });
+                            }
+
+                            answers[qid] = matches;
                         }
                     });
 
@@ -615,7 +714,7 @@
                             isSubmitted = true;
                             const results = json.results;
 
-                            // Hiển thị kết quả
+                            // Hiển thị kết quả cho từng câu hỏi
                             Object.entries(results).forEach(([qid, data]) => {
                                 const block = document.querySelector(
                                     `.question-block[data-question-id="${qid}"]`);
@@ -632,13 +731,11 @@
                                         radio.disabled = true;
                                         label.classList.remove('correct', 'incorrect');
 
-                                        // Highlight đáp án đúng
                                         if (radio.getAttribute('data-is-correct') ===
                                             'true') {
                                             label.classList.add('correct');
                                         }
 
-                                        // Highlight đáp án sai của user
                                         if (radio.checked && radio.getAttribute(
                                                 'data-is-correct') === 'false') {
                                             label.classList.add('incorrect');
@@ -646,27 +743,67 @@
                                     });
                                 }
                                 // Xử lý fill_blank
-                                else {
+                                else if (block.querySelector('input[type="text"]')) {
                                     const input = block.querySelector('input[type="text"]');
-                                    if (input) {
-                                        input.disabled = true;
-                                        input.classList.remove('correct', 'incorrect');
-                                        input.classList.add(data.is_correct ? 'correct' :
-                                            'incorrect');
+                                    input.disabled = true;
+                                    input.classList.remove('correct', 'incorrect');
+                                    input.classList.add(data.is_correct ? 'correct' : 'incorrect');
 
-                                        // Hiển thị đáp án đúng nếu sai
-                                        if (!data.is_correct) {
-                                            const correctAnswer = input.getAttribute(
-                                                'data-correct-answer');
-                                            if (correctAnswer) {
-                                                const correctDiv = document.createElement('div');
-                                                correctDiv.className = 'correct-answer';
-                                                correctDiv.innerHTML =
-                                                    `<strong>Đáp án đúng:</strong> ${correctAnswer}`;
-                                                input.parentNode.insertBefore(correctDiv, input
-                                                    .nextSibling);
-                                            }
+                                    if (!data.is_correct) {
+                                        const correctAnswer = input.getAttribute(
+                                            'data-correct-answer');
+                                        if (correctAnswer) {
+                                            const correctDiv = document.createElement('div');
+                                            correctDiv.className = 'correct-answer';
+                                            correctDiv.innerHTML =
+                                                `<strong>Đáp án đúng:</strong> ${correctAnswer}`;
+                                            input.parentNode.insertBefore(correctDiv, input
+                                                .nextSibling);
                                         }
+                                    }
+                                }
+                                // Xử lý matching
+                                else if (block.querySelector('.matching-container')) {
+                                    const matchingContainer = block.querySelector(
+                                        '.matching-container');
+
+                                    // Xử lý image-drop-zone
+                                    const imageDropZones = matchingContainer.querySelectorAll(
+                                        '.image-drop-zone');
+                                    imageDropZones.forEach(zone => {
+                                        const matchedText = zone.querySelector(
+                                            '.matched-text');
+                                        if (matchedText) {
+                                            const isCorrect = matchedText.dataset
+                                                .matchKey === zone.dataset.matchKey;
+                                            zone.classList.remove('filled');
+                                            zone.classList.add(isCorrect ? 'correct' :
+                                                'incorrect');
+                                        }
+                                    });
+
+                                    // Xử lý drop-zone
+                                    const dropZones = matchingContainer.querySelectorAll(
+                                        '.drop-zone');
+                                    dropZones.forEach(zone => {
+                                        const droppedItem = zone.querySelector(
+                                            '.matching-item');
+                                        if (droppedItem) {
+                                            const isCorrect = droppedItem.dataset
+                                                .matchKey === zone.dataset.matchKey;
+                                            droppedItem.classList.remove('connected');
+                                            droppedItem.classList.add(isCorrect ?
+                                                'correct' : 'incorrect');
+                                            droppedItem.draggable = false;
+                                            droppedItem.style.cursor = 'default';
+                                        }
+                                    });
+
+                                    // Disable reset button
+                                    const resetBtn = block.querySelector('.reset-matching');
+                                    if (resetBtn) {
+                                        resetBtn.disabled = true;
+                                        resetBtn.style.opacity = '0.5';
                                     }
                                 }
 
@@ -683,69 +820,78 @@
                                     '❌ Sai rồi!');
                             });
 
-                            // Chuyển UI sang trạng thái đã nộp
-                            btnSubmit.style.display = 'none';
-                            btnComplete.style.display = 'inline-block';
-
-                            // Quay lại câu đầu để review
-                            idx = 0;
-                            show(0);
+                            createStatisticsView(json.correct_count, json.total_questions);
+                            showStatistics();
                         })
-                        .catch(err => {
-                            console.error('Lỗi khi submit:', err);
-                            alert("Lỗi mạng, vui lòng thử lại!");
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert("Có lỗi xảy ra. Vui lòng thử lại!");
                             show(idx);
                         });
                 });
             }
 
-            // Phím điều hướng với validation
-            document.addEventListener('keydown', e => {
-                if (e.key === 'ArrowLeft' && idx > 0) {
-                    idx--;
-                    show(idx);
-                }
-                if (e.key === 'ArrowRight' && idx < total - 1) {
-                    if (!isSubmitted && !isCurrentQuestionAnswered()) {
-                        const currentBlock = blocks[idx];
-                        const qid = currentBlock.getAttribute('data-question-id');
-                        showValidationMessage(qid);
-                        return;
-                    }
-                    idx++;
-                    show(idx);
+            // Xử lý khi tải trang
+            window.addEventListener('load', () => {
+                initDragAndDrop();
+                if (loading) {
+                    loading.classList.remove('active');
                 }
             });
 
-            // Ẩn thông báo validation khi user chọn đáp án
-            document.addEventListener('change', (e) => {
-                if (e.target.type === 'radio' || e.target.type === 'text') {
-                    const block = e.target.closest('.question-block');
-                    if (block) {
-                        const qid = block.getAttribute('data-question-id');
-                        const validationMsg = document.getElementById(`validation-${qid}`);
-                        if (validationMsg) {
-                            validationMsg.classList.remove('show');
+            // Xử lý khi người dùng rời khỏi trang
+            window.addEventListener('beforeunload', (e) => {
+                if (!isSubmitted) {
+                    e.preventDefault();
+                    e.returnValue = 'Bạn có chắc chắn muốn rời khỏi trang? Bài làm của bạn sẽ không được lưu.';
+                }
+            });
+
+            // Xử lý phím tắt
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowRight' || e.key === 'Enter') {
+                    if (idx < total - 1) {
+                        if (!isSubmitted && !isCurrentQuestionAnswered()) {
+                            const currentBlock = blocks[idx];
+                            const qid = currentBlock.getAttribute('data-question-id');
+                            showValidationMessage(qid);
+                            return;
                         }
+                        idx++;
+                        show(idx);
+                    }
+                } else if (e.key === 'ArrowLeft') {
+                    if (idx > 0) {
+                        idx--;
+                        show(idx);
                     }
                 }
             });
 
-            // Ẩn thông báo validation khi user nhập text
-            document.addEventListener('input', (e) => {
-                if (e.target.type === 'text') {
-                    const block = e.target.closest('.question-block');
-                    if (block) {
-                        const qid = block.getAttribute('data-question-id');
-                        const validationMsg = document.getElementById(`validation-${qid}`);
-                        if (validationMsg) {
-                            validationMsg.classList.remove('show');
+            // Xử lý auto-save cho fill_blank
+            document.querySelectorAll('.fill-blank-input').forEach(input => {
+                input.addEventListener('input', () => {
+                    console.log('Auto-saving:', input.value);
+                });
+            });
+
+            // Xử lý click vào progress bar để chuyển câu
+            if (progressBar) {
+                progressBar.addEventListener('click', (e) => {
+                    if (isSubmitted) {
+                        const rect = progressBar.getBoundingClientRect();
+                        const clickX = e.clientX - rect.left;
+                        const progressWidth = rect.width;
+                        const targetIndex = Math.floor((clickX / progressWidth) * total);
+
+                        if (targetIndex >= 0 && targetIndex < total) {
+                            idx = targetIndex;
+                            show(idx);
                         }
                     }
-                }
-            });
+                });
+            }
         })();
     </script>
-</body>
 
 </html>

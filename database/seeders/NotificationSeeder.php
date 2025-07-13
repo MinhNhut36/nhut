@@ -43,7 +43,7 @@ class NotificationSeeder extends Seeder
             ],
         ];
 
-        // Tạo thông báo chung (target = "all_students")
+        // Tạo thông báo chung
         foreach ($generalNotifications as $notification) {
             Notification::create([
                 'admin_id' => $admin->admin_id,

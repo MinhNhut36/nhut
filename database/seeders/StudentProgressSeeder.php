@@ -3,8 +3,8 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use App\Models\LessonPartScore;
 use App\Models\StudentProgress;
+use App\Models\LessonPartScore;
 use Carbon\Carbon;
 
 class StudentProgressSeeder extends Seeder

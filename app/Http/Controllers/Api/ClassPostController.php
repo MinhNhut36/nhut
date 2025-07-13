@@ -11,7 +11,7 @@ use Illuminate\Http\Request;
 class ClassPostController extends Controller
 {
     /**
-     * Lấy bài viết theo khóa học
+     * Lấy bài viết theo khóa học (for Kotlin)
      * GET /api/class-posts/course/{courseId}
      */
     public function getClassPostsByCourseId($courseId)
@@ -23,27 +23,46 @@ class ClassPostController extends Controller
                              ->orderBy('created_at', 'desc')
                              ->get();
 
-            // Thêm thông tin tác giả cho posts và comments
-            foreach ($posts as $post) {
-                $post->author = $post->teacher;
-                $post->author_type = 'teacher';
-                $post->author_name = $post->teacher ? $post->teacher->fullname : 'Unknown';
+            // Transform to match Kotlin ClassPost data class
+            $transformedPosts = $posts->map(function($post) {
+                // Transform comments to match Kotlin ClassPostComment data class
+                $transformedComments = $post->comments->map(function($comment) {
+                    return [
+                        'comment_id' => (int) $comment->comment_id,
+                        'post_id' => (int) $comment->post_id,
+                        'student_id' => $comment->student_id ? (int) $comment->student_id : null,
+                        'teacher_id' => $comment->teacher_id ? (int) $comment->teacher_id : null,
+                        'author_id' => (int) ($comment->student_id ?: $comment->teacher_id),
+                        'author_type' => (string) ($comment->student_id ? 'student' : 'teacher'),
+                        'author_name' => (string) ($comment->student_id
+                            ? ($comment->student?->fullname ?? 'Unknown')
+                            : ($comment->teacher?->fullname ?? 'Unknown')),
+                        'content' => (string) $comment->content,
+                        'status' => (int) $comment->status,
+                        'created_at' => (string) $comment->created_at,
+                        'updated_at' => (string) $comment->updated_at,
+                        'author' => $comment->student_id ? $comment->student : $comment->teacher,
+                        'post' => null, // Avoid circular reference
+                    ];
+                });
 
-                // Thêm thông tin tác giả cho comments
-                foreach ($post->comments as $comment) {
-                    if ($comment->student_id) {
-                        $comment->author = $comment->student;
-                        $comment->author_type = 'student';
-                        $comment->author_name = $comment->student ? $comment->student->fullname : 'Unknown';
-                    } else {
-                        $comment->author = $comment->teacher;
-                        $comment->author_type = 'teacher';
-                        $comment->author_name = $comment->teacher ? $comment->teacher->fullname : 'Unknown';
-                    }
-                }
-            }
-            
-            return response()->json($posts, 200);
+                return [
+                    'post_id' => (int) $post->post_id,
+                    'course_id' => (int) $post->course_id,
+                    'teacher_id' => (int) $post->teacher_id, // Updated to match Kotlin data class
+                    'title' => (string) $post->title,
+                    'content' => (string) $post->content,
+                    'status' => (int) $post->status,
+                    'answered_at' => $post->answered_at ? (string) $post->answered_at : null, // New field
+                    'created_at' => (string) $post->created_at,
+                    'updated_at' => (string) $post->updated_at,
+                    'teacher' => $post->teacher, // Updated to match Kotlin data class
+                    'course' => $post->course,
+                    'comments' => $transformedComments->toArray(),
+                ];
+            });
+
+            return response()->json($transformedPosts->toArray(), 200);
             
         } catch (\Exception $e) {
             return response()->json([
@@ -54,7 +73,7 @@ class ClassPostController extends Controller
     }
     
     /**
-     * Lấy bài viết theo ID
+     * Lấy bài viết theo ID (for Kotlin)
      * GET /api/class-posts/{postId}
      */
     public function getClassPostById($postId)
@@ -68,25 +87,44 @@ class ClassPostController extends Controller
                 ], 404);
             }
 
-            // Thêm thông tin tác giả
-            $post->author = $post->teacher;
-            $post->author_type = 'teacher';
-            $post->author_name = $post->teacher ? $post->teacher->fullname : 'Unknown';
+            // Transform comments to match Kotlin ClassPostComment data class
+            $transformedComments = $post->comments->map(function($comment) {
+                return [
+                    'comment_id' => (int) $comment->comment_id,
+                    'post_id' => (int) $comment->post_id,
+                    'student_id' => $comment->student_id ? (int) $comment->student_id : null,
+                    'teacher_id' => $comment->teacher_id ? (int) $comment->teacher_id : null,
+                    'author_id' => (int) ($comment->student_id ?: $comment->teacher_id),
+                    'author_type' => (string) ($comment->student_id ? 'student' : 'teacher'),
+                    'author_name' => (string) ($comment->student_id
+                        ? ($comment->student?->fullname ?? 'Unknown')
+                        : ($comment->teacher?->fullname ?? 'Unknown')),
+                    'content' => (string) $comment->content,
+                    'status' => (int) $comment->status,
+                    'created_at' => (string) $comment->created_at,
+                    'updated_at' => (string) $comment->updated_at,
+                    'author' => $comment->student_id ? $comment->student : $comment->teacher,
+                    'post' => null, // Avoid circular reference
+                ];
+            });
 
-            // Thêm thông tin tác giả cho comments
-            foreach ($post->comments as $comment) {
-                if ($comment->student_id) {
-                    $comment->author = $comment->student;
-                    $comment->author_type = 'student';
-                    $comment->author_name = $comment->student ? $comment->student->fullname : 'Unknown';
-                } else {
-                    $comment->author = $comment->teacher;
-                    $comment->author_type = 'teacher';
-                    $comment->author_name = $comment->teacher ? $comment->teacher->fullname : 'Unknown';
-                }
-            }
-            
-            return response()->json($post, 200);
+            // Transform post to match Kotlin ClassPost data class
+            $transformedPost = [
+                'post_id' => (int) $post->post_id,
+                'course_id' => (int) $post->course_id,
+                'teacher_id' => (int) $post->teacher_id, // Updated to match Kotlin data class
+                'title' => (string) $post->title,
+                'content' => (string) $post->content,
+                'status' => (int) $post->status,
+                'answered_at' => $post->answered_at ? (string) $post->answered_at : null, // New field
+                'created_at' => (string) $post->created_at,
+                'updated_at' => (string) $post->updated_at,
+                'teacher' => $post->teacher, // Updated to match Kotlin data class
+                'course' => $post->course,
+                'comments' => $transformedComments->toArray(),
+            ];
+
+            return response()->json($transformedPost, 200);
             
         } catch (\Exception $e) {
             return response()->json([
@@ -119,16 +157,28 @@ class ClassPostController extends Controller
                 'status' => 1,
             ]);
 
-            // Load relationships
+            // Load relationships and transform for Kotlin
             $post->load(['course', 'teacher']);
-            $post->author = $post->teacher;
-            $post->author_type = 'teacher';
-            $post->author_name = $post->teacher ? $post->teacher->fullname : 'Unknown';
+
+            $transformedPost = [
+                'post_id' => (int) $post->post_id,
+                'course_id' => (int) $post->course_id,
+                'teacher_id' => (int) $post->teacher_id, // Updated to match Kotlin data class
+                'title' => (string) $post->title,
+                'content' => (string) $post->content,
+                'status' => (int) $post->status,
+                'answered_at' => $post->answered_at ? (string) $post->answered_at : null, // New field
+                'created_at' => (string) $post->created_at,
+                'updated_at' => (string) $post->updated_at,
+                'teacher' => $post->teacher, // Updated to match Kotlin data class
+                'course' => $post->course,
+                'comments' => [],
+            ];
 
             return response()->json([
                 'success' => true,
                 'message' => 'Tạo bài viết thành công',
-                'data' => $post
+                'data' => $transformedPost
             ], 201);
 
         } catch (\Exception $e) {
@@ -153,23 +203,28 @@ class ClassPostController extends Controller
                                       ->orderBy('created_at', 'asc')
                                       ->get();
 
-            // Thêm thông tin tác giả cho mỗi comment
-            foreach ($comments as $comment) {
-                if ($comment->student_id) {
-                    $comment->author = $comment->student;
-                    $comment->author_type = 'student';
-                    $comment->author_name = $comment->student ? $comment->student->fullname : 'Unknown';
-                } else {
-                    $comment->author = $comment->teacher;
-                    $comment->author_type = 'teacher';
-                    $comment->author_name = $comment->teacher ? $comment->teacher->fullname : 'Unknown';
-                }
-            }
+            // Transform to match Kotlin ClassPostComment data class
+            $transformedComments = $comments->map(function($comment) {
+                return [
+                    'comment_id' => (int) $comment->comment_id,
+                    'post_id' => (int) $comment->post_id,
+                    'student_id' => $comment->student_id ? (int) $comment->student_id : null,
+                    'teacher_id' => $comment->teacher_id ? (int) $comment->teacher_id : null,
+                    'author_id' => (int) ($comment->student_id ?: $comment->teacher_id),
+                    'author_type' => (string) ($comment->student_id ? 'student' : 'teacher'),
+                    'author_name' => (string) ($comment->student_id
+                        ? ($comment->student?->fullname ?? 'Unknown')
+                        : ($comment->teacher?->fullname ?? 'Unknown')),
+                    'content' => (string) $comment->content,
+                    'status' => (int) $comment->status,
+                    'created_at' => (string) $comment->created_at,
+                    'updated_at' => (string) $comment->updated_at,
+                    'author' => $comment->student_id ? $comment->student : $comment->teacher,
+                    'post' => $comment->post,
+                ];
+            });
 
-            return response()->json([
-                'success' => true,
-                'data' => $comments
-            ], 200);
+            return response()->json($transformedComments->toArray(), 200);
 
         } catch (\Exception $e) {
             return response()->json([
@@ -218,22 +273,31 @@ class ClassPostController extends Controller
                 'status' => 1,
             ]);
 
-            // Load relationships
+            // Load relationships and transform for Kotlin
             $comment->load(['student', 'teacher', 'post']);
-            if ($comment->student_id) {
-                $comment->author = $comment->student;
-                $comment->author_type = 'student';
-                $comment->author_name = $comment->student ? $comment->student->fullname : 'Unknown';
-            } else {
-                $comment->author = $comment->teacher;
-                $comment->author_type = 'teacher';
-                $comment->author_name = $comment->teacher ? $comment->teacher->fullname : 'Unknown';
-            }
+
+            $transformedComment = [
+                'comment_id' => (int) $comment->comment_id,
+                'post_id' => (int) $comment->post_id,
+                'student_id' => $comment->student_id ? (int) $comment->student_id : null,
+                'teacher_id' => $comment->teacher_id ? (int) $comment->teacher_id : null,
+                'author_id' => (int) ($comment->student_id ?: $comment->teacher_id),
+                'author_type' => (string) ($comment->student_id ? 'student' : 'teacher'),
+                'author_name' => (string) ($comment->student_id
+                    ? ($comment->student?->fullname ?? 'Unknown')
+                    : ($comment->teacher?->fullname ?? 'Unknown')),
+                'content' => (string) $comment->content,
+                'status' => (int) $comment->status,
+                'created_at' => (string) $comment->created_at,
+                'updated_at' => (string) $comment->updated_at,
+                'author' => $comment->student_id ? $comment->student : $comment->teacher,
+                'post' => $comment->post,
+            ];
 
             return response()->json([
                 'success' => true,
                 'message' => 'Tạo bình luận thành công',
-                'data' => $comment
+                'data' => $transformedComment
             ], 201);
 
         } catch (\Exception $e) {
@@ -322,6 +386,106 @@ class ClassPostController extends Controller
     }
 
     /**
+     * Lấy tất cả posts trong một khóa học kèm comment
+     * GET /api/class-posts/course/{courseId}/posts-with-comments
+     */
+    public function getPostsWithCommentsByCourse($courseId)
+    {
+        try {
+            // Validate course exists
+            $course = Course::findOrFail($courseId);
+
+            // Lấy danh sách posts theo khóa học, kèm author và comments
+            // Note: Only teachers can create class posts
+            $posts = ClassPost::where('course_id', $courseId)
+                ->where('status', 1)
+                ->with([
+                    'teacher:teacher_id,fullname,email',
+                    'course:course_id,course_name,level',
+                    'comments' => function($q) {
+                        $q->where('status', 1)
+                          ->with(['student:student_id,fullname,email', 'teacher:teacher_id,fullname,email']);
+                    }
+                ])
+                ->orderBy('created_at', 'desc')
+                ->get();
+
+            // Transform data to match Kotlin ClassPost data class exactly
+            $transformed = $posts->map(function($post) {
+                // Only teachers can create posts, so author is always teacher
+                $authorType = 'teacher';
+                $authorModel = $post->teacher;
+
+                // Map nested comments to match ClassPostComment data class
+                $comments = $post->comments->map(function($comment) {
+                    $cType = $comment->student_id ? 'student' : 'teacher';
+                    $cModel = $comment->student_id ? $comment->student : $comment->teacher;
+                    $authorId = $comment->student_id ? $cModel->student_id : $cModel->teacher_id;
+
+                    return [
+                        'comment_id'   => $comment->comment_id,
+                        'post_id'      => $comment->post_id,
+                        'author_id'    => $authorId,
+                        'author_type'  => $cType,
+                        'content'      => $comment->content,
+                        'status'       => $comment->status,
+                        'created_at'   => $comment->created_at->toISOString(),
+                        'updated_at'   => $comment->updated_at->toISOString(),
+                        'author'       => [
+                            'id'       => $authorId,
+                            'fullname' => $cModel->fullname,
+                            'email'    => $cModel->email,
+                            'type'     => $cType,
+                        ],
+                    ];
+                });
+
+                return [
+                    'post_id'      => $post->post_id,
+                    'course_id'    => $post->course_id,
+                    'author_id'    => $authorModel->teacher_id,
+                    'author_type'  => $authorType,
+                    'author_name'  => $authorModel->fullname,
+                    'title'        => $post->title,
+                    'content'      => $post->content,
+                    'status'       => $post->status,
+                    'created_at'   => $post->created_at->toISOString(),
+                    'updated_at'   => $post->updated_at->toISOString(),
+                    'author'       => [
+                        'id'       => $authorModel->teacher_id,
+                        'fullname' => $authorModel->fullname,
+                        'email'    => $authorModel->email,
+                        'type'     => $authorType,
+                    ],
+                    'course'       => [
+                        'course_id'   => $post->course->course_id,
+                        'course_name' => $post->course->course_name,
+                        'level'       => $post->course->level,
+                        'schedule'    => null, // Not available in database
+                    ],
+                    'comments'     => $comments->toArray(),
+                ];
+            });
+
+            // Return direct array for Kotlin List<ClassPost> compatibility
+            return response()->json($transformed->toArray(), 200);
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'error'   => 'Course not found',
+                'message' => 'Khóa học không tồn tại'
+            ], 404);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error'   => 'Server error',
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
      * Cập nhật bài viết (chỉ teacher)
      * PUT /api/class-posts/{postId}
      */
@@ -346,16 +510,28 @@ class ClassPostController extends Controller
 
             $post->update($request->only(['title', 'content', 'status']));
 
-            // Load relationships
+            // Load relationships and transform for Kotlin
             $post->load(['course', 'teacher']);
-            $post->author = $post->teacher;
-            $post->author_type = 'teacher';
-            $post->author_name = $post->teacher ? $post->teacher->fullname : 'Unknown';
+
+            $transformedPost = [
+                'post_id' => (int) $post->post_id,
+                'course_id' => (int) $post->course_id,
+                'teacher_id' => (int) $post->teacher_id, // Updated to match Kotlin data class
+                'title' => (string) $post->title,
+                'content' => (string) $post->content,
+                'status' => (int) $post->status,
+                'answered_at' => $post->answered_at ? (string) $post->answered_at : null, // New field
+                'created_at' => (string) $post->created_at,
+                'updated_at' => (string) $post->updated_at,
+                'teacher' => $post->teacher, // Updated to match Kotlin data class
+                'course' => $post->course,
+                'comments' => [],
+            ];
 
             return response()->json([
                 'success' => true,
                 'message' => 'Cập nhật bài viết thành công',
-                'data' => $post
+                'data' => $transformedPost
             ], 200);
 
         } catch (\Exception $e) {
@@ -476,6 +652,156 @@ class ClassPostController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
+                'error' => 'Lỗi server',
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Lấy bài viết theo teacher (for teacher's own posts)
+     * GET /api/class-posts/teacher/{teacherId}
+     */
+    public function getClassPostsByTeacher($teacherId)
+    {
+        try {
+            $posts = ClassPost::where('teacher_id', $teacherId)
+                             ->where('status', 1)
+                             ->with(['course', 'teacher', 'comments.student', 'comments.teacher'])
+                             ->orderBy('created_at', 'desc')
+                             ->get();
+
+            // Transform to match Kotlin ClassPost data class
+            $transformedPosts = $posts->map(function($post) {
+                // Transform comments to match Kotlin ClassPostComment data class
+                $transformedComments = $post->comments->map(function($comment) {
+                    return [
+                        'comment_id' => (int) $comment->comment_id,
+                        'post_id' => (int) $comment->post_id,
+                        'student_id' => $comment->student_id ? (int) $comment->student_id : null,
+                        'teacher_id' => $comment->teacher_id ? (int) $comment->teacher_id : null,
+                        'author_id' => (int) ($comment->student_id ?: $comment->teacher_id),
+                        'author_type' => (string) ($comment->student_id ? 'student' : 'teacher'),
+                        'author_name' => (string) ($comment->student_id
+                            ? ($comment->student?->fullname ?? 'Unknown')
+                            : ($comment->teacher?->fullname ?? 'Unknown')),
+                        'content' => (string) $comment->content,
+                        'status' => (int) $comment->status,
+                        'created_at' => (string) $comment->created_at,
+                        'updated_at' => (string) $comment->updated_at,
+                        'author' => $comment->student_id ? $comment->student : $comment->teacher,
+                        'post' => null, // Avoid circular reference
+                    ];
+                });
+
+                return [
+                    'post_id' => (int) $post->post_id,
+                    'course_id' => (int) $post->course_id,
+                    'teacher_id' => (int) $post->teacher_id,
+                    'title' => (string) $post->title,
+                    'content' => (string) $post->content,
+                    'status' => (int) $post->status,
+                    'answered_at' => $post->answered_at ? (string) $post->answered_at : null,
+                    'created_at' => (string) $post->created_at,
+                    'updated_at' => (string) $post->updated_at,
+                    'teacher' => $post->teacher,
+                    'course' => $post->course,
+                    'comments' => $transformedComments->toArray(),
+                ];
+            });
+
+            return response()->json($transformedPosts->toArray(), 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Lỗi server',
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Lấy comments theo teacher
+     * GET /api/class-post-replies/teacher/{teacherId}
+     */
+    public function getCommentsByTeacher($teacherId)
+    {
+        try {
+            $comments = ClassPostComment::where('teacher_id', $teacherId)
+                                      ->where('status', 1)
+                                      ->with(['student', 'teacher', 'post.course'])
+                                      ->orderBy('created_at', 'desc')
+                                      ->get();
+
+            // Transform to match Kotlin ClassPostComment data class
+            $transformedComments = $comments->map(function($comment) {
+                return [
+                    'comment_id' => (int) $comment->comment_id,
+                    'post_id' => (int) $comment->post_id,
+                    'student_id' => $comment->student_id ? (int) $comment->student_id : null,
+                    'teacher_id' => $comment->teacher_id ? (int) $comment->teacher_id : null,
+                    'author_id' => (int) ($comment->student_id ?: $comment->teacher_id),
+                    'author_type' => (string) ($comment->student_id ? 'student' : 'teacher'),
+                    'author_name' => (string) ($comment->student_id
+                        ? ($comment->student?->fullname ?? 'Unknown')
+                        : ($comment->teacher?->fullname ?? 'Unknown')),
+                    'content' => (string) $comment->content,
+                    'status' => (int) $comment->status,
+                    'created_at' => (string) $comment->created_at,
+                    'updated_at' => (string) $comment->updated_at,
+                    'author' => $comment->student_id ? $comment->student : $comment->teacher,
+                    'post' => $comment->post,
+                ];
+            });
+
+            return response()->json($transformedComments->toArray(), 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Lỗi server',
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Lấy comments theo student
+     * GET /api/class-post-replies/student/{studentId}
+     */
+    public function getCommentsByStudent($studentId)
+    {
+        try {
+            $comments = ClassPostComment::where('student_id', $studentId)
+                                      ->where('status', 1)
+                                      ->with(['student', 'teacher', 'post.course'])
+                                      ->orderBy('created_at', 'desc')
+                                      ->get();
+
+            // Transform to match Kotlin ClassPostComment data class
+            $transformedComments = $comments->map(function($comment) {
+                return [
+                    'comment_id' => (int) $comment->comment_id,
+                    'post_id' => (int) $comment->post_id,
+                    'student_id' => $comment->student_id ? (int) $comment->student_id : null,
+                    'teacher_id' => $comment->teacher_id ? (int) $comment->teacher_id : null,
+                    'author_id' => (int) ($comment->student_id ?: $comment->teacher_id),
+                    'author_type' => (string) ($comment->student_id ? 'student' : 'teacher'),
+                    'author_name' => (string) ($comment->student_id
+                        ? ($comment->student?->fullname ?? 'Unknown')
+                        : ($comment->teacher?->fullname ?? 'Unknown')),
+                    'content' => (string) $comment->content,
+                    'status' => (int) $comment->status,
+                    'created_at' => (string) $comment->created_at,
+                    'updated_at' => (string) $comment->updated_at,
+                    'author' => $comment->student_id ? $comment->student : $comment->teacher,
+                    'post' => $comment->post,
+                ];
+            });
+
+            return response()->json($transformedComments->toArray(), 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
                 'error' => 'Lỗi server',
                 'message' => $e->getMessage()
             ], 500);

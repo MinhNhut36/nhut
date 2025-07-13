@@ -10,6 +10,7 @@ use App\Models\Answer;
 use App\Models\CourseEnrollment;
 use App\Models\LessonPart;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class RealisticStudentAnswerSeeder extends Seeder
 {
@@ -18,164 +19,139 @@ class RealisticStudentAnswerSeeder extends Seeder
      */
     public function run(): void
     {
-        // Xóa dữ liệu cũ
+        echo "🚀 Starting Realistic Student Answer Seeder...\n";
+
+        // Clear existing data
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
         StudentAnswer::truncate();
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
-        $enrollments = CourseEnrollment::with(['student', 'course'])->get();
+        $enrollments = CourseEnrollment::with(['student'])->get();
+        echo "📊 Found {$enrollments->count()} enrollments to process\n";
 
-        echo "Found {$enrollments->count()} enrollments\n";
-
+        $processed = 0;
         foreach ($enrollments as $enrollment) {
-            echo "Processing enrollment {$enrollment->enrollment_id} with status {$enrollment->status->value}\n";
-            $this->createAnswersForEnrollment($enrollment);
+            $this->processEnrollment($enrollment);
+            $processed++;
+            if ($processed % 10 === 0) {
+                echo "✅ Processed {$processed}/{$enrollments->count()} enrollments\n";
+            }
+        }
+
+        echo "🎉 Completed! Generated realistic student answers for all enrollments.\n";
+    }
+
+    protected function processEnrollment($enrollment)
+    {
+        $status = $enrollment->status->value;
+
+        // Skip pending enrollments (status 1)
+        if ($status === 1) {
+            return;
+        }
+
+        // Different simulation parameters based on enrollment status
+        switch ($status) {
+            case 2: // Studying - moderate progress, decent accuracy
+                $this->simulate($enrollment, 0.65, 0.3, 0.6);
+                break;
+            case 3: // Passed - high progress, high accuracy
+                $this->simulate($enrollment, 0.85, 0.7, 0.9);
+                break;
+            case 4: // Failed - moderate progress, low accuracy
+                $this->simulate($enrollment, 0.45, 0.5, 0.8);
+                break;
         }
     }
 
-    private function createAnswersForEnrollment($enrollment)
+    protected function simulate($enrollment, $correctRate, $partMin, $partMax)
     {
-        // Logic dựa trên status của enrollment
-        $statusValue = $enrollment->status->value;
-        switch ($statusValue) {
-            case 1: // Pending - không có answers
-                echo "  Skipping pending enrollment\n";
-                break;
-            case 2: // Studying - có một số answers, chưa hoàn thành
-                echo "  Creating studying answers\n";
-                $this->createStudyingAnswers($enrollment);
-                break;
-            case 3: // Passed - có đầy đủ answers với tỷ lệ đúng cao
-                echo "  Creating passed answers\n";
-                $this->createPassedAnswers($enrollment);
-                break;
-            case 4: // Failed - có đầy đủ answers nhưng tỷ lệ đúng thấp
-                echo "  Creating failed answers\n";
-                $this->createFailedAnswers($enrollment);
-                break;
-        }
-    }
+        // Get all lesson parts (since we removed level filtering)
+        $allParts = LessonPart::all();
 
-    private function createStudyingAnswers($enrollment)
-    {
-        // Get all lesson parts since level column was removed
-        // TODO: Need to redesign relationship between courses and lesson_parts
-        $lessonParts = LessonPart::all();
+        // Randomly select a subset of lesson parts based on student progress
+        $partCount = ceil($allParts->count() * rand($partMin * 100, $partMax * 100) / 100);
+        $selectedParts = $allParts->random($partCount);
 
-        // Giảm số lesson parts: chỉ làm 30-60% lesson parts
-        $lessonPartsToAnswer = $lessonParts->take(ceil($lessonParts->count() * rand(30, 60) / 100));
+        foreach ($selectedParts as $part) {
+            $questions = Question::where('lesson_part_id', $part->lesson_part_id)->get();
 
-        foreach ($lessonPartsToAnswer as $lessonPart) {
-            $questions = Question::where('lesson_part_id', $lessonPart->lesson_part_id)->get();
+            // Answer a subset of questions in this lesson part
+            $questionCount = ceil($questions->count() * rand($partMin * 100, $partMax * 100) / 100);
+            $selectedQuestions = $questions->random($questionCount);
 
-            // Studying students: 30-60% câu hỏi đã trả lời trong lesson part
-            $answerPercentage = rand(30, 60) / 100;
-            $questionsToAnswer = $questions->take(ceil($questions->count() * $answerPercentage));
-
-            foreach ($questionsToAnswer as $question) {
-                $this->createStudentAnswer($enrollment, $question, 0.65); // 65% correct rate
+            foreach ($selectedQuestions as $question) {
+                $this->answerQuestion($enrollment, $question, $correctRate);
             }
         }
     }
 
-    private function createPassedAnswers($enrollment)
-    {
-        // Get all lesson parts since level column was removed
-        $lessonParts = LessonPart::all();
-
-        // Passed students: làm 80-100% lesson parts
-        $lessonPartsToAnswer = $lessonParts->take(ceil($lessonParts->count() * rand(80, 100) / 100));
-
-        foreach ($lessonPartsToAnswer as $lessonPart) {
-            $questions = Question::where('lesson_part_id', $lessonPart->lesson_part_id)->get();
-
-            // Passed students: 70-90% câu hỏi đã trả lời trong lesson part
-            $answerPercentage = rand(70, 90) / 100;
-            $questionsToAnswer = $questions->take(ceil($questions->count() * $answerPercentage));
-
-            foreach ($questionsToAnswer as $question) {
-                $this->createStudentAnswer($enrollment, $question, 0.85); // 85% correct rate
-            }
-        }
-    }
-
-    private function createFailedAnswers($enrollment)
-    {
-        // Get all lesson parts since level column was removed
-        $lessonParts = LessonPart::all();
-
-        // Failed students: làm 60-90% lesson parts
-        $lessonPartsToAnswer = $lessonParts->take(ceil($lessonParts->count() * rand(60, 90) / 100));
-
-        foreach ($lessonPartsToAnswer as $lessonPart) {
-            $questions = Question::where('lesson_part_id', $lessonPart->lesson_part_id)->get();
-
-            // Failed students: 50-80% câu hỏi đã trả lời nhưng tỷ lệ đúng thấp
-            $answerPercentage = rand(50, 80) / 100;
-            $questionsToAnswer = $questions->take(ceil($questions->count() * $answerPercentage));
-
-            foreach ($questionsToAnswer as $question) {
-                $this->createStudentAnswer($enrollment, $question, 0.45); // 45% correct rate
-            }
-        }
-    }
-
-    private function createStudentAnswer($enrollment, $question, $correctRate)
+    protected function answerQuestion($enrollment, Question $question, $correctRate)
     {
         $answers = Answer::where('questions_id', $question->questions_id)->get();
-        $correctAnswers = $answers->where('is_correct', 1);
-        $incorrectAnswers = $answers->where('is_correct', 0);
 
-        // Determine if answer should be correct based on correctRate
-        $shouldBeCorrect = (rand(1, 100) / 100) <= $correctRate;
+        if ($answers->isEmpty()) {
+            return; // Skip if no answers available
+        }
 
-        // Create answer text based on question type
-        $answerText = $this->generateAnswerText($question, $answers, $shouldBeCorrect);
+        $shouldCorrect = (rand(1, 100) / 100) <= $correctRate;
+        $answerText = $this->generateText($question->question_type, $answers, $shouldCorrect);
 
-        // Giảm số attempts: chỉ 30% câu hỏi có multiple attempts
+        // 30% chance of multiple attempts (realistic retry behavior)
         $attempts = (rand(1, 100) <= 30) ? 2 : 1;
+
         for ($i = 0; $i < $attempts; $i++) {
-            $answeredAt = $this->getAnsweredAtTime($enrollment, $i);
+            $answeredAt = $this->getAnsweredAt($enrollment, $i);
 
-            StudentAnswer::create([
-                'student_id' => $enrollment->student_id,
-                'questions_id' => $question->questions_id,
-                'course_id' => $enrollment->assigned_course_id,
-                'answer_text' => $answerText,
-                'answered_at' => $answeredAt,
-            ]);
+            try {
+                StudentAnswer::create([
+                    'student_id'   => $enrollment->student_id,
+                    'questions_id' => $question->questions_id,
+                    'course_id'    => $enrollment->assigned_course_id,
+                    'answer_text'  => $answerText,
+                    'answered_at'  => $answeredAt
+                ]);
+            } catch (\Exception $e) {
+                // Skip if duplicate or other error
+                continue;
+            }
 
-            // If first attempt was wrong, make subsequent attempts more likely to be correct
-            if ($i == 0 && !$shouldBeCorrect) {
-                $shouldBeCorrect = rand(1, 100) <= 70; // 70% chance to improve
-                $answerText = $this->generateAnswerText($question, $answers, $shouldBeCorrect);
+            // If first attempt was wrong, improve chance for second attempt
+            if ($i === 0 && !$shouldCorrect && $attempts > 1) {
+                $shouldCorrect = (rand(1, 100) <= 70); // 70% chance to improve
+                $answerText = $this->generateText($question->question_type, $answers, $shouldCorrect);
             }
         }
     }
 
-    private function generateAnswerText($question, $answers, $shouldBeCorrect)
+    protected function generateText($type, $answers, $correct)
     {
-        $questionType = $question->question_type;
-
-        switch ($questionType) {
-            case 'single_choice':
-                return $this->generateSingleChoiceAnswer($answers, $shouldBeCorrect);
-            case 'matching':
-                return $this->generateMatchingAnswer($answers, $shouldBeCorrect);
-            case 'classification':
-                return $this->generateClassificationAnswer($answers, $shouldBeCorrect);
-            case 'fill_blank':
-                return $this->generateFillBlankAnswer($answers, $shouldBeCorrect);
-            case 'arrangement':
-                return $this->generateArrangementAnswer($answers, $shouldBeCorrect);
-            case 'image_word':
-                return $this->generateImageWordAnswer($answers, $shouldBeCorrect);
-            default:
-                return $this->generateSingleChoiceAnswer($answers, $shouldBeCorrect);
+        try {
+            switch ($type) {
+                case 'single_choice':
+                    return $this->genSingle($answers, $correct);
+                case 'matching':
+                    return $this->genMatching($answers, $correct);
+                case 'classification':
+                    return $this->genClassification($answers, $correct);
+                case 'fill_blank':
+                    return $this->genFill($answers, $correct);
+                case 'arrangement':
+                    return $this->genArrangement($answers, $correct);
+                case 'image_word':
+                    return $this->genImageWord($answers, $correct);
+                default:
+                    return $this->genSingle($answers, $correct);
+            }
+        } catch (\Exception $e) {
+            // Fallback to simple answer if generation fails
+            return $answers->isNotEmpty() ? $answers->random()->answer_text : 'fallback_answer';
         }
     }
 
-    private function generateSingleChoiceAnswer($answers, $shouldBeCorrect)
+    protected function genSingle($answers, $correct)
     {
-        if ($shouldBeCorrect) {
+        if ($correct) {
             $correctAnswer = $answers->where('is_correct', 1)->first();
             return $correctAnswer ? $correctAnswer->answer_text : $answers->random()->answer_text;
         } else {
@@ -184,74 +160,95 @@ class RealisticStudentAnswerSeeder extends Seeder
         }
     }
 
-    private function generateMatchingAnswer($answers, $shouldBeCorrect)
+    protected function genMatching($answers, $correct)
     {
-        // Format: "apple|táo" (English word | Vietnamese meaning)
-        if ($shouldBeCorrect) {
+        if ($correct) {
             $correctAnswer = $answers->where('is_correct', 1)->first();
-            return $correctAnswer ? $correctAnswer->match_key . '|' . $correctAnswer->answer_text : 'apple|táo';
+            if ($correctAnswer) {
+                return $correctAnswer->match_key . ':' . $correctAnswer->answer_text;
+            }
         } else {
-            $incorrectAnswer = $answers->where('is_correct', 0)->random();
-            return $incorrectAnswer->match_key . '|' . $incorrectAnswer->answer_text;
-        }
-    }
-
-    private function generateClassificationAnswer($answers, $shouldBeCorrect)
-    {
-        // Format: "run|verb,beautiful|adjective" (word|category pairs)
-        $result = [];
-        foreach ($answers as $answer) {
-            if ($shouldBeCorrect) {
-                $result[] = $answer->answer_text . '|' . ($answer->group_label ?? 'unknown');
-            } else {
-                // Mix up categories
-                $wrongCategories = ['noun', 'verb', 'adjective', 'adverb'];
-                $result[] = $answer->answer_text . '|' . $wrongCategories[array_rand($wrongCategories)];
+            $incorrectAnswers = $answers->where('is_correct', 0);
+            if ($incorrectAnswers->isNotEmpty()) {
+                $wrongAnswer = $incorrectAnswers->random();
+                return $wrongAnswer->match_key . ':' . $wrongAnswer->answer_text;
             }
         }
+
+        // Fallback
+        $fallback = $answers->random();
+        return $fallback->match_key . ':' . $fallback->answer_text;
+    }
+
+    protected function genClassification($answers, $correct)
+    {
+        $result = [];
+        $wrongCategories = ['noun', 'verb', 'adjective', 'adverb'];
+
+        foreach ($answers as $answer) {
+            if ($correct) {
+                $category = $answer->match_key ?: 'unknown';
+            } else {
+                $category = $wrongCategories[array_rand($wrongCategories)];
+            }
+            $result[] = "{$answer->answer_text}:{$category}";
+        }
+
         return implode(',', $result);
     }
 
-    private function generateFillBlankAnswer($answers, $shouldBeCorrect)
+    protected function genFill($answers, $correct)
     {
-        if ($shouldBeCorrect) {
+        if ($correct) {
             $correctAnswer = $answers->where('is_correct', 1)->first();
             return $correctAnswer ? $correctAnswer->answer_text : 'go';
         } else {
-            $wrongAnswers = ['goes', 'going', 'went', 'gone'];
+            $wrongAnswers = ['wrong', 'xxxx', 'yy', 'goes', 'going', 'went'];
             return $wrongAnswers[array_rand($wrongAnswers)];
         }
     }
 
-    private function generateArrangementAnswer($answers, $shouldBeCorrect)
+    protected function genArrangement($answers, $correct)
     {
-        // Format: "I,am,a,student" (ordered words)
-        if ($shouldBeCorrect) {
-            $correctAnswers = $answers->where('is_correct', 1)->sortBy('order');
-            return $correctAnswers->pluck('answer_text')->implode(',');
+        $correctAnswers = $answers->where('is_correct', 1);
+
+        if ($correctAnswers->isEmpty()) {
+            return 'I,am,a,student'; // Fallback
+        }
+
+        if ($correct) {
+            return $correctAnswers->sortBy('order_index')->pluck('answer_text')->implode(',');
         } else {
-            // Shuffle the order
-            $allAnswers = $answers->where('is_correct', 1)->shuffle();
-            return $allAnswers->pluck('answer_text')->implode(',');
+            // Shuffle the correct order to make it wrong
+            return $correctAnswers->shuffle()->pluck('answer_text')->implode(',');
         }
     }
 
-    private function generateImageWordAnswer($answers, $shouldBeCorrect)
+    protected function genImageWord($answers, $correct)
     {
-        // Format: "c,a,t" (ordered letters)
-        if ($shouldBeCorrect) {
-            $correctAnswers = $answers->where('is_correct', 1)->sortBy('order');
-            return $correctAnswers->pluck('answer_text')->implode(',');
+        $correctAnswers = $answers->where('is_correct', 1);
+
+        if ($correctAnswers->isEmpty()) {
+            return 'c,a,t'; // Fallback
+        }
+
+        if ($correct) {
+            return $correctAnswers->sortBy('order_index')->pluck('answer_text')->implode(',');
         } else {
-            // Mix in wrong letters or wrong order
-            $allAnswers = $answers->shuffle();
-            return $allAnswers->take(3)->pluck('answer_text')->implode(',');
+            // Shuffle letters or take partial word
+            $shuffled = $correctAnswers->shuffle();
+            $count = max(1, min(3, $shuffled->count()));
+            return $shuffled->take($count)->pluck('answer_text')->implode(',');
         }
     }
 
-    private function getAnsweredAtTime($enrollment, $attemptNumber)
+    protected function getAnsweredAt($enrollment, $attemptNumber)
     {
-        $baseTime = Carbon::parse($enrollment->registration_date)->addDays(rand(1, 30));
+        // Use registration_date if available, otherwise use created_at
+        $baseDate = $enrollment->registration_date ?? $enrollment->created_at ?? now();
+        $baseTime = Carbon::parse($baseDate)->addDays(rand(1, 30));
+
+        // Add hours for multiple attempts (spread them out)
         return $baseTime->addHours($attemptNumber * rand(1, 24));
     }
 }

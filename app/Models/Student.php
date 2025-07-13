@@ -50,7 +50,7 @@ class Student extends Authenticatable
 
     public function studentProgress()
     {
-        return $this->hasManyThrough(StudentProgres::class, LessonPartScore::class, 'student_id', 'score_id', 'student_id', 'score_id');
+        return $this->hasManyThrough(StudentProgress::class, LessonPartScore::class, 'student_id', 'score_id', 'student_id', 'score_id');
     }
     public function studentEvaluations()
     {

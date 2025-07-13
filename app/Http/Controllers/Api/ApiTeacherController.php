@@ -8,7 +8,7 @@ use App\Models\Teacher;
 class ApiTeacherController extends Controller
 {
     /**
-     * Lấy tất cả giáo viên
+     * Lấy tất cả giảng viên
      * GET /api/teachers
      */
     public function getAllTeachers()
@@ -16,7 +16,6 @@ class ApiTeacherController extends Controller
         try {
             $teachers = Teacher::where('is_status', 1)->with('courses')->get();
             return response()->json($teachers, 200);
-
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'Lỗi server',
@@ -26,7 +25,7 @@ class ApiTeacherController extends Controller
     }
 
     /**
-     * Lấy giáo viên theo ID
+     * Lấy giảng viên theo ID
      * GET /api/teachers/{teacherId}
      */
     public function getTeacherById($teacherId)
@@ -36,12 +35,11 @@ class ApiTeacherController extends Controller
 
             if (!$teacher) {
                 return response()->json([
-                    'error' => 'Không tìm thấy giáo viên'
+                    'error' => 'Không tìm thấy giảng viên'
                 ], 404);
             }
 
             return response()->json($teacher, 200);
-
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'Lỗi server',
@@ -51,18 +49,17 @@ class ApiTeacherController extends Controller
     }
 
     /**
-     * Lấy giáo viên theo khóa học
+     * Lấy giảng viên theo khóa học
      * GET /api/teachers/course/{courseId}
      */
     public function getTeachersByCourseId($courseId)
     {
         try {
-            $teachers = Teacher::whereHas('courses', function($query) use ($courseId) {
+            $teachers = Teacher::whereHas('courses', function ($query) use ($courseId) {
                 $query->where('courses.course_id', $courseId);
             })->with('courses')->get();
 
             return response()->json($teachers, 200);
-
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'Lỗi server',

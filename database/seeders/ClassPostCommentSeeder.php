@@ -73,7 +73,7 @@ class ClassPostCommentSeeder extends Seeder
             $numComments = rand(1, 5);
 
             for ($i = 0; $i < $numComments; $i++) {
-                // 70% bình luận từ học sinh enrolled, 30% từ giáo viên
+                // 70% bình luận từ học sinh enrolled, 30% từ giảng viên
                 $isStudent = rand(1, 10) <= 7;
 
                 $studentId = null;

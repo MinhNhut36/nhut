@@ -17,9 +17,9 @@ class TeacherCourseAssignmentSeeder extends Seeder
     {
         $teachers = Teacher::all();
         $courses = Course::all();
-        
+
         foreach ($courses as $course) {
-            // Mỗi khóa học có đúng 2 giáo viên
+            // Mỗi khóa học có đúng 2 giảng viên
             $randomTeachers = $teachers->random(2);
 
             foreach ($randomTeachers as $index => $teacher) {

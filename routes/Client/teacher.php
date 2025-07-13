@@ -8,9 +8,7 @@ Route::prefix('teacher')->name('teacher.')->middleware(['web', 'teacher'])->grou
 
     Route::get('/CoursesOpening', [TeacherController::class, 'CoursesOpening'])->name('coursesopening');
 
-
     Route::get('/home/AssignedCoursesList/{courseId}', [TeacherController::class, 'CourseDetails'])->name('coursedetails');
-
 
     // Course Management Routes
     Route::prefix('/home/AssignedCoursesList/{courseId}')->group(function () {
@@ -23,11 +21,16 @@ Route::prefix('teacher')->name('teacher.')->middleware(['web', 'teacher'])->grou
         Route::get('/board', [TeacherController::class, 'CourseBulletin'])->name('boards');
         Route::post('/posts', [TeacherController::class, 'StorePost'])->name('post'); // Đăng bài viết mới
         Route::post('/comment', [TeacherController::class, 'StoreComment'])->name('comment'); // Gửi bình luận cho một bài viết
-        Route::delete('/posts/delete/{postId}', [TeacherController::class, 'deletePost'])
+        Route::delete('/posts/{postId}/delete', [TeacherController::class, 'deletePost'])
             ->name('posts.delete');
+        Route::delete('/comment/{commentId}/delete', [TeacherController::class, 'deleteComment'])
+            ->name('comment.delete');
+
+
 
         // Course Grade
         Route::get('/grade', [TeacherController::class, 'CourseGrade'])->name('grade');
+        Route::get('/grade/export', [TeacherController::class, 'exportCourseGrade'])->name('exportCourseGrade');
         Route::post('/grade/update', [TeacherController::class, 'updateGrade'])->name('updategrade');
 
         // Course Assignments

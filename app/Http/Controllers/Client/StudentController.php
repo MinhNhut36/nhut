@@ -165,7 +165,7 @@ class StudentController extends Controller
     public function board(int $course_id)
     {
         $student = Auth::guard('student')->user();
-        // Lấy danh sách bài viết của giáo viên đó trong khóa học này
+        // Lấy danh sách bài viết của giảng viên đó trong khóa học này
         $posts = ClassPost::with([
             'teacher',                  // người tạo bài viết
             'comments',      // người tạo bình luận (student/teacher)

@@ -551,13 +551,15 @@
                                                         {{-- Nút xóa comment - chỉ hiển thị nếu là comment của sinh viên đó --}}
                                                         @if ($comment->student_id === $student_id)
                                                             <div class="comment-actions">
-                                                                <form action="{{ route('student.lesson.board.comment.delete', $comment->comment_id) }}" 
-                                                                      method="POST" 
-                                                                      onsubmit="return confirm('Bạn có chắc chắn muốn xóa comment này?')"
-                                                                      style="display: inline;">
+                                                                <form
+                                                                    action="{{ route('student.lesson.board.comment.delete', $comment->comment_id) }}"
+                                                                    method="POST"
+                                                                    onsubmit="return confirm('Bạn có chắc chắn muốn xóa comment này?')"
+                                                                    style="display: inline;">
                                                                     @csrf
                                                                     @method('DELETE')
-                                                                    <button type="submit" class="btn-delete-comment" title="Xóa comment">
+                                                                    <button type="submit" class="btn-delete-comment"
+                                                                        title="Xóa comment">
                                                                         <i class="fas fa-trash"></i>
                                                                     </button>
                                                                 </form>
@@ -574,8 +576,8 @@
 
                             {{-- Form phản hồi --}}
                             <div class="reply-form">
-                                <form action="{{ route('student.lesson.board.comment', ['postId' => $post->post_id]) }}" method="POST"
-                                    class="d-flex align-items-start gap-3">
+                                <form action="{{ route('student.lesson.board.comment', ['postId' => $post->post_id]) }}"
+                                    method="POST" class="d-flex align-items-start gap-3">
                                     @csrf
                                     <img src="{{ asset('uploads/avatars/' . ($student->avatar ?? 'AvtMacDinh.jpg')) }}"
                                         onerror="this.onerror=null;this.src='{{ asset('uploads/avatars/AvtMacDinh.jpg') }}';"
@@ -599,7 +601,7 @@
                         <h3 class="empty-title">Chưa có bài viết nào</h3>
                         <p class="empty-description">
                             Hiện tại chưa có bài viết nào trong bảng tin. Vui lòng quay lại sau để xem các thông báo và bài
-                            viết mới từ giáo viên!
+                            viết mới từ giảng viên!
                         </p>
                     </div>
                 @endif

@@ -332,6 +332,10 @@
                 display: none;
             }
         }
+
+        .d-flex.gap-2>* {
+            margin-left: 0.5rem;
+        }
     </style>
 @endsection
 
@@ -404,11 +408,19 @@
                     <span class="badge bg-primary">{{ $studentgrades->count() }} sinh viên</span>
                 </div>
 
-                <div class="p-3 text-end">
+
+                <div class="p-3 text-end d-flex justify-content-end align-items-center gap-2">
+                    <form method="GET" action="{{ route('teacher.exportCourseGrade', $course->course_id) }}">
+                        <button type="submit" class="btn btn-success">
+                            💾 Xuất bảng điểm
+                        </button>
+                    </form>
+
                     <button type="button" id="enable-edit" class="btn btn-warning">
                         <i class="fas fa-edit me-1"></i> Chỉnh sửa điểm
                     </button>
                 </div>
+
 
                 <form method="POST" action="{{ route('teacher.updategrade', $course->course_id) }}">
                     @csrf

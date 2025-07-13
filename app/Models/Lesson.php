@@ -25,5 +25,4 @@ class Lesson extends Model
     {
         return $this->hasMany(LessonPart::class, 'level');
     }
-
 }

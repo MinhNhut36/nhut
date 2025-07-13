@@ -144,7 +144,7 @@ class AdminController extends Controller
         ]);
     }
 
-    //Danh sách quản lý giáo viên có kết hợp tìm kiếm
+    //Danh sách quản lý giảng viên có kết hợp tìm kiếm
     public function GetTeacherList(Request $request)
     {
 
@@ -181,7 +181,7 @@ class AdminController extends Controller
             ->with('teachers', $Teachers);
     }
 
-    //Thêm giáo viên
+    //Thêm giảng viên
     public function AddTeachers(AddTeacherRequest $request)
     {
         $data = $request->validated();
@@ -203,10 +203,10 @@ class AdminController extends Controller
 
         Teacher::create($data);
 
-        return redirect()->back()->with('success', 'Thêm giáo viên thành công!');
+        return redirect()->back()->with('success', 'Thêm giảng viên thành công!');
     }
 
-    // Thay đổi trạng thái giáo viên 
+    // Thay đổi trạng thái giảng viên 
     public function AjaxToggleStatusTeacher(int $id)
     {
         $teacher = Teacher::find($id);
@@ -336,10 +336,10 @@ class AdminController extends Controller
             ])
             ->get();
 
-        // Lấy tất cả giáo viên đang hoạt động
+        // Lấy tất cả giảng viên đang hoạt động
         $teachers = Teacher::where('is_status', 1)->get();
 
-        // Lấy danh sách giáo viên đã được phân công cho các khóa học này
+        // Lấy danh sách giảng viên đã được phân công cho các khóa học này
         $assignments = TeacherCourseAssignment::with('teacher')
             ->whereIn('course_id', $courses->pluck('course_id'))
             ->get();
@@ -358,7 +358,7 @@ class AdminController extends Controller
             'courseAssignments' => $courseAssignments,
         ]);
     }
-    // Phân công giáo viên
+    // Phân công giảng viên
     public function assignTeacher(Request $request)
     {
         $request->validate([
@@ -367,13 +367,13 @@ class AdminController extends Controller
             'role' => 'required|in:Main Teacher,Assistant Teacher',
         ]);
 
-        // Kiểm tra nếu giáo viên đã được phân công vào khóa học này
+        // Kiểm tra nếu giảng viên đã được phân công vào khóa học này
         $exists = TeacherCourseAssignment::where('course_id', $request->course_id)
             ->where('teacher_id', $request->teacher_id)
             ->exists();
 
         if ($exists) {
-            return back()->with('error', 'Giáo viên này đã được phân công cho khóa học.');
+            return back()->with('error', 'Giảng viên này đã được phân công cho khóa học.');
         }
 
         TeacherCourseAssignment::create([
@@ -383,7 +383,7 @@ class AdminController extends Controller
             'assigned_at' => now(),
         ]);
 
-        return back()->with('success', 'Phân công giáo viên thành công.');
+        return back()->with('success', 'Phân công giảng viên thành công.');
     }
 
     //Xóa phân công 
@@ -394,7 +394,7 @@ class AdminController extends Controller
         TeacherCourseAssignment::where('course_id', $courseId)
             ->where('teacher_id', $teacherId)
             ->delete();
-        return back()->with('success', 'Đã xoá giáo viên khỏi khóa học.');
+        return back()->with('success', 'Đã xoá giảng viên khỏi khóa học.');
     }
     //Danh sách các trình độ
     public function ShowListLesson()

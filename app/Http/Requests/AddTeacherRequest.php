@@ -35,7 +35,7 @@ class AddTeacherRequest extends FormRequest
         return [
             'fullname.required' => 'Vui lòng nhập họ tên.',
             'email.required' => 'Vui lòng nhập email.',
-            'email.unique' => 'Email giáo viên này đã tồn tại.',
+            'email.unique' => 'Email giảng viên này đã tồn tại.',
             'date_of_birth.required' => 'Vui lòng chọn ngày sinh.',
             'date_of_birth.before_or_equal' => 'Ngày sinh không được lớn hơn ngày hôm nay.',
             'gender.required' => 'Vui lòng chọn giới tính.',

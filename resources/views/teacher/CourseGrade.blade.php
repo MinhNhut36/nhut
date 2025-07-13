@@ -105,17 +105,20 @@
             background: #f8fafc;
             color: #374151;
             font-weight: 600;
-            padding: 1rem 1.5rem;
+            padding: 0.5rem 0.75rem;
             text-align: center;
             border-bottom: 2px solid #e5e7eb;
+            white-space: nowrap;
         }
 
         .members-table td {
-            padding: 1rem 1.5rem;
+            padding: 0.5rem 0.75rem;
             text-align: center;
             border-bottom: 1px solid #e5e7eb;
             vertical-align: middle;
+            white-space: nowrap;
         }
+
 
         .members-table tbody tr:hover {
             background: rgba(59, 130, 246, 0.05);
@@ -536,7 +539,7 @@
                                     <tr>
                                         <td colspan="5" class="text-center">
                                             <div class="empty-state">
-                                                @if (request('search') ||  request('gender') !== null)
+                                                @if (request('search') || request('gender') !== null)
                                                     <i class="fas fa-search"></i>
                                                     <h4>Không tìm thấy sinh viên</h4>
                                                     <p>Không có sinh viên nào phù hợp với từ khóa tìm kiếm

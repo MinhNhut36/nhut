@@ -154,6 +154,14 @@
                                 </li>
                                 <li class="mb-2 d-flex justify-content-between">
                                     <span class="fw-semibold">
+                                        <i class="fas fa-calendar-alt me-1"></i>Ngày kết thúc:
+                                    </span>
+                                    <span class="fw-semibold">
+                                        {{ \Carbon\Carbon::parse($MyCourse->course->end_date)->format('d/m/Y') }}
+                                    </span>
+                                </li>
+                                <li class="mb-2 d-flex justify-content-between">
+                                    <span class="fw-semibold">
                                         <i class="fas fa-clock me-1"></i>Buổi học:
                                     </span>
                                     <span class="fw-semibold text-dark">{{ $MyCourse->course->description }}</span>
@@ -174,52 +182,55 @@
                                 </li>
                             </ul>
                         </div>
-                        <div class="card-footer bg-transparent border-top-0">
-                            <a href="{{ route('student.lesson', $MyCourse->course->course_id) }}"
-                                class="btn course-btn w-100 text-white d-flex justify-content-between align-items-center">
-                                <span>
-                                    @if (request()->routeIs('student.myCourses'))
-                                        <i class="fas fa-play me-2"></i>Xem bài học
-                                    @else
-                                        <i class="fas fa-eye me-2"></i>Xem lại bài học
-                                    @endif
-                                </span>
-                                <i class="fas fa-arrow-right"></i>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            @empty
-                <div class="col-12">
-                    <div class="empty-state">
-                        <div class="empty-state-icon">
-                            @if (request()->routeIs('student.myCourses'))
-                                <i class="fas fa-book-open"></i>
-                            @else
-                                <i class="fas fa-graduation-cap"></i>
-                            @endif
-                        </div>
-                        <h3 class="empty-state-title">
-                            @if (request()->routeIs('student.myCourses'))
-                                Chưa có khóa học đang học
-                            @else
-                                Chưa có khóa học đã hoàn thành
-                            @endif
-                        </h3>
-                        <p class="empty-state-description">
-                            @if (request()->routeIs('student.myCourses'))
-                                Hãy đăng ký một khóa học mới để bắt đầu hành trình học tập của bạn.
-                            @else
-                                Hoàn thành các khóa học đang học để xem chúng xuất hiện ở đây.
-                            @endif
-                        </p>
-                        @if (request()->routeIs('student.myCourses'))
-                            <a href="{{ route('student.courses') }}" class="btn btn-primary">
-                                <i class="fas fa-plus me-2"></i>Khám phá khóa học
-                            </a>
+
+
+                        @if (now()->lessThanOrEqualTo($MyCourse->course->end_date))
+                            <div class="card-footer bg-transparent border-top-0">
+                                <a href="{{ route('student.lesson', $MyCourse->course->course_id) }}"
+                                    class="btn course-btn w-100 text-white d-flex justify-content-between align-items-center">
+
+                                    <i class="fas fa-play me-2"></i> Xem bài học
+
+                                    <i class="fas fa-arrow-right"></i>
+                                </a>
+                            </div>
+                        @else
+                            <div class="card-footer bg-transparent border-top-0">
+                                <span class="card-status-studying">Khóa học đã hết hạn</span>
+                            </div>
                         @endif
                     </div>
-                </div>
+                @empty
+                    <div class="col-12">
+                        <div class="empty-state">
+                            <div class="empty-state-icon">
+                                @if (request()->routeIs('student.myCourses'))
+                                    <i class="fas fa-book-open"></i>
+                                @else
+                                    <i class="fas fa-graduation-cap"></i>
+                                @endif
+                            </div>
+                            <h3 class="empty-state-title">
+                                @if (request()->routeIs('student.myCourses'))
+                                    Chưa có khóa học đang học
+                                @else
+                                    Chưa có khóa học đã hoàn thành
+                                @endif
+                            </h3>
+                            <p class="empty-state-description">
+                                @if (request()->routeIs('student.myCourses'))
+                                    Hãy đăng ký một khóa học mới để bắt đầu hành trình học tập của bạn.
+                                @else
+                                    Hoàn thành các khóa học đang học để xem chúng xuất hiện ở đây.
+                                @endif
+                            </p>
+                            @if (request()->routeIs('student.myCourses'))
+                                <a href="{{ route('student.courses') }}" class="btn btn-primary">
+                                    <i class="fas fa-plus me-2"></i>Khám phá khóa học
+                                </a>
+                            @endif
+                        </div>
+                    </div>
             @endforelse
         </div>
 

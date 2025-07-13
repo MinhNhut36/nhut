@@ -418,7 +418,7 @@ class TeacherController extends Controller
         }
 
         // Lấy đường dẫn Desktop (Windows)
-        $desktopPath = getenv("HOMEDRIVE") . getenv("HOMEPATH") . '\Desktop';
+        $desktopPath = getenv("HOMEDRIVE") . getenv("HOMEPATH") . '\Downloads';
 
         // Tạo đường dẫn file CSV
         $filePath = $desktopPath . '\bang_diem_khoa_' . $courseId . '.csv';

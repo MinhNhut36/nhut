@@ -18,24 +18,23 @@ class AuthController extends Controller
     {
         try {
             $student = Student::where('username', $taikhoan)->first();
-            
+
             if (!$student) {
                 return response()->json([], 404);
             }
-            
+
             // Kiểm tra mật khẩu
             if (!Hash::check($matkhau, $student->password)) {
                 return response()->json([], 401);
             }
-            
+
             // Kiểm tra trạng thái tài khoản
             if ($student->is_status == 0) {
                 return response()->json([], 403); // Tài khoản bị khóa
             }
-            
+
             // Trả về thông tin học sinh
             return response()->json([$student], 200);
-            
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'Lỗi server',
@@ -43,33 +42,32 @@ class AuthController extends Controller
             ], 500);
         }
     }
-    
+
     /**
-     * Kiểm tra đăng nhập cho giáo viên
+     * Kiểm tra đăng nhập cho giảng viên
      * GET /api/TeacherDN/{taikhoan}/{matkhau}
      */
     public function kiemTraDangNhapTeacher($taikhoan, $matkhau)
     {
         try {
             $teacher = Teacher::where('username', $taikhoan)->first();
-            
+
             if (!$teacher) {
                 return response()->json([], 404);
             }
-            
+
             // Kiểm tra mật khẩu
             if (!Hash::check($matkhau, $teacher->password)) {
                 return response()->json([], 401);
             }
-            
+
             // Kiểm tra trạng thái tài khoản
             if ($teacher->is_status == 0) {
                 return response()->json([], 403); // Tài khoản bị khóa
             }
-            
-            // Trả về thông tin giáo viên
+
+            // Trả về thông tin giảng viên
             return response()->json([$teacher], 200);
-            
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'Lỗi server',

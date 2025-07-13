@@ -392,12 +392,14 @@
             font-size: 0.9rem;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            text-align: center;
         }
 
         .members-table td {
             padding: 1.25rem 1.5rem;
             border-bottom: 1px solid var(--border-color);
             vertical-align: middle;
+            text-align: center;
         }
 
         .members-table tbody tr {

@@ -105,17 +105,20 @@
             background: #f8fafc;
             color: #374151;
             font-weight: 600;
-            padding: 1rem 1.5rem;
+            padding: 0.5rem 0.75rem;
             text-align: center;
             border-bottom: 2px solid #e5e7eb;
+            white-space: nowrap;
         }
 
         .members-table td {
-            padding: 1rem 1.5rem;
+            padding: 0.5rem 0.75rem;
             text-align: center;
             border-bottom: 1px solid #e5e7eb;
             vertical-align: middle;
+            white-space: nowrap;
         }
+
 
         .members-table tbody tr:hover {
             background: rgba(59, 130, 246, 0.05);
@@ -332,6 +335,10 @@
                 display: none;
             }
         }
+
+        .d-flex.gap-2>* {
+            margin-left: 0.5rem;
+        }
     </style>
 @endsection
 
@@ -404,11 +411,19 @@
                     <span class="badge bg-primary">{{ $studentgrades->count() }} sinh viên</span>
                 </div>
 
-                <div class="p-3 text-end">
+
+                <div class="p-3 text-end d-flex justify-content-end align-items-center gap-2">
+                    <form method="GET" action="{{ route('teacher.exportCourseGrade', $course->course_id) }}">
+                        <button type="submit" class="btn btn-success">
+                            💾 Xuất bảng điểm
+                        </button>
+                    </form>
+
                     <button type="button" id="enable-edit" class="btn btn-warning">
                         <i class="fas fa-edit me-1"></i> Chỉnh sửa điểm
                     </button>
                 </div>
+
 
                 <form method="POST" action="{{ route('teacher.updategrade', $course->course_id) }}">
                     @csrf
@@ -524,7 +539,7 @@
                                     <tr>
                                         <td colspan="5" class="text-center">
                                             <div class="empty-state">
-                                                @if (request('search') ||  request('gender') !== null)
+                                                @if (request('search') || request('gender') !== null)
                                                     <i class="fas fa-search"></i>
                                                     <h4>Không tìm thấy sinh viên</h4>
                                                     <p>Không có sinh viên nào phù hợp với từ khóa tìm kiếm

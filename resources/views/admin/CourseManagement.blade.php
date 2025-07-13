@@ -229,6 +229,9 @@
             font-weight: 600;
             color: var(--text-dark);
             border-bottom: 2px solid var(--border-color);
+            white-space: nowrap;
+            vertical-align: middle;
+            text-align: center;
         }
 
         .table-custom td {
@@ -712,6 +715,7 @@
                                 <th>Năm</th>
                                 <th>Trạng thái</th>
                                 <th>Ngày bắt đầu</th>
+                                <th>Ngày kết thúc</th>
                                 <th>Giảng viên</th>
                                 <th>Thao tác</th>
                             </tr>
@@ -733,6 +737,7 @@
                                         </span>
                                     </td>
                                     <td>{{ \Carbon\Carbon::parse($course->starts_date)->format('d/m/Y') }}</td>
+                                    <td>{{ \Carbon\Carbon::parse($course->end_date)->format('d/m/Y') }}</td>
                                     <td>
                                         <div class="instructor-list">
                                             @if ($course->teachers->isEmpty())
@@ -847,7 +852,7 @@
                                 <!-- Mô tả -->
                                 <div class="form-group">
                                     <label class="form-label">
-                                        Mô tả (lịch học, thời gian, địa điểm, v.v.) 
+                                        Mô tả (lịch học, thời gian, địa điểm, v.v.)
                                     </label>
                                     <textarea class="form-control" id="courseDescription" placeholder="Nhập mô tả về khóa học" name="description">{{ old('description') }}</textarea>
                                     @error('description')
@@ -861,8 +866,21 @@
                                         Ngày bắt đầu <span class="required">*</span>
                                     </label>
                                     <input type="date" class="form-control" id="startDate" name="starts_date"
-                                        value="{{ old('starts_date') }}">
+                                        value="{{ old('starts_date') }}" min="{{ now()->toDateString() }}">
+
                                     @error('starts_date')
+                                        <small class="text-danger auto-hide-error">{{ $message }}</small>
+                                    @enderror
+                                </div>
+
+                                <!-- Ngày kết thúc -->
+                                <div class="form-group mt-3">
+                                    <label class="form-label">
+                                        Ngày kết thúc <span class="required">*</span>
+                                    </label>
+                                    <input type="date" class="form-control" id="endDate" name="end_date"
+                                        value="{{ old('end_date') }}">
+                                    @error('end_date')
                                         <small class="text-danger auto-hide-error">{{ $message }}</small>
                                     @enderror
                                 </div>
@@ -970,6 +988,44 @@
         // Set default date to today
         document.getElementById('startDate').value = new Date().toISOString().split('T')[0];
 
+        // function openModal() {
+        //     const modal = document.getElementById('courseModal');
+        //     const form = document.getElementById('courseForm');
+
+        //     // Hiển thị modal
+        //     modal.style.display = 'flex';
+        //     setTimeout(() => {
+        //         modal.classList.add('show');
+        //     }, 10);
+
+        //     // Reset form
+        //     form.reset();
+
+        //     // Reset action
+        //     form.action = "{{ route('admin.courses.create') }}";
+
+        //     // Reset các input ẩn
+        //     document.getElementById('formMode').value = 'create';
+        //     const hiddenId = document.getElementById('editCourseId');
+        //     if (hiddenId) hiddenId.value = '';
+
+        //     // Đặt lại tiêu đề và nút
+        //     document.querySelector('.modal-title').innerHTML =
+        //         '<i class="fas fa-graduation-cap me-2"></i> Tạo khóa học mới';
+        //     document.querySelector('#courseForm .btn-primary').innerHTML =
+        //         '<i class="fas fa-save me-2"></i> Lưu khóa học';
+
+        //     // Ẩn dropdown trạng thái
+        //     document.getElementById('statusGroup').classList.add('d-none');
+
+        //     // Reset lại giá trị các input
+        //     document.getElementById('courseName').value = '';
+        //     document.getElementById('courseLevel').value = '';
+        //     document.getElementById('courseYear').value = new Date().getFullYear();
+        //     document.getElementById('courseDescription').value = '';
+        //     document.getElementById('startDate').value = new Date().toISOString().split('T')[0];
+        //     document.getElementById('courseStatus').value = ''; // reset trạng thái nếu có
+        // }
         function openModal() {
             const modal = document.getElementById('courseModal');
             const form = document.getElementById('courseForm');
@@ -1000,13 +1056,39 @@
             // Ẩn dropdown trạng thái
             document.getElementById('statusGroup').classList.add('d-none');
 
-            // Reset lại giá trị các input
+            // Ngày hiện tại
+            const today = new Date();
+            const todayStr = today.toISOString().split('T')[0];
+
+            // Gán min và mặc định cho ngày bắt đầu
+            document.getElementById('startDate').min = todayStr;
+            document.getElementById('startDate').value = todayStr;
+
+            // Mặc định ngày kết thúc +8 tuần sau ngày bắt đầu
+            const endDate = new Date();
+            endDate.setDate(today.getDate() + 56);
+            const endDateStr = endDate.toISOString().split('T')[0];
+
+            // Gán giá trị input
             document.getElementById('courseName').value = '';
             document.getElementById('courseLevel').value = '';
-            document.getElementById('courseYear').value = new Date().getFullYear();
+            document.getElementById('courseYear').value = today.getFullYear();
             document.getElementById('courseDescription').value = '';
-            document.getElementById('startDate').value = new Date().toISOString().split('T')[0];
-            document.getElementById('courseStatus').value = ''; // reset trạng thái nếu có
+            document.getElementById('startDate').value = todayStr;
+            document.getElementById('endDate').value = endDateStr;
+            document.getElementById('endDate').min = todayStr;
+            document.getElementById('courseStatus').value = '';
+
+            // Tự cập nhật ngày kết thúc khi người dùng chọn lại ngày bắt đầu
+            document.getElementById('startDate').addEventListener('change', function() {
+                const newStart = new Date(this.value);
+                const newEnd = new Date(newStart);
+                newEnd.setDate(newStart.getDate() + 56);
+
+                const newEndStr = newEnd.toISOString().split('T')[0];
+                document.getElementById('endDate').value = newEndStr;
+                document.getElementById('endDate').min = this.value;
+            });
         }
 
 

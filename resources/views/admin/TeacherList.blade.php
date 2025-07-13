@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'QUẢN LÝ GIÁO VIÊN')
+@section('title', 'QUẢN LÝ GIẢNG VIÊN')
 
 @section('styles')
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -470,14 +470,14 @@
         <div class="main-container">
             <!-- Header -->
             <div class="header">
-                <h1><i class="fas fa-graduation-cap"></i> Quản lý Giáo viên</h1>
+                <h1><i class="fas fa-graduation-cap"></i> Quản lý Giảng viên</h1>
             </div>
 
             <!-- Statistics -->
             <div class="stats">
                 <div class="stat-card">
                     <div class="stat-number">{{ $total }}</div>
-                    <div class="stat-label">Tổng số giáo viên</div>
+                    <div class="stat-label">Tổng số giảng viên</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-number">{{ $active }}</div>
@@ -524,7 +524,7 @@
                         <div class="filter-group">
                             <button type="button" class="btn btn-success" data-bs-toggle="modal"
                                 data-bs-target="#addStudentModal">
-                                <i class="fas fa-plus"></i> Thêm giáo viên
+                                <i class="fas fa-plus"></i> Thêm giảng viên
                             </button>
                         </div>
                     </div>
@@ -536,7 +536,7 @@
                 <table class="student-table">
                     <thead>
                         <tr>
-                            <th>Thông tin giáo viên</th>
+                            <th>Thông tin giảng viên</th>
                             <th>Tên đăng nhập</th>
                             <th>Email</th>
                             <th>Ngày sinh</th>
@@ -593,7 +593,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">
-                        <i class="fas fa-user-plus me-2"></i>Thêm giáo viên mới
+                        <i class="fas fa-user-plus me-2"></i>Thêm giảng viên mới
                     </h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>

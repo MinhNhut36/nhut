@@ -24,7 +24,7 @@ return new class extends Migration
                 ->onDelete('cascade');
             $table->date('evaluation_date'); // Ngày đánh giá
             $table->integer('final_status')->default(0); // Trạng thái hoàn thành: 0 - chưa hoàn thành, 1 - đã hoàn thành
-            $table->longText('remark')->nullable(); // Nhận xét của giáo viên về tiến độ học tập của học sinh
+            $table->longText('remark')->nullable(); // Nhận xét của giảng viên về tiến độ học tập của học sinh
             $table->timestamps();
         });
     }

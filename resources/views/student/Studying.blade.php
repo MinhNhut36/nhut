@@ -340,21 +340,21 @@
             .content-container {
                 width: 95%;
             }
-            
+
             .nav-content {
                 flex-direction: column;
                 text-align: center;
             }
-            
+
             .nav-title {
                 font-size: 1.3rem;
             }
-            
+
             .nav-buttons {
                 width: 100%;
                 justify-content: center;
             }
-            
+
             .lesson-header h1 {
                 font-size: 2rem;
             }
@@ -373,25 +373,25 @@
                 width: 100%;
                 padding: 0 1rem;
             }
-            
+
             .lesson-main {
                 padding: 1rem 0;
             }
-            
+
             .nav-bar {
                 padding: 1rem 1.5rem;
             }
-            
+
             .nav-buttons {
                 flex-direction: column;
                 gap: 0.75rem;
             }
-            
+
             .nav-btn {
                 width: 100%;
                 justify-content: center;
             }
-            
+
             .lesson-actions {
                 flex-direction: column;
             }
@@ -405,7 +405,7 @@
                 align-items: flex-start;
                 gap: 0.5rem;
             }
-            
+
             .status-badge {
                 align-self: flex-start;
             }
@@ -424,11 +424,11 @@
                         Học tập
                     </div>
                     <div class="nav-buttons">
-                        <a href="{{ route('student.lesson',$courseId) }}" class="nav-btn">
+                        <a href="{{ route('student.lesson', $courseId) }}" class="nav-btn">
                             <i class="fas fa-book-open"></i>
                             Làm bài
                         </a>
-                        <a href="{{ route('student.lesson.board',$courseId) }}" class="nav-btn">
+                        <a href="{{ route('student.lesson.board', $courseId) }}" class="nav-btn">
                             <i class="fas fa-bullhorn"></i>
                             Bảng tin
                         </a>
@@ -451,7 +451,7 @@
                             $total = $lesson->myScore->total_questions ?? null;
                             $correct = $lesson->myScore->correct_answers ?? 0;
                             $status = $lesson->myScore->StudentProgcess ?? null;
-                            
+
                         @endphp
 
                         <div class="lesson-card">
@@ -468,16 +468,19 @@
                             <!-- Action Buttons -->
                             <div class="lesson-actions">
                                 <div style="width: 100%; margin-bottom: 1rem;">
-                                    <p><strong>Kết quả lần trước:</strong> {{ $correct }} / {{ $total }} câu đúng</p>
+                                    <p><strong>Kết quả lần trước:</strong> {{ $correct }} / {{ $total }} câu
+                                        đúng</p>
                                     <p class="score">
                                         <i class="fas fa-star" style="margin-right: 0.25rem;"></i>{{ $score }} điểm
                                     </p>
-                                    
+
                                     @if ($status?->completion_status !== null)
                                         <div class="progress-status">
                                             <strong>Kết quả:</strong>
-                                            <span class="status-badge {{ $status->completion_status ? 'status-pass' : 'status-fail' }}">
-                                                <i class="fas {{ $status->completion_status ? 'fa-check-circle' : 'fa-times-circle' }}"></i>
+                                            <span
+                                                class="status-badge {{ $status->completion_status ? 'status-pass' : 'status-fail' }}">
+                                                <i
+                                                    class="fas {{ $status->completion_status ? 'fa-check-circle' : 'fa-times-circle' }}"></i>
                                                 {{ $status->completion_status ? 'Đạt' : 'Không đạt' }}
                                             </span>
                                         </div>
@@ -507,7 +510,7 @@
                     </div>
                     <h3 class="empty-title">Chưa có bài học nào</h3>
                     <p class="empty-description">
-                        Hiện tại chưa có bài học nào được thêm vào. Vui lòng quay lại sau hoặc liên hệ với giáo viên!
+                        Hiện tại chưa có bài học nào được thêm vào. Vui lòng quay lại sau hoặc liên hệ với giảng viên!
                     </p>
                 </div>
             @endif

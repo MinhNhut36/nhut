@@ -256,6 +256,9 @@
             display: flex;
             flex-direction: column;
             gap: 0.25rem;
+            justify-content: space-between;
+            /* Giãn đều giữa các phần tử */
+            align-items: center;
         }
 
         /* Reply Form */
@@ -571,6 +574,21 @@
                 transform: translateY(0);
             }
         }
+
+        /* Mặc định ẩn nút xoá */
+        .comment-actions {
+            display: none;
+        }
+
+        /* Hiển thị nút xoá khi di chuột vào phần bình luận */
+        .comment-item:hover .comment-actions {
+            display: block;
+        }
+
+        .comment-actions {
+            margin-left: auto;
+            /* Đẩy nút xóa sang bên phải */
+        }
     </style>
 @endsection
 
@@ -661,13 +679,16 @@
                             <div class="post-time">{{ $post->created_at->diffForHumans() }}</div>
                         </div>
                     </div>
-                    <div class="post-actions">
-                        <button class="delete-btn" onclick="confirmDeletePost({{ $post->post_id }})">
-                            <i class="fas fa-trash-alt me-1"></i>
-                            Xóa
-                        </button>
-                    </div>
+
+                    @if ($teacher->teacher_id === $post->teacher->teacher_id)
+                        <div class="post-actions">
+                            <button class="delete-btn" onclick="confirmDeletePost({{ $post->post_id }})" title="Xoá">
+                                <i class="fas fa-trash-alt me-1"></i>
+                            </button>
+                        </div>
+                    @endif
                 </div>
+
 
                 {{-- Nội dung --}}
                 <div class="post-content">
@@ -695,9 +716,26 @@
                                                 </div>
                                                 <div class="comment-time">{{ $comment->created_at->format('H:i - d/m/Y') }}
                                                 </div>
+
                                             </div>
                                         </div>
                                         <div class="comment-content">{{ $comment->content }}</div>
+                                    </div>
+                                    <div class="comment-actions">
+                                        <form
+                                            action="{{ route('teacher.comment.delete', [
+                                                'courseId' => $course->course_id,
+                                                'commentId' => $comment->comment_id,
+                                            ]) }}"
+                                            method="POST"
+                                            onsubmit="return confirm('Bạn có chắc chắn muốn xóa bình luận này?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-danger btn-sm" title="Xoá">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+
+                                        </form>
                                     </div>
                                 </div>
                             </div>

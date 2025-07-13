@@ -17,7 +17,7 @@ Route::middleware(['web', 'admin'])->prefix('admin')->name('admin.')->group(func
 
 
 
-    //Route dành cho quản lý giáo viên
+    //Route dành cho quản lý giảng viên
     Route::get('/Teacherlist', [AdminController::class, 'GetTeacherList'])->name('teacherlist');
 
     Route::post('/teachers/{id}/toggle-status', [AdminController::class, 'AjaxToggleStatusTeacher']);

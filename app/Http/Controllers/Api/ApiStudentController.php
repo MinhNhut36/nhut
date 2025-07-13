@@ -8,6 +8,7 @@ use App\Models\LessonPartScore;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\DB;
 
 class ApiStudentController extends Controller
 {
@@ -82,15 +83,52 @@ class ApiStudentController extends Controller
     }
 
     /**
-     * Lấy điểm số của học sinh
+     * Lấy điểm số cao nhất của học sinh cho mỗi lesson_part (for Kotlin)
      * GET /api/scores/student/{studentId}
      */
     public function getScoresByStudentId($studentId)
     {
         try {
-            $scores = LessonPartScore::where('student_id', $studentId)->get();
-            return response()->json($scores, 200);
+            // Validate student exists
+            $student = Student::findOrFail($studentId);
 
+            // Get all scores and filter to highest per lesson_part in PHP
+            $allScores = LessonPartScore::where('student_id', $studentId)
+                ->orderBy('lesson_part_id')
+                ->orderBy('score', 'desc')
+                ->get();
+
+            // Group by lesson_part_id and take highest score for each
+            $highestScores = $allScores->groupBy('lesson_part_id')
+                ->map(function($scoresForLessonPart) {
+                    return $scoresForLessonPart->sortByDesc('score')->first();
+                })
+                ->values();
+
+            // Transform to match Kotlin LessonPartScore data class
+            $transformedScores = $highestScores->map(function($score) {
+                return [
+                    'score_id' => (int) $score->score_id,
+                    'student_id' => (int) $score->student_id,
+                    'lesson_part_id' => (int) $score->lesson_part_id,
+                    'course_id' => (int) $score->course_id,
+                    'attempt_no' => (int) $score->attempt_no,
+                    'score' => (float) $score->score,
+                    'total_questions' => (int) $score->total_questions,
+                    'correct_answers' => (int) $score->correct_answers,
+                    'submit_time' => (string) $score->submit_time,
+                    'created_at' => (string) $score->created_at,
+                    'updated_at' => (string) $score->updated_at,
+                ];
+            });
+
+            // Return direct array for Kotlin List<LessonPartScore>
+            return response()->json($transformedScores->toArray(), 200);
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'error' => 'Không tìm thấy học sinh'
+            ], 404);
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'Lỗi server',

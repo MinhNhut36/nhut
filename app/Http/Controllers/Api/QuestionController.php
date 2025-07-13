@@ -7,10 +7,61 @@ use App\Models\Question;
 use App\Models\Answer;
 use App\Models\StudentAnswer;
 use App\Models\LessonPartScore;
+use App\Models\StudentProgress;
 use Illuminate\Http\Request;
 
 class QuestionController extends Controller
 {
+    /**
+     * Get question by ID with answers for Kotlin
+     * GET /api/questions/{questionId}
+     */
+    public function getQuestionById($questionId)
+    {
+        try {
+            $question = Question::with('answers')->findOrFail($questionId);
+
+            // Transform data to match Kotlin data class structure
+            $transformedQuestion = [
+                'questions_id' => $question->questions_id,
+                'lesson_part_id' => $question->lesson_part_id,
+                'question_type' => $question->question_type,
+                'question_text' => $question->question_text,
+                'media_url' => $question->media_url,
+                'order_index' => $question->order_index,
+                'created_at' => $question->created_at->toISOString(),
+                'updated_at' => $question->updated_at->toISOString(),
+                'answers' => $question->answers->map(function($answer) {
+                    return [
+                        'answers_id' => $answer->answers_id,
+                        'questions_id' => $answer->questions_id,
+                        'match_key' => $answer->match_key,
+                        'answer_text' => $answer->answer_text,
+                        'is_correct' => $answer->is_correct,
+                        'feedback' => $answer->feedback,
+                        'media_url' => $answer->media_url,
+                        'order_index' => $answer->order_index,
+                        'created_at' => $answer->created_at->toISOString(),
+                        'updated_at' => $answer->updated_at->toISOString()
+                    ];
+                })->toArray()
+            ];
+
+            return response()->json($transformedQuestion, 200);
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'error' => 'Question not found',
+                'message' => 'The specified question does not exist'
+            ], 404);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Server error',
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
     /**
      * Get questions by lesson part with answers
      * GET /api/questions/lesson-part/{lessonPartId}
@@ -198,202 +249,258 @@ class QuestionController extends Controller
     }
 
     /**
-     * Submit student answers by course and lesson part
-     * POST /api/student-answers/student/{studentId}/course/{courseId}/lesson-part/{lessonPartId}
-     */
+    * Submit student answers by course and lesson part (Create new answers)
+    * POST /api/student-answers/student/{studentId}/course/{courseId}/lesson-part/{lessonPartId}
+    */
     public function submitStudentAnswerByCourseAndLessonPart(Request $request, $studentId, $courseId, $lessonPartId)
     {
         try {
+            // Validate input according to Kotlin StudentAnswersUpdateRequest
             $validated = $request->validate([
-                'answers' => 'required|array',
+                'answers' => 'required|array|min:1',
                 'answers.*.question_id' => 'required|integer|exists:questions,questions_id',
                 'answers.*.answer_text' => 'required|string',
-                'answers.*.is_correct' => 'sometimes|boolean'
+                'answers.*.is_correct' => 'nullable|boolean', // Optional from Kotlin
             ]);
 
-            $updatedAnswers = [];
+            // Validate student, course, lesson_part exist
+            $student = \App\Models\Student::findOrFail($studentId);
+            $course = \App\Models\Course::findOrFail($courseId);
+            $lessonPart = \App\Models\LessonPart::findOrFail($lessonPartId);
+
             $totalQuestions = count($validated['answers']);
             $correctAnswers = 0;
+            $createdAnswers = [];
+
+            // Delete existing answers for this student/lesson_part to create fresh
+            StudentAnswer::where('student_id', $studentId)
+                        ->whereHas('question', function($query) use ($lessonPartId) {
+                            $query->where('lesson_part_id', $lessonPartId);
+                        })
+                        ->delete();
 
             foreach ($validated['answers'] as $answerData) {
-                // Kiểm tra question thuộc lesson_part
+                // Verify question belongs to lesson_part
                 $question = Question::where('questions_id', $answerData['question_id'])
-                    ->where('lesson_part_id', $lessonPartId)
-                    ->first();
+                                    ->where('lesson_part_id', $lessonPartId)
+                                    ->first();
 
                 if (!$question) {
                     return response()->json([
-                        'error' => 'Question not found in specified lesson part'
+                        'success' => false,
+                        'message' => "Question {$answerData['question_id']} not found in lesson part {$lessonPartId}",
+                        'data' => null
                     ], 404);
                 }
 
-                // Tính toán is_correct nếu không được truyền vào
-                if (!isset($answerData['is_correct'])) {
-                    $answerData['is_correct'] = $this->calculateCorrectness($question, $answerData['answer_text']);
-                }
+                // Calculate correctness if not provided
+                $isCorrect = $answerData['is_correct'] ?? $this->calculateCorrectness($question, $answerData['answer_text']);
 
-                if ($answerData['is_correct']) {
+                if ($isCorrect) {
                     $correctAnswers++;
                 }
 
-                // Update hoặc create student answer
-                $studentAnswer = StudentAnswer::updateOrCreate(
-                    [
-                        'student_id' => $studentId,
-                        'questions_id' => $answerData['question_id']
-                    ],
-                    [
-                        'answer_text' => $answerData['answer_text'],
-                        'course_id' => $courseId,
-                        'answered_at' => now()
-                    ]
-                );
+                // Create new student answer
+                $studentAnswer = StudentAnswer::create([
+                    'student_id' => $studentId,
+                    'questions_id' => $answerData['question_id'],
+                    'course_id' => $courseId,
+                    'answer_text' => $answerData['answer_text'],
+                    'is_correct' => $isCorrect ? 1 : 0,
+                    'answered_at' => now(),
+                ]);
 
-                $updatedAnswers[] = $studentAnswer;
+                $createdAnswers[] = $studentAnswer;
             }
 
-            // Tính điểm và cập nhật lesson part score
-            $score = ($totalQuestions > 0) ? ($correctAnswers / $totalQuestions) * 10 : 0;
+            // Calculate score (0-10 scale) and progress percentage
+            $score = $totalQuestions > 0
+                ? round(($correctAnswers / $totalQuestions) * 10, 2)
+                : 0.0;
+            $progress = round(($correctAnswers / $totalQuestions) * 100, 2);
 
-            // Lấy attempt_no hiện tại
-            $currentAttempt = LessonPartScore::where('student_id', $studentId)
-                ->where('lesson_part_id', $lessonPartId)
-                ->max('attempt_no') ?? 0;
+            // Create new lesson part score record
+            $attemptNo = LessonPartScore::where('student_id', $studentId)
+                                       ->where('lesson_part_id', $lessonPartId)
+                                       ->where('course_id', $courseId)
+                                       ->count() + 1;
 
-            $lessonPartScore = LessonPartScore::updateOrCreate(
-                [
-                    'student_id' => $studentId,
-                    'lesson_part_id' => $lessonPartId
-                ],
-                [
-                    'course_id' => $courseId,
-                    'attempt_no' => $currentAttempt + 1,
-                    'score' => $score,
-                    'total_questions' => $totalQuestions,
-                    'correct_answers' => $correctAnswers,
-                    'submit_time' => now()
-                ]
-            );
+            $lessonPartScore = LessonPartScore::create([
+                'student_id' => $studentId,
+                'lesson_part_id' => $lessonPartId,
+                'course_id' => $courseId,
+                'score' => $score,
+                'total_questions' => $totalQuestions,
+                'correct_answers' => $correctAnswers,
+                'attempt_no' => $attemptNo,
+                'submit_time' => now(),
+            ]);
 
-            // Cập nhật student progress nếu đạt 70%
+            // Update student progress if score >= 70%
             if ($score >= 7.0) {
-                \App\Models\StudentProgress::updateOrCreate(
+                StudentProgress::updateOrCreate(
                     ['score_id' => $lessonPartScore->score_id],
                     [
-                        'completion_status' => 1,
-                        'last_updated' => now()
+                        'completion_status' => true,
+                        'last_updated' => now(),
                     ]
                 );
             }
 
+            // Return response matching Kotlin StudentAnswersUpdateResponse
             return response()->json([
-                'message' => 'Student answers updated successfully',
+                'success' => true,
+                'message' => 'Student answers submitted successfully',
                 'data' => [
-                    'updated_answers' => $updatedAnswers,
-                    'lesson_part_score' => $lessonPartScore,
-                    'total_questions' => $totalQuestions,
-                    'correct_answers' => $correctAnswers,
+                    'updated_count' => $totalQuestions,
                     'score' => $score,
-                    'completion_percentage' => ($score / 10) * 100
+                    'progress' => $progress,
                 ]
-            ], 200);
+            ], 201); // 201 for created
 
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
-                'error' => 'Validation failed',
-                'details' => $e->errors()
+                'success' => false,
+                'message' => 'Validation failed',
+                'data'    => ['errors' => $e->errors()],
             ], 422);
         } catch (\Exception $e) {
             return response()->json([
-                'error' => 'Server error',
-                'message' => $e->getMessage()
+                'success' => false,
+                'message' => 'Server error: ' . $e->getMessage(),
             ], 500);
         }
     }
 
+
     /**
-     * Get recent submission score and progress
+     * Get recent submission score and progress for Kotlin
      * GET /api/student-answers/recent-submission/student/{studentId}/course/{courseId}/lesson-part/{lessonPartId}
      */
     public function getRecentSubmissionScoreAndProgress(Request $request, $studentId, $courseId, $lessonPartId)
     {
         try {
+            // Validate parameters
+            $student = \App\Models\Student::findOrFail($studentId);
+            $course = \App\Models\Course::findOrFail($courseId);
+            $lessonPart = \App\Models\LessonPart::findOrFail($lessonPartId);
+
+            // Get submission_time parameter (optional)
             $submissionTime = $request->query('submission_time');
 
-            if (!$submissionTime) {
-                return response()->json([
-                    'error' => 'submission_time parameter is required'
-                ], 400);
+            // If submission_time provided, get answers from that time onwards
+            // If not provided, get the most recent submission
+            if ($submissionTime) {
+                $studentAnswersRaw = StudentAnswer::where('student_id', $studentId)
+                    ->whereHas('question', fn($q) => $q->where('lesson_part_id', $lessonPartId))
+                    ->where('answered_at', '>=', $submissionTime)
+                    ->with('question.answers')
+                    ->orderBy('answered_at', 'desc')
+                    ->get();
+            } else {
+                // Get most recent submission (latest answered_at)
+                $latestAnswerTime = StudentAnswer::where('student_id', $studentId)
+                    ->whereHas('question', fn($q) => $q->where('lesson_part_id', $lessonPartId))
+                    ->max('answered_at');
+
+                if (!$latestAnswerTime) {
+                    // No submissions found
+                    return response()->json([
+                        'success' => true,
+                        'data' => [
+                            'score' => null,
+                            'progress' => null,
+                            'submission_time' => null,
+                            'answers_count' => 0,
+                            'total_questions' => \App\Models\Question::where('lesson_part_id', $lessonPartId)->count(),
+                            'correct_answers' => 0,
+                            'student_answers' => []
+                        ]
+                    ], 200);
+                }
+
+                $submissionTime = $latestAnswerTime;
+                $studentAnswersRaw = StudentAnswer::where('student_id', $studentId)
+                    ->whereHas('question', fn($q) => $q->where('lesson_part_id', $lessonPartId))
+                    ->where('answered_at', '>=', $submissionTime)
+                    ->with('question.answers')
+                    ->orderBy('answered_at', 'desc')
+                    ->get();
             }
 
-            // Lấy student answers từ thời điểm submission_time
-            $studentAnswers = StudentAnswer::where('student_id', $studentId)
-                ->whereHas('question', function($query) use ($lessonPartId) {
-                    $query->where('lesson_part_id', $lessonPartId);
-                })
-                ->where('answered_at', '>=', $submissionTime)
-                ->with(['question' => function($query) {
-                    $query->select('questions_id', 'lesson_part_id', 'question_text', 'question_type');
-                }])
-                ->orderBy('answered_at', 'desc')
-                ->get();
+            // Calculate totals
+            $totalAnswers = $studentAnswersRaw->count();
+            $totalQuestions = \App\Models\Question::where('lesson_part_id', $lessonPartId)->count();
 
-            if ($studentAnswers->isEmpty()) {
-                return response()->json([
-                    'message' => 'No recent submissions found',
-                    'data' => []
-                ], 200);
-            }
+            // Map to Kotlin StudentAnswerDetail structure
+            $studentAnswers = $studentAnswersRaw->map(function($ans) {
+                $question = $ans->question;
 
-            // Lấy lesson part score
+                // Find correct answer and feedback
+                $correctAnswerModel = $question->answers
+                    ->first(fn($a) => $a->is_correct == 1);
+
+                $isCorrect = $this->calculateCorrectness($question, $ans->answer_text);
+
+                return [
+                    'question_id' => $question->questions_id,
+                    'question_text' => $question->question_text,
+                    'student_answer' => $ans->answer_text,
+                    'correct_answer' => $correctAnswerModel->answer_text ?? null,
+                    'is_correct' => $isCorrect,
+                    'feedback' => $correctAnswerModel->feedback ?? null,
+                ];
+            });
+
+            // Get lesson part score (latest submission)
             $lessonPartScore = LessonPartScore::where('student_id', $studentId)
                 ->where('lesson_part_id', $lessonPartId)
+                ->latest('submit_time')
                 ->first();
 
-            // Lấy student progress
-            $studentProgress = null;
-            if ($lessonPartScore) {
-                $studentProgress = \App\Models\StudentProgress::where('score_id', $lessonPartScore->score_id)
-                    ->first();
+            $score = $lessonPartScore ? (double)$lessonPartScore->score : null;
+
+            // Calculate course progress percentage
+            $progress = null;
+            if (method_exists($this, 'calculateStudentCourseProgress')) {
+                $progress = round($this->calculateStudentCourseProgress($studentId, $courseId), 2);
             }
 
-            // Tính toán thống kê - cần tính lại is_correct vì không lưu trong DB
-            $totalAnswers = $studentAnswers->count();
-            $correctAnswers = 0;
+            // Count correct answers
+            $correctCount = $studentAnswers->where('is_correct', true)->count();
 
-            foreach ($studentAnswers as $answer) {
-                if ($this->calculateCorrectness($answer->question, $answer->answer_text)) {
-                    $correctAnswers++;
-                }
-            }
-
-            $accuracy = $totalAnswers > 0 ? ($correctAnswers / $totalAnswers) * 100 : 0;
-
+            // Return response matching Kotlin RecentSubmissionResponse with proper type casting
             return response()->json([
-                'message' => 'Recent submission data retrieved successfully',
+                'success' => true,
                 'data' => [
-                    'student_id' => $studentId,
-                    'course_id' => $courseId,
-                    'lesson_part_id' => $lessonPartId,
-                    'submission_time' => $submissionTime,
-                    'recent_answers' => $studentAnswers,
-                    'lesson_part_score' => $lessonPartScore,
-                    'student_progress' => $studentProgress,
-                    'statistics' => [
-                        'total_answers' => $totalAnswers,
-                        'correct_answers' => $correctAnswers,
-                        'accuracy_percentage' => round($accuracy, 2),
-                        'score' => $lessonPartScore ? $lessonPartScore->score : 0,
-                        'is_completed' => $studentProgress ? $studentProgress->completion_status : false,
-                        'attempts_count' => $lessonPartScore ? $lessonPartScore->attempts_count : 0
-                    ]
+                    'score' => $score !== null ? (float) $score : null,
+                    'progress' => $progress !== null ? (float) $progress : null,
+                    'submission_time' => $submissionTime !== null ? (string) $submissionTime : null,
+                    'answers_count' => (int) $totalAnswers,
+                    'total_questions' => (int) $totalQuestions,
+                    'correct_answers' => (int) $correctCount,
+                    'student_answers' => $studentAnswers->map(function($answer) {
+                        return [
+                            'question_id' => (int) $answer['question_id'],
+                            'question_text' => (string) $answer['question_text'],
+                            'student_answer' => (string) $answer['student_answer'],
+                            'correct_answer' => $answer['correct_answer'] !== null ? (string) $answer['correct_answer'] : null,
+                            'is_correct' => (bool) $answer['is_correct'],
+                            'feedback' => $answer['feedback'] !== null ? (string) $answer['feedback'] : null,
+                        ];
+                    })->values()->toArray(),
                 ]
             ], 200);
 
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'data' => null
+            ], 404);
         } catch (\Exception $e) {
             return response()->json([
-                'error' => 'Server error',
-                'message' => $e->getMessage()
+                'success' => false,
+                'data' => null
             ], 500);
         }
     }

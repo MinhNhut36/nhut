@@ -34,6 +34,6 @@ class LessonPart extends Model
     {
         return $this->hasOne(LessonPartScore::class, 'lesson_part_id', 'lesson_part_id')
             ->where('student_id', auth('student')->id())
-            ->orderByDesc('attempt_no');
+            ->orderByDesc('score');
     }
 }

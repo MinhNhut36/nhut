@@ -105,7 +105,7 @@ class ProgressController extends Controller
                 return response()->json(['error' => 'Student not enrolled in this course'], 404);
             }
 
-            // Áp dụng công thức ĐÚNG theo course_id (updated for new structure)
+            // Áp dụng công thức ĐÚNG theo course_id và level của course
             $progressData = DB::select("
                 SELECT
                     SUM(question_count) as total_questions,
@@ -121,10 +121,10 @@ class ProgressController extends Controller
                     JOIN questions q ON lp.lesson_part_id = q.lesson_part_id
                     LEFT JOIN student_answers sa ON q.questions_id = sa.questions_id AND sa.student_id = ? AND sa.course_id = ?
                     LEFT JOIN answers a ON q.questions_id = a.questions_id AND a.is_correct = 1
-                    WHERE 1=1
+                    WHERE lp.level = ?
                     GROUP BY lp.lesson_part_id
                 ) AS progress_table
-            ", [$studentId, $courseId]);
+            ", [$studentId, $courseId, $course->level]);
 
             $totalQuestions = $progressData[0]->total_questions ?? 0;
             $totalAnswered = $progressData[0]->total_answered ?? 0;
@@ -139,9 +139,8 @@ class ProgressController extends Controller
                 $isCompleted = ($totalAnswered >= $totalQuestions) && ($totalCorrect >= (0.7 * $totalQuestions));
             }
 
-            // Get all lesson parts since level column was removed
-            // TODO: Need to redesign relationship between courses and lesson_parts
-            $lessonParts = LessonPart::all();
+            // Get lesson parts for this course's level only
+            $lessonParts = LessonPart::where('level', $course->level)->get();
             $lessonsProgress = [];
 
             foreach ($lessonParts as $lessonPart) {
@@ -166,7 +165,7 @@ class ProgressController extends Controller
 
                 $lessonsProgress[] = [
                     'lesson_part_id' => $lessonPart->lesson_part_id,
-                    'level' => $lessonPart->level,
+                    'level' => $course->level, // Use course level instead
                     'lesson_title' => $lessonPart->part_type,
                     'total_questions' => (int)$partQuestions,
                     'answered_questions' => (int)$partAnswered,
@@ -183,33 +182,30 @@ class ProgressController extends Controller
                 $estimatedDate = now()->addDays($daysRemaining)->format('Y-m-d');
             }
 
-            $response = [
-                'success' => true,
-                'data' => [
-                    'course_id' => (int)$courseId,
-                    'course_name' => $course->course_name,
-                    'student_id' => (int)$studentId,
-                    'enrollment_status' => $enrollment->status,
-                    'total_questions' => (int)$totalQuestions,
-                    'answered_questions' => (int)$totalAnswered,
-                    'correct_answers' => (int)$totalCorrect,
-                    'overall_progress_percentage' => round($overallProgress, 2),
-                    'correct_percentage' => $totalQuestions > 0 ? round(($totalCorrect / $totalQuestions) * 100, 2) : 0,
-                    'is_completed' => $isCompleted,
-                    'required_correct_percentage' => 70,
-                    'lessons_progress' => $lessonsProgress,
-                    'total_time_spent_minutes' => 0, // Would need time tracking
-                    'estimated_completion_date' => $estimatedDate
-                ]
-            ];
+$data = [
+            'course_id' => (int)$courseId,
+            'course_name' => $course->course_name,
+            'student_id' => (int)$studentId,
+            'enrollment_status' => $enrollment->status->value,
+            'total_questions' => (int)$totalQuestions,
+            'answered_questions' => (int)$totalAnswered,
+            'correct_answers' => (int)$totalCorrect,
+            'overall_progress_percentage' => round($overallProgress, 2),
+            'correct_percentage' => $totalQuestions > 0 ? round(($totalCorrect / $totalQuestions) * 100, 2) : 0,
+            'is_completed' => $isCompleted,
+            'required_correct_percentage' => 70,
+            'lessons_progress' => $lessonsProgress,
+            'total_time_spent_minutes' => 0,
+            'estimated_completion_date' => $estimatedDate
+        ];
 
-            return response()->json($response, 200);
+        // Return direct object for Kotlin CourseProgress compatibility
+        return response()->json($data, 200);
 
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Server error: ' . $e->getMessage()
-            ], 500);
+    } catch (\Exception $e) {
+        return response()->json([
+            'message' => 'Server error: ' . $e->getMessage()
+        ], 500);
         }
     }
 

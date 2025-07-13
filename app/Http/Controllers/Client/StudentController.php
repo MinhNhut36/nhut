@@ -174,12 +174,12 @@ class StudentController extends Controller
             ->where('status', 1)
             ->orderByDesc('created_at')
             ->get();
-
         return view('student.board')
             ->with('posts', $posts)
             ->with('courseId', $course_id)
             ->with('student_id', $student->student_id);
     }
+
     // Học sinh viết phản hồi
     public function UpPostComment(Request $request, int $course_id)
     {
@@ -195,8 +195,9 @@ class StudentController extends Controller
             'status' => 1, // Trạng thái bình luận
         ]);
 
-        return redirect()->back()->with('success', 'Phản hồi của bạn đã được gửi!')->with('courseId', $course_id);
+        return redirect()->back()->with('courseId', $course_id);
     }
+
     // Xóa bình luận của học sinh
     public function DeleteComment(ClassPostComment $comment)
     {
@@ -212,6 +213,7 @@ class StudentController extends Controller
 
         return redirect()->back()->with('success', 'Bình luận đã được xóa thành công.');
     }
+
     //HỌC SINH VÀO LÀM BÀI TẬP
     public function startExercise(int $lessonPartId)
     {
@@ -237,7 +239,7 @@ class StudentController extends Controller
         $score = LessonPartScore::create([
             'lesson_part_id'  => $lessonPartId,
             'student_id'      => $studentId,
-            'course_id'       => $courseId,              // hoặc lấy đúng course_id từ lesson_part quan hệ
+            'course_id'       => $courseId,
             'attempt_no'      => $lastAttempt + 1,
             'total_questions' => $totalQuestions,
             'correct_answers' => 0,
@@ -247,9 +249,27 @@ class StudentController extends Controller
 
         // 5. Lấy danh sách câu hỏi dạng single_choice
         $questions = Question::with('answers')->where('lesson_part_id', $lessonPartId)
-            ->whereIn('question_type', ['single_choice', 'fill_blank'])
+            ->whereIn('question_type', ['single_choice', 'fill_blank', 'matching','arrangement'])
             ->orderBy('order_index')
             ->get();
+
+        foreach ($questions as $question) {
+            if ($question->question_type === 'single_choice') {
+                // Trắc nghiệm: đảo toàn bộ đáp án
+                $question->shuffled_answers = $question->answers->shuffle();
+            } elseif ($question->question_type === 'matching') {
+                // Matching: chỉ đảo phần answer_text (bên trái)
+                $texts = $question->answers->where('answer_text', '!=', '')->unique('answer_text')->shuffle();
+                $images = $question->answers->where('media_url', '!=', '')->unique('match_key')->shuffle();
+
+                // Gán riêng ra 2 nhóm cho view xử lý
+                $question->shuffled_texts = $texts->values();   // danh sách text đã shuffle
+                $question->shuffled_images = $images->values(); // giữ nguyên hình ảnh
+            } else {
+                // Các loại câu hỏi khác (fill_blank, ...)
+                $question->shuffled_answers = $question->answers;
+            }
+        }
 
         // 3. Trả về view chỉ với danh sách câu hỏi và score_id
         return view('student.practice.exercise', [
@@ -311,6 +331,28 @@ class StudentController extends Controller
                 $feedback = $isCorrect
                     ? ($correctAnswer->feedback ?? '✅ Điền chính xác!')
                     : ($correctAnswer->feedback ?? '❌ Gợi ý: hãy kiểm tra lại chính tả hoặc ngữ nghĩa.');
+            } elseif ($questionType === 'matching' && is_array($answerValue)) {
+                $pairs = $question->answers;
+
+                $totalPairs = count($answerValue);
+                $correctPairs = 0;
+
+                foreach ($answerValue as $textKey => $imageKey) {
+                    $expected = $pairs->first(function ($item) use ($textKey) {
+                        return mb_strtolower($item->answer_text) === mb_strtolower($textKey);
+                    });
+
+                    if ($expected && $expected->match_key === $imageKey) {
+                        $correctPairs++;
+                    }
+                }
+
+                $isCorrect = ($correctPairs === $totalPairs);
+                $feedback = $isCorrect
+                    ? '✅ Bạn đã ghép đúng tất cả các cặp!'
+                    : "❌ Bạn ghép đúng $correctPairs / $totalPairs cặp.";
+
+                $answerText = json_encode($answerValue);
             }
 
             // Lưu câu trả lời của học sinh
@@ -330,7 +372,9 @@ class StudentController extends Controller
                 'your_answer'    => $answerValue,
                 'correct_answer' => $questionType === 'single_choice'
                     ? $correctAnswer?->answers_id
-                    : $correctAnswer?->answer_text,
+                    : ($questionType === 'fill_blank'
+                        ? $correctAnswer?->answer_text
+                        : null),
                 'is_correct'     => $isCorrect,
                 'feedback'       => $feedback,
             ];
@@ -359,7 +403,10 @@ class StudentController extends Controller
 
         return response()->json([
             'success' => true,
-            'results' => $results
+            'results' => $results,
+            'correct_count'   => $correctCount,
+            'total_questions' => $totalQuestions,
+            'final_score'     => $finalScore,
         ]);
     }
 }

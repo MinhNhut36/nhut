@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Phân công giảng viên - Admin Dashboard')
+@section('title', 'Phân công giảng dạy - Admin Dashboard')
 
 @section('styles')
     <style>
@@ -356,7 +356,7 @@
 
     <div class="course-assignment-container">
         <div class="page-header">
-            <h1><i class="fas fa-chalkboard-teacher me-3"></i>Phân công giảng viên</h1>
+            <h1><i class="fas fa-chalkboard-teacher me-3"></i>Phân công giảng dạy</h1>
         </div>
         @include('partials.alerts')
         <div id="courses-container">
@@ -378,7 +378,7 @@
                         </div>
                     </div>
 
-                    {{-- Form phân công giảng viên --}}
+                    {{-- Form Phân công giảng dạy --}}
                     <form action="{{ route('admin.course.assign-teacher') }}" method="POST" class="add-teacher-form">
                         @csrf
                         <input type="hidden" name="course_id" value="{{ $course->course_id }}">
@@ -545,7 +545,7 @@
                     });
 
                     if (alreadyAssigned && selectedTeacherId) {
-                        alert('Giảng viên này đã được phân công cho khóa học!');
+                        alert('giảng viên này đã được phân công cho khóa học!');
                         this.value = '';
                     }
                 });

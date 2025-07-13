@@ -106,16 +106,29 @@ Route::post('student-answers/student/{studentId}/course/{courseId}/lesson-part/{
 Route::get('student-answers/recent-submission/student/{studentId}/course/{courseId}/lesson-part/{lessonPartId}', [QuestionController::class, 'getRecentSubmissionScoreAndProgress']);
 
 // ==================== CLASS POSTS & COMMUNICATION ====================
+// Class Posts - Get posts by course
 Route::get('class-posts/course/{courseId}', [ClassPostController::class, 'getClassPostsByCourseId']);
 Route::get('class-posts/course/{courseId}/comments', [ClassPostController::class, 'getClassPostCommentsByCourse']);
+Route::get('class-posts/course/{courseId}/posts-with-comments', [ClassPostController::class, 'getPostsWithCommentsByCourse']);
+
+// Class Posts - Single post operations
 Route::get('class-posts/{postId}', [ClassPostController::class, 'getClassPostById']);
 Route::post('class-posts', [ClassPostController::class, 'createClassPost']);
 Route::put('class-posts/{postId}', [ClassPostController::class, 'updateClassPost']);
 Route::delete('class-posts/{postId}', [ClassPostController::class, 'deleteClassPost']);
+
+// Class Posts - Get posts by teacher (for teacher's own posts)
+Route::get('class-posts/teacher/{teacherId}', [ClassPostController::class, 'getClassPostsByTeacher']);
+
+// Class Post Comments - Comment operations
 Route::get('class-post-replies/post/{postId}', [ClassPostController::class, 'getClassPostReplies']);
 Route::post('class-post-replies', [ClassPostController::class, 'createClassPostReply']);
 Route::put('class-post-replies/{commentId}', [ClassPostController::class, 'updateClassPostReply']);
 Route::delete('class-post-replies/{commentId}', [ClassPostController::class, 'deleteClassPostReply']);
+
+// Class Post Comments - Get comments by user
+Route::get('class-post-replies/teacher/{teacherId}', [ClassPostController::class, 'getCommentsByTeacher']);
+Route::get('class-post-replies/student/{studentId}', [ClassPostController::class, 'getCommentsByStudent']);
 
 // ==================== NOTIFICATIONS ====================
 Route::get('notifications/student/{studentId}', [NotificationController::class, 'getNotificationsByStudentId']);

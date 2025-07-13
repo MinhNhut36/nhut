@@ -53,7 +53,7 @@ class AdminController extends Controller
             'message' => $request->message,
             'notification_date' => now(),
         ]);
-
+        
         return redirect()->back()->with('success', 'Thông báo đã được thêm thành công!');
     }
     //Xóa thông báo

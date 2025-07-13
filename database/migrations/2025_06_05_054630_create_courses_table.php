@@ -19,6 +19,7 @@ return new class extends Migration
             $table->longText('description');
             $table->string('status')->default('Chờ xác thực');
             $table->date('starts_date');
+            $table->date('end_date');
             $table->timestamps();
             $table->foreign('level')
                 ->references('level')

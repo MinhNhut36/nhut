@@ -440,7 +440,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach ($studentgrades as $studentgrade)
+                                @forelse ($studentgrades as $studentgrade)
                                     @php
                                         $studentId = $studentgrade->student->student_id;
                                     @endphp
@@ -532,7 +532,33 @@
                                             @endif
                                         </td>
                                     </tr>
-                                @endforeach
+                                @empty
+                                    <tr>
+                                        <td colspan="5" class="text-center">
+                                            <div class="empty-state">
+                                                @if (request('search') ||  request('gender') !== null)
+                                                    <i class="fas fa-search"></i>
+                                                    <h4>Không tìm thấy sinh viên</h4>
+                                                    <p>Không có sinh viên nào phù hợp với từ khóa tìm kiếm
+                                                        @if (request('search'))
+                                                            "<strong>{{ request('search') }}</strong>"
+                                                        @endif
+                                                        trong lớp này.
+                                                    </p>
+                                                    <a href="{{ route('teacher.grade', $course->course_id) }}"
+                                                        class="btn-clear-search">
+                                                        <i class="fas fa-times"></i>
+                                                        Xóa bộ lọc
+                                                    </a>
+                                                @else
+                                                    <i class="fas fa-users"></i>
+                                                    <h4>Chưa có sinh viên</h4>
+                                                    <p>Lớp học này chưa có sinh viên nào tham gia.</p>
+                                                @endif
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endforelse
                             </tbody>
                         </table>
                     </div>

@@ -274,7 +274,7 @@
                                     <textarea class="form-control" name="question_text" rows="2"
                                         placeholder="Ví dụ: Nối từ với hình ảnh tương ứng..."></textarea>
                                 </div>
-
+                                
                                 <label class="form-label">Các cặp nối:</label>
                                 <div id="matchingPairs">
                                     <div class="matching-pair">
@@ -507,7 +507,7 @@
     <script>
         let selectedQuestionType = '';
         let selectedLessonPartId = '';
-
+        var count_create_matching_pair = 1;
         $(document).ready(function() {
             // Xử lý chọn level
             $('#levelSelect').on('change', function() {
@@ -561,24 +561,33 @@
             $('.image-upload-area').on('click', function() {
                 $(this).find('input[type="file"]').click();
             });
-
             // Xử lý thêm cặp nối
             $('#addMatchingPair').on('click', function() {
-                const newPair = `
-                    <div class="matching-pair">
-                        <div class="flex-fill">
-                            <input type="text" class="form-control" name="words[]" placeholder="Từ vựng">
-                        </div>
-                        <i class="fas fa-arrows-alt-h text-muted"></i>
-                        <div class="flex-fill">
-                            <input type="file" class="form-control" name="images[]" accept="image/*">
-                        </div>
-                        <button type="button" class="btn btn-sm btn-danger remove-pair">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
-                `;
-                $('#matchingPairs').append(newPair);
+                if(count_create_matching_pair < 5)
+                {
+                    const newPair = `
+                            <div class="matching-pair">
+                                <div class="flex-fill">
+                                    <input type="text" class="form-control" name="words[]" placeholder="Từ vựng">
+                                </div>
+                                <i class="fas fa-arrows-alt-h text-muted"></i>
+                                <div class="flex-fill">
+                                    <input type="file" class="form-control" name="images[]" accept="image/*">
+                                </div>
+                                <button type="button" class="btn btn-sm btn-danger remove-pair">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        `;
+                        $('#matchingPairs').append(newPair);
+                        count_create_matching_pair++;
+                }
+                else
+                {
+                    alert('Bạn chỉ được thêm tối đa 5 cặp');
+                }
+                console.log(count_create_matching_pair);
+                
             });
 
             // Xử lý xóa cặp nối
@@ -586,6 +595,9 @@
                 if ($('#matchingPairs .matching-pair').length > 1) {
                     $(this).closest('.matching-pair').remove();
                 }
+                count_create_matching_pair--;
+                console.log('zzz');
+                console.log(count_create_matching_pair);
             });
 
             // Tự động tạo từ xáo trộn cho sắp xếp câu
@@ -747,6 +759,11 @@
 
             if (words.length < 2) {
                 alert('Cần ít nhất 2 cặp nối');
+                return false;
+            }
+
+            if (words.length >= 5) {
+                alert('Chỉ được thêm tối đa 5 cặp');
                 return false;
             }
 

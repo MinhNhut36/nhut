@@ -19,10 +19,10 @@ class StudentAuthMiddleware
 
         if (Auth::guard('student')->check())
         {
-            Log::info('thành công');
+          
             return $next($request);
         } else {
-            Log::info('thất bại');
+          
             return redirect()->route('login');
         }
     }

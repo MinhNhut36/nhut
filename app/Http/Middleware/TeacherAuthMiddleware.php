@@ -18,10 +18,10 @@ class TeacherAuthMiddleware
     {
             if (Auth::guard('teacher')->check())
         {
-            Log::info('thành công');
+         
             return $next($request);
         } else {
-            Log::info('thất bại');
+            
             return redirect()->route('login');
         }
     }

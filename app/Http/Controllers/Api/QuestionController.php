@@ -69,15 +69,47 @@ class QuestionController extends Controller
     public function getQuestionsByLessonPart($lessonPartId)
     {
         try {
+            // Lấy câu hỏi ngẫu nhiên và với đáp án ngẫu nhiên
             $questions = Question::where('lesson_part_id', $lessonPartId)
-                ->with('answers')
-                ->orderBy('order_index')
+                ->inRandomOrder() // Random câu hỏi
+                ->with(['answers' => function ($query) {
+                    $query->inRandomOrder(); // Random đáp án
+                }])
+                ->orderBy('order_index') // Nếu vẫn muốn ưu tiên order_index sau khi random
                 ->get();
 
-            return response()->json($questions, 200);
+            // Transform questions để đảm bảo định dạng JSON như mong muốn
+            $transformedQuestions = $questions->map(function($question) {
+                return [
+                    'questions_id'    => $question->questions_id,
+                    'lesson_part_id'  => $question->lesson_part_id,
+                    'question_type'   => $question->question_type,
+                    'question_text'   => $question->question_text,
+                    'media_url'       => $question->media_url,
+                    'order_index'     => $question->order_index,
+                    'created_at'      => $question->created_at->toISOString(),
+                    'updated_at'      => $question->updated_at->toISOString(),
+                    'answers'         => collect($question->answers)->map(function($answer) {
+                        return [
+                            'answers_id'     => $answer->answers_id,
+                            'questions_id'   => $answer->questions_id,
+                            'match_key'      => $answer->match_key,
+                            'answer_text'    => $answer->answer_text,
+                            'is_correct'     => $answer->is_correct,
+                            'feedback'       => $answer->feedback,
+                            'media_url'      => $answer->media_url,
+                            'order_index'    => $answer->order_index,
+                            'created_at'     => $answer->created_at->toISOString(),
+                            'updated_at'     => $answer->updated_at->toISOString(),
+                        ];
+                    })->toArray(),
+                ];
+            });
+
+            return response()->json($transformedQuestions, 200);
         } catch (\Exception $e) {
             return response()->json([
-                'error' => 'Server error',
+                'error'   => 'Server error',
                 'message' => $e->getMessage()
             ], 500);
         }
@@ -94,7 +126,23 @@ class QuestionController extends Controller
                 ->orderBy('order_index')
                 ->get();
 
-            return response()->json($answers, 200);
+            // Transform answers to ensure proper serialization
+            $transformedAnswers = $answers->map(function($answer) {
+                return [
+                    'answers_id' => $answer->answers_id,
+                    'questions_id' => $answer->questions_id,
+                    'match_key' => $answer->match_key,
+                    'answer_text' => $answer->answer_text,
+                    'is_correct' => $answer->is_correct,
+                    'feedback' => $answer->feedback,
+                    'media_url' => $answer->media_url,
+                    'order_index' => $answer->order_index,
+                    'created_at' => $answer->created_at->toISOString(),
+                    'updated_at' => $answer->updated_at->toISOString()
+                ];
+            });
+
+            return response()->json($transformedAnswers, 200);
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'Server error',
@@ -104,27 +152,67 @@ class QuestionController extends Controller
     }
 
     /**
+     * Test endpoint for debugging
+     * POST /api/lesson-part-scores/test
+     */
+    public function testSubmitLessonPartScore(Request $request)
+    {
+        \Log::info('Test endpoint called', ['request' => $request->all()]);
+        return response()->json([
+            'success' => true,
+            'message' => 'Test endpoint working',
+            'received_data' => $request->all()
+        ]);
+    }
+
+    /**
      * Submit lesson part score
      * POST /api/lesson-part-scores
+     * Matches Kotlin LessonPartScoreRequest and LessonPartScoreResponse
      */
     public function submitLessonPartScore(Request $request)
     {
         try {
-            $validated = $request->validate([
-                'student_id' => 'required|integer',
-                'lesson_part_id' => 'required|integer',
-                'course_id' => 'required|integer',
-                'attempt_no' => 'sometimes|integer',
-                'score' => 'required|numeric',
-                'total_questions' => 'required|integer',
-                'correct_answers' => 'required|integer'
+            // Log incoming request for debugging
+            \Log::info('submitLessonPartScore called', [
+                'request_data' => $request->all()
             ]);
 
-            // Auto-calculate attempt_no if not provided
-            if (!isset($validated['attempt_no'])) {
-                $validated['attempt_no'] = LessonPartScore::where('student_id', $validated['student_id'])
+            // Validate input to match Kotlin LessonPartScoreRequest
+            $validated = $request->validate([
+                'student_id' => 'required|integer|exists:students,student_id',
+                'lesson_part_id' => 'required|integer|exists:lesson_parts,lesson_part_id',
+                'course_id' => 'required|integer|exists:courses,course_id',
+                'attempt_no' => 'nullable|integer|min:1',
+                'score' => 'required|numeric|min:0|max:10',
+                'total_questions' => 'required|integer|min:1',
+                'correct_answers' => 'required|integer|min:0'
+            ]);
+
+            \Log::info('Validation passed', ['validated' => $validated]);
+
+            // Additional validation: correct_answers should not exceed total_questions
+            if ($validated['correct_answers'] > $validated['total_questions']) {
+                \Log::error('correct_answers exceeds total_questions', [
+                    'correct_answers' => $validated['correct_answers'],
+                    'total_questions' => $validated['total_questions']
+                ]);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Correct answers cannot exceed total questions',
+                    'score_data' => null,
+                    'progress_updated' => false,
+                    'is_completed' => false,
+                    'course_progress_percentage' => 0.0
+                ], 422);
+            }
+
+            // Auto-calculate attempt_no if not provided (null in Kotlin)
+            if (!isset($validated['attempt_no']) || is_null($validated['attempt_no'])) {
+                $maxAttempt = LessonPartScore::where('student_id', $validated['student_id'])
                     ->where('lesson_part_id', $validated['lesson_part_id'])
-                    ->max('attempt_no') + 1;
+                    ->max('attempt_no');
+                $validated['attempt_no'] = ($maxAttempt ?? 0) + 1;
             }
 
             // Save lesson part score
@@ -138,6 +226,8 @@ class QuestionController extends Controller
                 'correct_answers' => $validated['correct_answers'],
                 'submit_time' => now()
             ]);
+
+            \Log::info('LessonPartScore created', ['score_id' => $lessonPartScore->score_id]);
 
             // Check if lesson part is completed (70% or higher)
             $completionPercentage = ($validated['correct_answers'] / $validated['total_questions']) * 100;
@@ -162,27 +252,62 @@ class QuestionController extends Controller
             }
 
             // Calculate overall course progress for this student
-            $courseProgress = $this->calculateStudentCourseProgress($validated['student_id'], $validated['course_id']);
+            $courseProgress = 0.0;
+            try {
+                $courseProgress = $this->calculateStudentCourseProgress($validated['student_id'], $validated['course_id']);
+                \Log::info('Course progress calculated', ['progress' => $courseProgress]);
+            } catch (\Exception $e) {
+                \Log::error('Error calculating course progress', ['error' => $e->getMessage()]);
+                $courseProgress = 0.0;
+            }
 
+            // Return response matching Kotlin LessonPartScoreResponse
             return response()->json([
                 'success' => true,
                 'message' => 'Score submitted successfully',
                 'score_data' => [
-                    'score_id' => $lessonPartScore->score_id,
-                    'score' => $lessonPartScore->score,
-                    'attempt_no' => $lessonPartScore->attempt_no,
-                    'submit_time' => $lessonPartScore->submit_time,
-                    'completion_percentage' => round($completionPercentage, 2)
+                    'score_id' => (int) $lessonPartScore->score_id,
+                    'student_id' => (int) $lessonPartScore->student_id,
+                    'lesson_part_id' => (int) $lessonPartScore->lesson_part_id,
+                    'course_id' => (int) $lessonPartScore->course_id,
+                    'attempt_no' => (int) $lessonPartScore->attempt_no,
+                    'score' => (float) $lessonPartScore->score,
+                    'total_questions' => (int) $lessonPartScore->total_questions,
+                    'correct_answers' => (int) $lessonPartScore->correct_answers,
+                    'submit_time' => (string) $lessonPartScore->submit_time,
+                    'completion_percentage' => (float) round($completionPercentage, 2)
                 ],
-                'progress_updated' => $progressUpdated,
-                'is_completed' => $isCompleted,
-                'course_progress_percentage' => round($courseProgress, 2)
+                'progress_updated' => (bool) $progressUpdated,
+                'is_completed' => (bool) $isCompleted,
+                'course_progress_percentage' => (float) round($courseProgress, 2)
             ], 200);
 
-        } catch (\Exception $e) {
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            \Log::error('Validation failed in submitLessonPartScore', [
+                'errors' => $e->errors(),
+                'request_data' => $request->all()
+            ]);
             return response()->json([
                 'success' => false,
-                'message' => 'Server error: ' . $e->getMessage()
+                'message' => 'Validation failed',
+                'score_data' => null,
+                'progress_updated' => false,
+                'is_completed' => false,
+                'course_progress_percentage' => 0.0
+            ], 422);
+        } catch (\Exception $e) {
+            \Log::error('Error in submitLessonPartScore', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'request_data' => $request->all()
+            ]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Server error: ' . $e->getMessage(),
+                'score_data' => null,
+                'progress_updated' => false,
+                'is_completed' => false,
+                'course_progress_percentage' => 0.0
             ], 500);
         }
     }

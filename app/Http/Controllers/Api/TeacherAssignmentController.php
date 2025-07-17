@@ -12,7 +12,7 @@ use Illuminate\Validation\Rule;
 class TeacherAssignmentController extends Controller
 {
     /**
-     * Lấy phân công giảng viên theo khóa học
+     * Lấy phân công giáo viên theo khóa học
      * GET /api/teacher-assignments/course/{courseId}
      */
     public function getTeacherAssignmentsByCourseId($courseId)
@@ -20,13 +20,13 @@ class TeacherAssignmentController extends Controller
         try {
             // Validate course exists
             $course = Course::findOrFail($courseId);
-
+            
             $assignments = TeacherCourseAssignment::where('course_id', $courseId)
-                ->with(['teacher', 'course'])
-                ->orderBy('assigned_at', 'desc')
-                ->get();
-
-            $transformedAssignments = $assignments->map(function ($assignment) {
+                                                 ->with(['teacher', 'course'])
+                                                 ->orderBy('assigned_at', 'desc')
+                                                 ->get();
+            
+            $transformedAssignments = $assignments->map(function($assignment) {
                 return [
                     'assignment_id' => $assignment->assignment_id,
                     'role' => $assignment->role,
@@ -48,7 +48,7 @@ class TeacherAssignmentController extends Controller
                     ]
                 ];
             });
-
+            
             return response()->json([
                 'success' => true,
                 'data' => $transformedAssignments,
@@ -60,6 +60,7 @@ class TeacherAssignmentController extends Controller
                     'roles' => $transformedAssignments->pluck('role')->unique()->values()
                 ]
             ], 200);
+            
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             return response()->json([
                 'success' => false,
@@ -74,17 +75,17 @@ class TeacherAssignmentController extends Controller
             ], 500);
         }
     }
-
+    
     /**
-     * Lấy phân công giảng viên theo ID
+     * Lấy phân công giáo viên theo ID
      * GET /api/teacher-assignments/{assignmentId}
      */
     public function getTeacherAssignmentById($assignmentId)
     {
         try {
             $assignment = TeacherCourseAssignment::with(['teacher', 'course'])
-                ->findOrFail($assignmentId);
-
+                                                ->findOrFail($assignmentId);
+            
             return response()->json([
                 'success' => true,
                 'data' => [
@@ -108,6 +109,7 @@ class TeacherAssignmentController extends Controller
                     ]
                 ]
             ], 200);
+            
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             return response()->json([
                 'success' => false,
@@ -122,9 +124,9 @@ class TeacherAssignmentController extends Controller
             ], 500);
         }
     }
-
+    
     /**
-     * Lấy phân công theo giảng viên
+     * Lấy phân công theo giáo viên
      * GET /api/teacher-assignments/teacher/{teacherId}
      */
     public function getAssignmentsByTeacherId($teacherId)
@@ -132,13 +134,13 @@ class TeacherAssignmentController extends Controller
         try {
             // Validate teacher exists
             $teacher = Teacher::findOrFail($teacherId);
-
+            
             $assignments = TeacherCourseAssignment::where('teacher_id', $teacherId)
-                ->with(['teacher', 'course'])
-                ->orderBy('assigned_at', 'desc')
-                ->get();
-
-            $transformedAssignments = $assignments->map(function ($assignment) {
+                                                 ->with(['teacher', 'course'])
+                                                 ->orderBy('assigned_at', 'desc')
+                                                 ->get();
+            
+            $transformedAssignments = $assignments->map(function($assignment) {
                 return [
                     'assignment_id' => $assignment->assignment_id,
                     'role' => $assignment->role,
@@ -151,7 +153,7 @@ class TeacherAssignmentController extends Controller
                     ]
                 ];
             });
-
+            
             return response()->json([
                 'success' => true,
                 'data' => $transformedAssignments,
@@ -166,6 +168,7 @@ class TeacherAssignmentController extends Controller
                     'roles' => $transformedAssignments->pluck('role')->unique()->values()
                 ]
             ], 200);
+            
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             return response()->json([
                 'success' => false,
@@ -182,7 +185,7 @@ class TeacherAssignmentController extends Controller
     }
 
     /**
-     * Tạo phân công giảng viên mới
+     * Tạo phân công giáo viên mới
      * POST /api/teacher-assignments
      */
     public function createTeacherAssignment(Request $request)
@@ -197,9 +200,9 @@ class TeacherAssignmentController extends Controller
 
             // Check if assignment already exists
             $existingAssignment = TeacherCourseAssignment::where('teacher_id', $validated['teacher_id'])
-                ->where('course_id', $validated['course_id'])
-                ->where('role', $validated['role'])
-                ->first();
+                                                        ->where('course_id', $validated['course_id'])
+                                                        ->where('role', $validated['role'])
+                                                        ->first();
 
             if ($existingAssignment) {
                 return response()->json([
@@ -216,6 +219,7 @@ class TeacherAssignmentController extends Controller
                 'data' => $assignment->load(['teacher', 'course']),
                 'message' => 'Teacher assignment created successfully'
             ], 201);
+
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
                 'success' => false,
@@ -232,7 +236,7 @@ class TeacherAssignmentController extends Controller
     }
 
     /**
-     * Cập nhật phân công giảng viên
+     * Cập nhật phân công giáo viên
      * PUT /api/teacher-assignments/{assignmentId}
      */
     public function updateTeacherAssignment(Request $request, $assignmentId)
@@ -252,6 +256,7 @@ class TeacherAssignmentController extends Controller
                 'data' => $assignment->load(['teacher', 'course']),
                 'message' => 'Teacher assignment updated successfully'
             ], 200);
+
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             return response()->json([
                 'success' => false,
@@ -274,7 +279,7 @@ class TeacherAssignmentController extends Controller
     }
 
     /**
-     * Xóa phân công giảng viên
+     * Xóa phân công giáo viên
      * DELETE /api/teacher-assignments/{assignmentId}
      */
     public function deleteTeacherAssignment($assignmentId)
@@ -287,6 +292,7 @@ class TeacherAssignmentController extends Controller
                 'success' => true,
                 'message' => 'Teacher assignment deleted successfully'
             ], 200);
+
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             return response()->json([
                 'success' => false,

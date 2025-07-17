@@ -18,8 +18,16 @@ class CourseController extends Controller
     {
         try {
             $courses = Course::with(['lesson', 'teachers'])->get();
-            return response()->json($courses, 200);
-            
+
+            // Transform courses to ensure enum values are properly serialized
+            $transformedCourses = $courses->map(function($course) {
+                $courseArray = $course->toArray();
+                $courseArray['status'] = $course->status ? $course->status->value : '';
+                return $courseArray;
+            });
+
+            return response()->json($transformedCourses, 200);
+
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'Lỗi server',
@@ -154,8 +162,10 @@ class CourseController extends Controller
                 'course_name' => (string) ($course->course_name ?? ''),
                 'year' => (string) ($course->year ?? ''),
                 'description' => (string) ($course->description ?? ''),
-                'status' => (string) ($course->status ?? ''),
+                //'status' => (string) ($course->status ?? ''),
+                 'status' => $course->status ? $course->status->value : '',
                 'starts_date' => (string) ($course->starts_date ?? ''),
+                'end_date' => (string) ($course->end_date ?? ''),
                 'created_at' => (string) $course->created_at,
                 'updated_at' => (string) $course->updated_at,
                 'lesson' => $lesson,
@@ -190,9 +200,16 @@ class CourseController extends Controller
             $courses = Course::whereHas('enrollments', function($query) use ($studentId) {
                 $query->where('student_id', $studentId);
             })->with(['lesson', 'teachers'])->get();
-            
-            return response()->json($courses, 200);
-            
+
+            // Transform courses to ensure enum values are properly serialized
+            $transformedCourses = $courses->map(function($course) {
+                $courseArray = $course->toArray();
+                $courseArray['status'] = $course->status ? $course->status->value : '';
+                return $courseArray;
+            });
+
+            return response()->json($transformedCourses, 200);
+
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'Lỗi server',
@@ -211,9 +228,16 @@ class CourseController extends Controller
             $courses = Course::where('level', $level)
                            ->with(['lesson', 'teachers'])
                            ->get();
-            
-            return response()->json($courses, 200);
-            
+
+            // Transform courses to ensure enum values are properly serialized
+            $transformedCourses = $courses->map(function($course) {
+                $courseArray = $course->toArray();
+                $courseArray['status'] = $course->status ? $course->status->value : '';
+                return $courseArray;
+            });
+
+            return response()->json($transformedCourses, 200);
+
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'Lỗi server',
@@ -232,9 +256,18 @@ class CourseController extends Controller
             $enrollments = CourseEnrollment::where('student_id', $studentId)
                                          ->with(['course', 'student'])
                                          ->get();
-            
-            return response()->json($enrollments, 200);
-            
+
+            // Transform enrollments to ensure enum values are properly serialized
+            $transformedEnrollments = $enrollments->map(function($enrollment) {
+                $enrollmentArray = $enrollment->toArray();
+                if (isset($enrollmentArray['course']['status'])) {
+                    $enrollmentArray['course']['status'] = $enrollment->course->status ? $enrollment->course->status->value : '';
+                }
+                return $enrollmentArray;
+            });
+
+            return response()->json($transformedEnrollments, 200);
+
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'Lỗi server',
@@ -297,9 +330,18 @@ class CourseController extends Controller
             $enrollments = CourseEnrollment::where('assigned_course_id', $courseId)
                                          ->with(['student', 'course'])
                                          ->get();
-            
-            return response()->json($enrollments, 200);
-            
+
+            // Transform enrollments to ensure enum values are properly serialized
+            $transformedEnrollments = $enrollments->map(function($enrollment) {
+                $enrollmentArray = $enrollment->toArray();
+                if (isset($enrollmentArray['course']['status'])) {
+                    $enrollmentArray['course']['status'] = $enrollment->course->status ? $enrollment->course->status->value : '';
+                }
+                return $enrollmentArray;
+            });
+
+            return response()->json($transformedEnrollments, 200);
+
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'Lỗi server',

@@ -45,9 +45,30 @@ class ExamController extends Controller
                                 ->with(['student', 'course'])
                                 ->orderBy('exam_date', 'desc')
                                 ->get();
-            
-            return response()->json($results, 200);
-            
+
+            // Transform data to match Kotlin ExamResult data class
+            $transformedResults = $results->map(function($result) {
+                return [
+                    'exam_result_id' => (int) $result->exam_result_id,
+                    'student_id' => (int) $result->student_id,
+                    'course_id' => (int) $result->course_id,
+                    'exam_date' => (string) $result->exam_date,
+                    'listening_score' => (float) $result->listening_score,
+                    'reading_score' => (float) $result->reading_score,
+                    'speaking_score' => (float) $result->speaking_score,
+                    'writing_score' => (float) $result->writing_score,
+                    'overall_status' => (int) $result->overall_status,
+                    'created_at' => (string) $result->created_at,
+                    'updated_at' => (string) $result->updated_at,
+                    'student' => $result->student,
+                    'course' => $result->course,
+                    'average_score' => (float) round(($result->listening_score + $result->reading_score +
+                                                    $result->speaking_score + $result->writing_score) / 4, 2)
+                ];
+            });
+
+            return response()->json($transformedResults, 200);
+
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'Lỗi server',
@@ -64,67 +85,15 @@ class ExamController extends Controller
     public function getExamResultsByCourseAndStudent($courseId, $studentId)
     {
         try {
-            // Validate course and student exist
-            $course = \App\Models\Course::findOrFail($courseId);
-            $student = \App\Models\Student::findOrFail($studentId);
-
             $results = ExamResult::where('course_id', $courseId)
                                 ->where('student_id', $studentId)
                                 ->with(['student', 'course'])
                                 ->orderBy('exam_date', 'desc')
                                 ->get();
 
-            // Transform data with detailed information
-            $transformedResults = $results->map(function($result) {
-                $averageScore = ($result->listening_score + $result->speaking_score +
-                               $result->reading_score + $result->writing_score) / 4;
-
-                return [
-                    'exam_result_id' => $result->exam_result_id,
-                    'exam_date' => $result->exam_date,
-                    'scores' => [
-                        'listening' => $result->listening_score,
-                        'speaking' => $result->speaking_score,
-                        'reading' => $result->reading_score,
-                        'writing' => $result->writing_score,
-                        'average' => round($averageScore, 2)
-                    ],
-                    'overall_status' => $result->overall_status,
-                    'status_text' => $result->overall_status ? 'Passed' : 'Failed',
-                    'created_at' => $result->created_at,
-                    'updated_at' => $result->updated_at
-                ];
-            });
-
-            // Calculate student performance statistics
-            $bestScore = $transformedResults->count() > 0 ? $transformedResults->max('scores.average') : 0;
-            $latestScore = $transformedResults->count() > 0 ? $transformedResults->first()['scores']['average'] : 0;
-            $totalAttempts = $transformedResults->count();
-            $passedAttempts = $transformedResults->where('overall_status', 1)->count();
-
             return response()->json([
                 'success' => true,
-                'data' => $transformedResults,
-                'student_info' => [
-                    'student_id' => $student->student_id,
-                    'fullname' => $student->fullname,
-                    'email' => $student->email,
-                    'phone' => $student->phone ?? null
-                ],
-                'course_info' => [
-                    'course_id' => $course->course_id,
-                    'course_name' => $course->course_name,
-                    'level' => $course->level
-                ],
-                'performance_summary' => [
-                    'total_attempts' => $totalAttempts,
-                    'passed_attempts' => $passedAttempts,
-                    'failed_attempts' => $totalAttempts - $passedAttempts,
-                    'success_rate' => $totalAttempts > 0 ? round(($passedAttempts / $totalAttempts) * 100, 2) : 0,
-                    'best_score' => $bestScore,
-                    'latest_score' => $latestScore,
-                    'improvement' => $totalAttempts > 1 ? round($latestScore - $transformedResults->last()['scores']['average'], 2) : 0
-                ]
+                'data' => $results
             ], 200);
 
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
@@ -143,20 +112,93 @@ class ExamController extends Controller
     }
 
     /**
-     * Nộp kết quả thi
-     * POST /api/exam-results
+     * Nộp kết quả thi (Tạo mới hoặc cập nhật dựa trên examId)
+     * POST /api/exam-results/{examId}
      */
-    public function submitExamResult(Request $request)
+    public function submitExamResult(Request $request, $examId)
     {
         try {
-            $result = ExamResult::create($request->all());
-            
-            return response()->json($result, 201);
-            
+            // Validate input
+            $validated = $request->validate([
+                'student_id' => 'required|integer|exists:students,student_id',
+                'course_id' => 'required|integer|exists:courses,course_id',
+                'exam_date' => 'required|date',
+                'listening_score' => 'required|numeric|min:0|max:10',
+                'speaking_score' => 'required|numeric|min:0|max:10',
+                'reading_score' => 'required|numeric|min:0|max:10',
+                'writing_score' => 'required|numeric|min:0|max:10',
+                'overall_status' => 'required|integer|in:0,1'
+            ]);
+
+            $examData = [
+                'student_id' => $validated['student_id'],
+                'course_id' => $validated['course_id'],
+                'exam_date' => $validated['exam_date'],
+                'listening_score' => $validated['listening_score'],
+                'speaking_score' => $validated['speaking_score'],
+                'reading_score' => $validated['reading_score'],
+                'writing_score' => $validated['writing_score'],
+                'overall_status' => $validated['overall_status']
+            ];
+
+            // Check if examId exists in database
+            $examResult = ExamResult::find($examId);
+
+            if ($examResult) {
+                // Update existing exam result
+                $examResult->update($examData);
+                $message = 'Exam result updated successfully';
+                $statusCode = 200;
+            } else {
+                // Create new exam result with specified ID
+                $examData['exam_result_id'] = $examId;
+                $examResult = ExamResult::create($examData);
+                $message = 'Exam result created successfully';
+                $statusCode = 201;
+            }
+
+            // Load relationships and transform data to match Kotlin ExamResult data class
+            $examResult->load(['student', 'course']);
+
+            $transformedData = [
+                'exam_result_id' => (int) $examResult->exam_result_id,
+                'student_id' => (int) $examResult->student_id,
+                'course_id' => (int) $examResult->course_id,
+                'exam_date' => (string) $examResult->exam_date,
+                'listening_score' => (float) $examResult->listening_score,
+                'reading_score' => (float) $examResult->reading_score,
+                'speaking_score' => (float) $examResult->speaking_score,
+                'writing_score' => (float) $examResult->writing_score,
+                'overall_status' => (int) $examResult->overall_status,
+                'created_at' => (string) $examResult->created_at,
+                'updated_at' => (string) $examResult->updated_at,
+                'student' => $examResult->student,
+                'course' => $examResult->course,
+                'average_score' => (float) round(($examResult->listening_score + $examResult->reading_score +
+                                                $examResult->speaking_score + $examResult->writing_score) / 4, 2)
+            ];
+
+            // Return response matching Kotlin ApiResponse<ExamResult> format
+            return response()->json([
+                'success' => true,
+                'message' => $message,
+                'data' => $transformedData,
+                'error' => null
+            ], $statusCode);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'data' => null,
+                'error' => 'Validation failed'
+            ], 422);
         } catch (\Exception $e) {
             return response()->json([
-                'error' => 'Lỗi server',
-                'message' => $e->getMessage()
+                'success' => false,
+                'message' => $e->getMessage(),
+                'data' => null,
+                'error' => 'Server error'
             ], 500);
         }
     }

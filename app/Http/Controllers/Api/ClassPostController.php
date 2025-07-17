@@ -46,6 +46,12 @@ class ClassPostController extends Controller
                     ];
                 });
 
+                // Transform course to handle enum
+                $courseArray = $post->course ? $post->course->toArray() : null;
+                if ($courseArray && $post->course->status) {
+                    $courseArray['status'] = $post->course->status->value;
+                }
+
                 return [
                     'post_id' => (int) $post->post_id,
                     'course_id' => (int) $post->course_id,
@@ -57,7 +63,7 @@ class ClassPostController extends Controller
                     'created_at' => (string) $post->created_at,
                     'updated_at' => (string) $post->updated_at,
                     'teacher' => $post->teacher, // Updated to match Kotlin data class
-                    'course' => $post->course,
+                    'course' => $courseArray,
                     'comments' => $transformedComments->toArray(),
                 ];
             });
@@ -108,6 +114,12 @@ class ClassPostController extends Controller
                 ];
             });
 
+            // Transform course to handle enum
+            $courseArray = $post->course ? $post->course->toArray() : null;
+            if ($courseArray && $post->course->status) {
+                $courseArray['status'] = $post->course->status->value;
+            }
+
             // Transform post to match Kotlin ClassPost data class
             $transformedPost = [
                 'post_id' => (int) $post->post_id,
@@ -120,7 +132,7 @@ class ClassPostController extends Controller
                 'created_at' => (string) $post->created_at,
                 'updated_at' => (string) $post->updated_at,
                 'teacher' => $post->teacher, // Updated to match Kotlin data class
-                'course' => $post->course,
+                'course' => $courseArray,
                 'comments' => $transformedComments->toArray(),
             ];
 
@@ -160,6 +172,12 @@ class ClassPostController extends Controller
             // Load relationships and transform for Kotlin
             $post->load(['course', 'teacher']);
 
+            // Transform course to handle enum
+            $courseArray = $post->course ? $post->course->toArray() : null;
+            if ($courseArray && $post->course->status) {
+                $courseArray['status'] = $post->course->status->value;
+            }
+
             $transformedPost = [
                 'post_id' => (int) $post->post_id,
                 'course_id' => (int) $post->course_id,
@@ -171,7 +189,7 @@ class ClassPostController extends Controller
                 'created_at' => (string) $post->created_at,
                 'updated_at' => (string) $post->updated_at,
                 'teacher' => $post->teacher, // Updated to match Kotlin data class
-                'course' => $post->course,
+                'course' => $courseArray,
                 'comments' => [],
             ];
 
@@ -427,11 +445,12 @@ class ClassPostController extends Controller
                         'post_id'      => $comment->post_id,
                         'author_id'    => $authorId,
                         'author_type'  => $cType,
+                        'author_name'  => $cModel->fullname,
                         'content'      => $comment->content,
                         'status'       => $comment->status,
                         'created_at'   => $comment->created_at->toISOString(),
                         'updated_at'   => $comment->updated_at->toISOString(),
-                        'author'       => [
+                        'teacher'       => [
                             'id'       => $authorId,
                             'fullname' => $cModel->fullname,
                             'email'    => $cModel->email,
@@ -443,7 +462,7 @@ class ClassPostController extends Controller
                 return [
                     'post_id'      => $post->post_id,
                     'course_id'    => $post->course_id,
-                    'author_id'    => $authorModel->teacher_id,
+                    'teacher_id'    => $authorModel->teacher_id,
                     'author_type'  => $authorType,
                     'author_name'  => $authorModel->fullname,
                     'title'        => $post->title,
@@ -451,7 +470,7 @@ class ClassPostController extends Controller
                     'status'       => $post->status,
                     'created_at'   => $post->created_at->toISOString(),
                     'updated_at'   => $post->updated_at->toISOString(),
-                    'author'       => [
+                    'teacher'       => [
                         'id'       => $authorModel->teacher_id,
                         'fullname' => $authorModel->fullname,
                         'email'    => $authorModel->email,
@@ -513,6 +532,12 @@ class ClassPostController extends Controller
             // Load relationships and transform for Kotlin
             $post->load(['course', 'teacher']);
 
+            // Transform course to handle enum
+            $courseArray = $post->course ? $post->course->toArray() : null;
+            if ($courseArray && $post->course->status) {
+                $courseArray['status'] = $post->course->status->value;
+            }
+
             $transformedPost = [
                 'post_id' => (int) $post->post_id,
                 'course_id' => (int) $post->course_id,
@@ -524,7 +549,7 @@ class ClassPostController extends Controller
                 'created_at' => (string) $post->created_at,
                 'updated_at' => (string) $post->updated_at,
                 'teacher' => $post->teacher, // Updated to match Kotlin data class
-                'course' => $post->course,
+                'course' => $courseArray,
                 'comments' => [],
             ];
 
@@ -694,6 +719,12 @@ class ClassPostController extends Controller
                     ];
                 });
 
+                // Transform course to handle enum
+                $courseArray = $post->course ? $post->course->toArray() : null;
+                if ($courseArray && $post->course->status) {
+                    $courseArray['status'] = $post->course->status->value;
+                }
+
                 return [
                     'post_id' => (int) $post->post_id,
                     'course_id' => (int) $post->course_id,
@@ -705,7 +736,7 @@ class ClassPostController extends Controller
                     'created_at' => (string) $post->created_at,
                     'updated_at' => (string) $post->updated_at,
                     'teacher' => $post->teacher,
-                    'course' => $post->course,
+                    'course' => $courseArray,
                     'comments' => $transformedComments->toArray(),
                 ];
             });

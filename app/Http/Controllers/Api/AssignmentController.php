@@ -173,15 +173,41 @@ class AssignmentController extends Controller
     {
         try {
             $question = Question::with('Answers')->find($questionId);
-            
+
             if (!$question) {
                 return response()->json([
                     'error' => 'Không tìm thấy câu hỏi'
                 ], 404);
             }
-            
-            return response()->json($question, 200);
-            
+
+            // Transform question to ensure proper serialization
+            $transformedQuestion = [
+                'questions_id' => $question->questions_id,
+                'lesson_part_id' => $question->lesson_part_id,
+                'question_type' => $question->question_type,
+                'question_text' => $question->question_text,
+                'media_url' => $question->media_url,
+                'order_index' => $question->order_index,
+                'created_at' => $question->created_at->toISOString(),
+                'updated_at' => $question->updated_at->toISOString(),
+                'answers' => $question->answers->map(function($answer) {
+                    return [
+                        'answers_id' => $answer->answers_id,
+                        'questions_id' => $answer->questions_id,
+                        'match_key' => $answer->match_key,
+                        'answer_text' => $answer->answer_text,
+                        'is_correct' => $answer->is_correct,
+                        'feedback' => $answer->feedback,
+                        'media_url' => $answer->media_url,
+                        'order_index' => $answer->order_index,
+                        'created_at' => $answer->created_at->toISOString(),
+                        'updated_at' => $answer->updated_at->toISOString()
+                    ];
+                })->toArray()
+            ];
+
+            return response()->json($transformedQuestion, 200);
+
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'Lỗi server',

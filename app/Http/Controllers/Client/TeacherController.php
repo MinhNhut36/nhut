@@ -417,11 +417,13 @@ class TeacherController extends Controller
             return back()->with('error', 'Không có dữ liệu điểm để xuất.');
         }
 
+        $course = Course::findOrFail($courseId);
+
         // Lấy đường dẫn Desktop (Windows)
         $desktopPath = getenv("HOMEDRIVE") . getenv("HOMEPATH") . '\Downloads';
 
         // Tạo đường dẫn file CSV
-        $filePath = $desktopPath . '\bang_diem_khoa_' . $courseId . '.csv';
+        $filePath = $desktopPath . '\bang_diem_khoa_' . $course->course_name . '.csv';
 
         // Tạo dữ liệu xuất
         $rows = $enrollments->map(function ($enrollment) {

@@ -97,6 +97,7 @@ Route::delete('teacher-assignments/{assignmentId}', [TeacherAssignmentController
 Route::get('questions/{questionId}', [QuestionController::class, 'getQuestionById']);
 Route::get('questions/lesson-part/{lessonPartId}', [QuestionController::class, 'getQuestionsByLessonPart']);
 Route::get('answers/question/{questionId}', [QuestionController::class, 'getAnswersForQuestion']);
+Route::post('lesson-part-scores/test', [QuestionController::class, 'testSubmitLessonPartScore']);
 Route::post('lesson-part-scores', [QuestionController::class, 'submitLessonPartScore']);
 Route::get('student-answers/student/{studentId}/course/{courseId}/lesson-part/{lessonPartId}', [QuestionController::class, 'getAnswersByStudentCourseAndLessonPart']);
 Route::get('student-answers/student/{studentId}/course/{courseId}/lesson-part/{lessonPartId}/answered-at/{answeredAt}', [QuestionController::class, 'getAnswersByStudentCourseAndLessonPartAndDate']);
@@ -141,7 +142,7 @@ Route::delete('notifications/{notificationId}', [NotificationController::class, 
 Route::get('exam-results/{examId}', [ExamController::class, 'getExamById']);
 Route::get('exam-results/student/{studentId}', [ExamController::class, 'getExamResultsByStudentId']);
 Route::get('exam-results/course/{courseId}/student/{studentId}', [ExamController::class, 'getExamResultsByCourseAndStudent']);
-Route::post('exam-results', [ExamController::class, 'submitExamResult']);
+Route::post('exam-results/{examId}', [ExamController::class, 'submitExamResult']);
 Route::get('evaluations/student/{studentId}', [ExamController::class, 'getStudentEvaluations']);
 Route::post('evaluations', [ExamController::class, 'createStudentEvaluation']);
 

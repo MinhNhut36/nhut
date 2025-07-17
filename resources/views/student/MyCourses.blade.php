@@ -183,7 +183,6 @@
                             </ul>
                         </div>
 
-
                         @if (now()->lessThanOrEqualTo($MyCourse->course->end_date))
                             <div class="card-footer bg-transparent border-top-0">
                                 <a href="{{ route('student.lesson', $MyCourse->course->course_id) }}"
@@ -196,41 +195,42 @@
                             </div>
                         @else
                             <div class="card-footer bg-transparent border-top-0">
-                                <span class="card-status-studying">Khóa học đã hết hạn</span>
+                                <span class="card-status-studying">Khóa học đã hoàn thành chờ kết quả thi</span>
                             </div>
                         @endif
                     </div>
-                @empty
-                    <div class="col-12">
-                        <div class="empty-state">
-                            <div class="empty-state-icon">
-                                @if (request()->routeIs('student.myCourses'))
-                                    <i class="fas fa-book-open"></i>
-                                @else
-                                    <i class="fas fa-graduation-cap"></i>
-                                @endif
-                            </div>
-                            <h3 class="empty-state-title">
-                                @if (request()->routeIs('student.myCourses'))
-                                    Chưa có khóa học đang học
-                                @else
-                                    Chưa có khóa học đã hoàn thành
-                                @endif
-                            </h3>
-                            <p class="empty-state-description">
-                                @if (request()->routeIs('student.myCourses'))
-                                    Hãy đăng ký một khóa học mới để bắt đầu hành trình học tập của bạn.
-                                @else
-                                    Hoàn thành các khóa học đang học để xem chúng xuất hiện ở đây.
-                                @endif
-                            </p>
+                </div>
+            @empty
+                <div class="col-12">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">
                             @if (request()->routeIs('student.myCourses'))
-                                <a href="{{ route('student.courses') }}" class="btn btn-primary">
-                                    <i class="fas fa-plus me-2"></i>Khám phá khóa học
-                                </a>
+                                <i class="fas fa-book-open"></i>
+                            @else
+                                <i class="fas fa-graduation-cap"></i>
                             @endif
                         </div>
+                        <h3 class="empty-state-title">
+                            @if (request()->routeIs('student.myCourses'))
+                                Chưa có khóa học đang học
+                            @else
+                                Chưa có khóa học đã hoàn thành
+                            @endif
+                        </h3>
+                        <p class="empty-state-description">
+                            @if (request()->routeIs('student.myCourses'))
+                                Hãy đăng ký một khóa học mới để bắt đầu hành trình học tập của bạn.
+                            @else
+                                Hoàn thành các khóa học đang học để xem chúng xuất hiện ở đây.
+                            @endif
+                        </p>
+                        @if (request()->routeIs('student.myCourses'))
+                            <a href="{{ route('student.courses') }}" class="btn btn-primary">
+                                <i class="fas fa-plus me-2"></i>Khám phá khóa học
+                            </a>
+                        @endif
                     </div>
+                </div>
             @endforelse
         </div>
 

@@ -444,6 +444,11 @@ $data = [
 
     /**
      * Lấy tiến độ tổng quan của học sinh theo courses đã đăng ký
+     * Trả về dữ liệu phù hợp với OverallProgress data class trong Kotlin
+     *
+     * overall_progress_percentage: Trung bình cộng % hoàn thành của các khóa học có:
+     * - enrollment_status = 2 (đạt)
+     * - end_date > ngày hiện tại (chưa kết thúc)
      *
      * @param int $studentId
      * @return \Illuminate\Http\JsonResponse
@@ -455,53 +460,76 @@ $data = [
 
             if (!$student) {
                 return response()->json([
-                    'success' => false,
-                    'message' => 'Student không tồn tại'
+                    'student_id' => (int)$studentId,
+                    'student_name' => '',
+                    'total_courses' => 0,
+                    'completed_courses' => 0,
+                    'overall_progress_percentage' => 0.0,
+                    'courses_progress' => []
                 ], 404);
             }
 
             // Lấy tất cả courses mà student đã đăng ký
             $enrolledCourses = $student->courses()->get();
-            $progressData = [];
+
+            $coursesProgress = [];
             $totalCourses = $enrolledCourses->count();
             $completedCourses = 0;
-            $totalProgress = 0;
+            $totalProgressSum = 0;
+
+            $activeCoursesCount = 0; // Đếm số khóa học có enrollment_status = 2 (đạt) và end_date > ngày hiện tại
 
             foreach ($enrolledCourses as $course) {
-                $courseProgressResponse = $this->getCourseProgress($course->course_id, $studentId);
-                $courseProgressData = json_decode($courseProgressResponse->getContent(), true);
+                try {
+                    $courseProgressResponse = $this->getCourseProgress($course->course_id, $studentId);
+                    $courseProgressData = json_decode($courseProgressResponse->getContent(), true);
 
-                if ($courseProgressData['success']) {
-                    $progressData[] = $courseProgressData['data'];
-                    $totalProgress += $courseProgressData['data']['overall_progress_percentage'];
+                    // getCourseProgress trả về dữ liệu trực tiếp, không có success wrapper
+                    if ($courseProgressResponse->getStatusCode() == 200 && !isset($courseProgressData['error'])) {
+                        $courseData = $courseProgressData;
+                        $coursesProgress[] = $courseData;
 
-                    if ($courseProgressData['data']['is_completed']) {
-                        $completedCourses++;
+                        // Chỉ tính các khóa học có enrollment status = 2 (đạt) và end_date > ngày hiện tại (chưa kết thúc)
+                        if ($courseData['enrollment_status'] == 2 && $course->end_date > now()->toDateString()) {
+                            $totalProgressSum += $courseData['overall_progress_percentage'];
+                            $activeCoursesCount++;
+                        }
+
+                        if ($courseData['is_completed']) {
+                            $completedCourses++;
+                        }
                     }
+                } catch (\Exception $e) {
+                    // Log error nhưng tiếp tục xử lý các course khác
+                    
                 }
             }
 
-            $overallProgress = 0;
-            if ($totalCourses > 0) {
-                $overallProgress = $totalProgress / $totalCourses;
+            // Tính overall_progress_percentage là trung bình cộng % hoàn thành của các khóa có enrollment_status = 2 (đạt) và end_date > ngày hiện tại
+            $overallProgressPercentage = 0.0;
+
+            if ($activeCoursesCount > 0) {
+                $overallProgressPercentage = $totalProgressSum / $activeCoursesCount;
             }
 
+            // Trả về dữ liệu theo format OverallProgress data class
             return response()->json([
-                'success' => true,
-                'data' => [
-                    'student_id' => (int)$studentId,
-                    'student_name' => $student->fullname,
-                    'total_courses' => $totalCourses,
-                    'completed_courses' => $completedCourses,
-                    'overall_progress_percentage' => round($overallProgress, 2),
-                    'courses_progress' => $progressData
-                ]
+                'student_id' => (int)$studentId,
+                'student_name' => $student->fullname,
+                'total_courses' => $totalCourses,
+                'completed_courses' => $completedCourses,
+                'overall_progress_percentage' => round($overallProgressPercentage, 2),
+                'courses_progress' => $coursesProgress
             ]);
 
         } catch (\Exception $e) {
             return response()->json([
-                'success' => false,
-                'message' => 'Lỗi khi tính tiến độ tổng quan: ' . $e->getMessage()
+                'student_id' => (int)$studentId,
+                'student_name' => '',
+                'total_courses' => 0,
+                'completed_courses' => 0,
+                'overall_progress_percentage' => 0.0,
+                'courses_progress' => []
             ], 500);
         }
     }

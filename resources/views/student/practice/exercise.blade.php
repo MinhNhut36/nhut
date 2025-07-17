@@ -104,7 +104,7 @@
                         {{-- Khu vực chứa từ --}}
                         <div class="words-pool" data-question-id="{{ $question->questions_id }}">
                             <div class="words-pool-label">Click hoặc kéo các từ từ đây:</div>
-                            @foreach ($question->answers as $word)
+                            @foreach ($question->shuffled_words as $word)
                                 <div class="word-item clickable" draggable="true" data-word="{{ $word->answer_text }}"
                                     data-match-key="{{ $word->match_key }}" data-order="{{ $word->order_index }}"
                                     data-answer-id="{{ $word->answers_id }}">
@@ -516,7 +516,7 @@
         const loading = document.getElementById('loading');
         let idx = 0;
         let isSubmitted = false;
-        const total = blocks.length;
+        const total = {{ $questions->count() }};
 
         function updateProgress() {
             const progress = ((idx + 1) / total) * 100;
@@ -625,70 +625,106 @@
             return -1;
         }
 
-        // Function tạo view thống kê
-        function createStatisticsView(correctCount, totalQuestions) {
+        function createStatisticsView(correctCount, totalQuestions, results) {
             const statisticsHTML = `
-            <div class="question-block statistics-view" id="statistics-view">
-                <div class="statistics-header">
-                    <h2>🎉 Kết quả bài làm</h2>
-                    <div class="score-summary">
-                        <div class="score-circle">
-                            <div class="score-number">${correctCount}/${totalQuestions}</div>
-                            <div class="score-label">Câu đúng</div>
-                        </div>
-                        <div class="score-percentage">
-                            <span class="percentage-number">${Math.round((correctCount / totalQuestions) * 100)}%</span>
-                            <span class="percentage-label">Điểm số</span>
-                        </div>
+        <div class="question-block statistics-view" id="statistics-view">
+            <div class="statistics-header">
+                <h2>🎉 Kết quả bài làm</h2>
+                <div class="score-summary">
+                    <div class="score-circle">
+                        <div class="score-number">${correctCount}/${totalQuestions}</div>
+                        <div class="score-label">Câu đúng</div>
+                    </div>
+                    <div class="score-percentage">
+                        <span class="percentage-number">${Math.round((correctCount / totalQuestions) * 100)}%</span>
+                        <span class="percentage-label">Điểm số</span>
                     </div>
                 </div>
- 
-                <div class="statistics-details">
-                    <div class="stat-item correct-stat">
-                        <div class="stat-icon">✅</div>
-                        <div class="stat-content">
-                            <div class="stat-number">${correctCount}</div>
-                            <div class="stat-label">Câu trả lời đúng</div>
-                        </div>
-                    </div>
- 
-                    <div class="stat-item incorrect-stat">
-                        <div class="stat-icon">❌</div>
-                        <div class="stat-content">
-                            <div class="stat-number">${totalQuestions - correctCount}</div>
-                            <div class="stat-label">Câu trả lời sai</div>
-                        </div>
-                    </div>
- 
-                    <div class="stat-item total-stat">
-                        <div class="stat-icon">📊</div>
-                        <div class="stat-content">
-                            <div class="stat-number">${totalQuestions}</div>
-                            <div class="stat-label">Tổng số câu</div>
-                        </div>
+            </div>
+
+            <div class="statistics-details">
+                <div class="stat-item correct-stat">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-content">
+                        <div class="stat-number">${correctCount}</div>
+                        <div class="stat-label">Câu trả lời đúng</div>
                     </div>
                 </div>
- 
-                <div class="performance-message">
-                    ${getPerformanceMessage(correctCount, totalQuestions)}
+
+                <div class="stat-item incorrect-stat">
+                    <div class="stat-icon">❌</div>
+                    <div class="stat-content">
+                        <div class="stat-number">${totalQuestions - correctCount}</div>
+                        <div class="stat-label">Câu trả lời sai</div>
+                    </div>
                 </div>
- 
-                <div class="btn-group">
-                    <button class="btn btn-review" id="btn-review">
-                        📝 Xem lại bài làm
+
+                <div class="stat-item total-stat">
+                    <div class="stat-icon">📊</div>
+                    <div class="stat-content">
+                        <div class="stat-number">${totalQuestions}</div>
+                        <div class="stat-label">Tổng số câu</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PHẦN MỚI: Danh sách câu hỏi theo kết quả -->
+            <div class="question-results-section">
+                <div class="results-tabs">
+                    <button class="tab-btn active" data-tab="correct">
+                        ✅ Câu đúng (${correctCount})
                     </button>
-                    <a href="{{ route('student.lesson', ['course_id' => $courseId]) }}" class="btn btn-complete">
-                        🏁 Hoàn thành
-                    </a>
+                    <button class="tab-btn" data-tab="incorrect">
+                        ❌ Câu sai (${totalQuestions - correctCount})
+                    </button>
+                    <button class="tab-btn" data-tab="all">
+                        📋 Tất cả (${totalQuestions})
+                    </button>
                 </div>
-           </div>
-      `;
+
+                <div class="results-content">
+                    <div class="tab-content active" id="correct-tab">
+                        <div class="questions-list">
+                            ${generateQuestionsList(results, 'correct')}
+                        </div>
+                    </div>
+                    <div class="tab-content" id="incorrect-tab">
+                        <div class="questions-list">
+                            ${generateQuestionsList(results, 'incorrect')}
+                        </div>
+                    </div>
+                    <div class="tab-content" id="all-tab">
+                        <div class="questions-list">
+                            ${generateQuestionsList(results, 'all')}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="performance-message">
+                ${getPerformanceMessage(correctCount, totalQuestions)}
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-review" id="btn-review">
+                    📝 Xem lại bài làm
+                </button>
+                <a href="{{ route('student.lesson', ['course_id' => $courseId]) }}" class="btn btn-complete">
+                    🏁 Hoàn thành
+                </a>
+            </div>
+        </div>
+    `;
 
             const container = document.querySelector('.container');
             if (container) {
                 container.insertAdjacentHTML('beforeend', statisticsHTML);
             }
 
+            // Khởi tạo event listeners cho tabs
+            initStatisticsTabs();
+
+            // Event listener cho nút xem lại
             const btnReview = document.getElementById('btn-review');
             if (btnReview) {
                 btnReview.addEventListener('click', () => {
@@ -697,6 +733,221 @@
                 });
             }
         }
+
+        // 2. Function mới để tạo danh sách câu hỏi
+        function generateQuestionsList(results, filter) {
+            const questions = [];
+
+            // Lấy tất cả câu hỏi từ DOM
+            blocks.forEach((block, index) => {
+                const questionId = block.getAttribute('data-question-id');
+                const questionText = block.querySelector('.question-text')?.textContent?.trim() || '';
+                const result = results[questionId];
+
+                if (result && (filter === 'all' ||
+                        (filter === 'correct' && result.is_correct) ||
+                        (filter === 'incorrect' && !result.is_correct))) {
+
+                    // Lấy thông tin đáp án
+                    const answerInfo = getAnswerInfo(block, result);
+
+                    questions.push({
+                        index: index,
+                        id: questionId,
+                        text: questionText,
+                        isCorrect: result.is_correct,
+                        feedback: result.feedback || '',
+                        userAnswer: answerInfo.userAnswer,
+                        correctAnswer: answerInfo.correctAnswer,
+                        questionType: answerInfo.questionType
+                    });
+                }
+            });
+
+            if (questions.length === 0) {
+                return '<div class="no-questions">Không có câu hỏi nào.</div>';
+            }
+
+            return questions.map(q => `
+        <div class="question-item ${q.isCorrect ? 'correct' : 'incorrect'}">
+            <div class="question-header">
+                <span class="question-number">Câu ${q.index + 1}</span>
+                <span class="question-status ${q.isCorrect ? 'correct' : 'incorrect'}">
+                    ${q.isCorrect ? '✅' : '❌'}
+                </span>
+            </div>
+            <div class="question-content">
+                <div class="question-text-full">
+                    <strong>Câu hỏi:</strong> ${q.text}
+                </div>
+                
+                <div class="answer-details">
+                    <div class="user-answer">
+                        <strong>Đáp án của bạn:</strong> 
+                        <span class="${q.isCorrect ? 'correct-text' : 'incorrect-text'}">
+                            ${q.userAnswer}
+                        </span>
+                    </div>
+                    
+                    ${!q.isCorrect ? `
+                        <div class="correct-answer">
+                            <strong>Đáp án đúng:</strong> 
+                            <span class="correct-text">${q.correctAnswer}</span>
+                        </div>
+                    ` : ''}
+                    
+                    ${q.feedback ? `
+                        <div class="feedback-text">
+                            <strong>Giải thích:</strong> ${q.feedback}
+                        </div>
+                    ` : ''}
+                </div>
+            </div>
+        </div>
+    `).join('');
+        }
+
+        // Thêm function mới để lấy thông tin đáp án
+        function getAnswerInfo(block, result) {
+            const questionType = getQuestionType(block);
+            let userAnswer = '';
+            let correctAnswer = '';
+
+            switch (questionType) {
+                case 'single_choice':
+                    // Lấy đáp án người dùng chọn
+                    const selectedRadio = block.querySelector('input[type="radio"]:checked');
+                    if (selectedRadio) {
+                        const selectedLabel = block.querySelector(`label[for="${selectedRadio.id}"]`);
+                        userAnswer = selectedLabel?.textContent?.trim() || 'Không có đáp án';
+                    }
+
+                    // Lấy đáp án đúng
+                    const correctRadio = block.querySelector('input[type="radio"][data-is-correct="true"]');
+                    if (correctRadio) {
+                        const correctLabel = block.querySelector(`label[for="${correctRadio.id}"]`);
+                        correctAnswer = correctLabel?.textContent?.trim() || 'Không xác định';
+                    }
+                    break;
+
+                case 'fill_blank':
+                    const textInput = block.querySelector('input[type="text"]');
+                    userAnswer = textInput?.value?.trim() || 'Không có đáp án';
+                    correctAnswer = textInput?.getAttribute('data-correct-answer') || 'Không xác định';
+                    break;
+
+                case 'matching':
+                    const matchingContainer = block.querySelector('.matching-container');
+                    const userMatches = [];
+                    const correctMatches = [];
+
+                    // Lấy kết quả matching của người dùng - SỬA LẠI
+                    const imageDropZones = matchingContainer.querySelectorAll('.image-drop-zone');
+                    const dropZones = matchingContainer.querySelectorAll('.drop-zone');
+
+                    if (imageDropZones.length > 0) {
+                        // Xử lý image-drop-zone format
+                        imageDropZones.forEach(zone => {
+                            const matchedText = zone.querySelector('.matched-text');
+                            if (matchedText) {
+                                const img = zone.querySelector('img');
+                                if (img) {
+                                    const imageHtml =
+                                        `<img src="${img.src}" width="100" style="display:inline-block; vertical-align:middle;">`;
+                                    userMatches.push(`${matchedText.textContent.trim()} → ${imageHtml}`);
+                                }
+                            }
+                        });
+                    } else if (dropZones.length > 0) {
+                        // Xử lý drop-zone format
+                        dropZones.forEach(zone => {
+                            const droppedItem = zone.querySelector('.matching-item');
+                            if (droppedItem) {
+                                const img = zone.querySelector('img');
+                                if (img) {
+                                    const imageHtml =
+                                        `<img src="${img.src}" width="100" style="display:inline-block; vertical-align:middle;">`;
+                                    userMatches.push(`${droppedItem.textContent.trim()} → ${imageHtml}`);
+                                }
+                            }
+                        });
+                    }
+
+                    // Lấy đáp án đúng - SỬA LẠI
+                    const allZones = imageDropZones.length > 0 ? imageDropZones : dropZones;
+                    allZones.forEach(zone => {
+                        const matchKey = zone.getAttribute('data-match-key');
+                        const textItem = matchingContainer.querySelector(
+                            `.matching-item[data-match-key="${matchKey}"]`);
+                        const img = zone.querySelector('img');
+                        if (textItem && img) {
+                            const imageHtml =
+                                `<img src="${img.src}" width="100" style="display:inline-block; vertical-align:middle;">`;
+                            correctMatches.push(`${textItem.textContent.trim()} → ${imageHtml}`);
+                        }
+                    });
+
+                    userAnswer = userMatches.join('<br>') || 'Chưa hoàn thành';
+                    correctAnswer = correctMatches.join('<br>') || 'Không xác định';
+                    break;
+
+                case 'arrangement':
+                    const arrangementContainer = block.querySelector('.arrangement-container');
+                    const sentenceBuilder = arrangementContainer.querySelector('.sentence-builder');
+                    const wordsInSentence = sentenceBuilder.querySelectorAll('.word-item.in-sentence');
+
+                    const userSentence = Array.from(wordsInSentence).map(word => word.textContent.trim()).join(' ');
+                    userAnswer = userSentence || 'Không có đáp án';
+
+                    // Lấy đáp án đúng từ order_index
+                    const allWords = arrangementContainer.querySelectorAll('.word-item');
+                    const correctOrder = Array.from(allWords)
+                        .sort((a, b) => parseInt(a.getAttribute('data-order')) - parseInt(b.getAttribute(
+                            'data-order')))
+                        .map(word => word.textContent.trim());
+                    correctAnswer = correctOrder.join(' ') || 'Không xác định';
+                    break;
+
+                default:
+                    userAnswer = 'Không xác định';
+                    correctAnswer = 'Không xác định';
+            }
+
+            return {
+                userAnswer,
+                correctAnswer,
+                questionType
+            };
+        }
+
+        // Thêm function để xác định loại câu hỏi
+        function getQuestionType(block) {
+            if (block.querySelector('input[type="radio"]')) return 'single_choice';
+            if (block.querySelector('input[type="text"]')) return 'fill_blank';
+            if (block.querySelector('.matching-container')) return 'matching';
+            if (block.querySelector('.arrangement-container')) return 'arrangement';
+            return 'unknown';
+        }
+
+        // 3. Function khởi tạo tabs
+        function initStatisticsTabs() {
+            const tabButtons = document.querySelectorAll('.tab-btn');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            tabButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    // Remove active class from all tabs
+                    tabButtons.forEach(b => b.classList.remove('active'));
+                    tabContents.forEach(c => c.classList.remove('active'));
+
+                    // Add active class to clicked tab
+                    btn.classList.add('active');
+                    const tabId = btn.getAttribute('data-tab') + '-tab';
+                    document.getElementById(tabId)?.classList.add('active');
+                });
+            });
+        }
+
 
         function showStatistics() {
             blocks.forEach(b => b.classList.remove('active'));
@@ -1024,7 +1275,8 @@
                                         result
                                     ]) => {
                                         const word = arrangementContainer.querySelector(
-                                            `[data-answer-id="${answerId}"]`);
+                                            `.sentence-builder [data-answer-id="${answerId}"]`
+                                        );
                                         if (word) {
                                             word.classList.add(result.is_correct ?
                                                 'correct' : 'incorrect');
@@ -1053,7 +1305,7 @@
                                 '❌ Sai rồi!');
                         });
 
-                        createStatisticsView(json.correct_count, json.total_questions);
+                        createStatisticsView(json.correct_count, json.total_questions, results);
                         showStatistics();
                     })
                     .catch(error => {
@@ -1124,6 +1376,11 @@
                 }
             });
         }
+        window.goToQuestion = function(questionIndex) {
+            idx = questionIndex;
+            show(idx);
+        };
+
     })();
 </script>
 

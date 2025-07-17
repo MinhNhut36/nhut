@@ -225,8 +225,7 @@ class StudentController extends Controller
             ->max('attempt_no') ?? 0;
 
         // 2. Đếm số câu hỏi 
-        $totalQuestions = Question::where('lesson_part_id', $lessonPartId)->count();
-
+        $totalQuestions = Question::where('lesson_part_id', $lessonPartId)->whereIn('question_type', ['single_choice', 'fill_blank', 'matching', 'arrangement'])->count();
         // 3. tìm khóa học học sinh đang học 
         $level = LessonPart::with('lesson')->findOrFail($lessonPartId);
         $courseIds = Course::where('level', $level->level)
@@ -265,6 +264,9 @@ class StudentController extends Controller
                 // Gán riêng ra 2 nhóm cho view xử lý
                 $question->shuffled_texts = $texts->values();   // danh sách text đã shuffle
                 $question->shuffled_images = $images->values(); // giữ nguyên hình ảnh
+            } elseif ($question->question_type === 'arrangement') {
+                // Arrangement: đảo vị trí các từ (answer_text)
+                $question->shuffled_words = $question->answers->shuffle()->values();
             } else {
                 // Các loại câu hỏi khác (fill_blank, ...)
                 $question->shuffled_answers = $question->answers;
@@ -293,7 +295,7 @@ class StudentController extends Controller
         $results = [];
 
         // Tổng số câu hỏi trong lesson part và điểm cho mỗi câu
-        $totalQuestions = Question::where('lesson_part_id', $lessonPartId)->count();
+        $totalQuestions = Question::where('lesson_part_id', $lessonPartId) ->whereIn('question_type', ['single_choice', 'fill_blank', 'matching', 'arrangement'])->count();
         $scorePerQuestion = $totalQuestions > 0 ? 10 / $totalQuestions : 0;
 
         $correctCount = 0;

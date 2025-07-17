@@ -422,11 +422,6 @@
                 </div>
 
                 <div class="info-card">
-                    <div class="info-label">Ngày đăng ký</div>
-                    <div class="info-value">{{ $course->registration_date }}</div>
-                </div>
-
-                <div class="info-card">
                     <div class="info-label">Trạng thái</div>
                     <div class="info-value">
                         <span class="status-badge {{ $student->is_status->badgeClass() }}">
@@ -460,7 +455,7 @@
                                             <tr>
                                                 <th>Lần làm</th>
                                                 <th>Điểm</th>
-                                                <th>Số câu</th>
+                                                <th>Tổng số câu hỏi</th>
                                                 <th>Câu đúng</th>
                                                 <th>Thời gian nộp</th>
                                             </tr>

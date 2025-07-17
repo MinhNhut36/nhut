@@ -39,13 +39,13 @@ class EnrollmentController extends Controller
                     'student_id' => $enrollment->student_id,
                     'assigned_course_id' => $enrollment->assigned_course_id,
                     'registration_date' => $enrollment->registration_date,
-                    'status' => $enrollment->status,
+                    'status' => $enrollment->status ? $enrollment->status->value : null,
                     'course' => [
                         'course_id' => $enrollment->course->course_id,
                         'level' => $enrollment->course->level,
                         'course_name' => $enrollment->course->course_name,
                         'description' => $enrollment->course->description,
-                        'status' => $enrollment->course->status
+                        'status' => $enrollment->course->status ? $enrollment->course->status->value : ''
                     ],
                     'progress_percentage' => round($progressPercentage, 2),
                     'last_activity_date' => $lastActivity
@@ -90,13 +90,13 @@ class EnrollmentController extends Controller
                 'student_id' => $enrollment->student_id,
                 'assigned_course_id' => $enrollment->assigned_course_id,
                 'registration_date' => $enrollment->registration_date,
-                'status' => $enrollment->status,
+                'status' => $enrollment->status ? $enrollment->status->value : null,
                 'course' => [
                     'course_id' => $enrollment->course->course_id,
                     'level' => $enrollment->course->level,
                     'course_name' => $enrollment->course->course_name,
                     'description' => $enrollment->course->description,
-                    'status' => $enrollment->course->status
+                    'status' => $enrollment->course->status ? $enrollment->course->status->value : ''
                 ],
                 'progress_percentage' => $this->calculateCourseProgress($enrollment->assigned_course_id, $enrollment->student_id),
                 'last_activity_date' => DB::table('student_answers')
@@ -207,7 +207,7 @@ class EnrollmentController extends Controller
                     'existing_enrollment' => [
                         'course_id' => $existingEnrollment->assigned_course_id,
                         'course_name' => $existingEnrollment->course->course_name,
-                        'status' => $existingEnrollment->status
+                        'status' => $existingEnrollment->status ? $existingEnrollment->status->value : null
                     ]
                 ], 409);
             }
@@ -245,7 +245,7 @@ class EnrollmentController extends Controller
                     'course_name' => $selectedCourse['course']->course_name,
                     'level' => $selectedCourse['course']->level,
                     'description' => $selectedCourse['course']->description,
-                    'status' => $enrollment->status,
+                    'status' => $enrollment->status ? $enrollment->status->value : null,
                     'registration_date' => $enrollment->registration_date,
                     'current_student_count' => $selectedCourse['student_count'] + 1
                 ],

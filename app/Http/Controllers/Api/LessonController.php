@@ -148,7 +148,35 @@ class LessonController extends Controller
                 ->orderBy('order_index')
                 ->get();
 
-            return response()->json($questions, 200);
+            // Transform questions to ensure proper serialization
+            $transformedQuestions = $questions->map(function($question) {
+                return [
+                    'questions_id' => $question->questions_id,
+                    'lesson_part_id' => $question->lesson_part_id,
+                    'question_type' => $question->question_type,
+                    'question_text' => $question->question_text,
+                    'media_url' => $question->media_url,
+                    'order_index' => $question->order_index,
+                    'created_at' => $question->created_at->toISOString(),
+                    'updated_at' => $question->updated_at->toISOString(),
+                    'answers' => $question->answers->map(function($answer) {
+                        return [
+                            'answers_id' => $answer->answers_id,
+                            'questions_id' => $answer->questions_id,
+                            'match_key' => $answer->match_key,
+                            'answer_text' => $answer->answer_text,
+                            'is_correct' => $answer->is_correct,
+                            'feedback' => $answer->feedback,
+                            'media_url' => $answer->media_url,
+                            'order_index' => $answer->order_index,
+                            'created_at' => $answer->created_at->toISOString(),
+                            'updated_at' => $answer->updated_at->toISOString()
+                        ];
+                    })->toArray()
+                ];
+            });
+
+            return response()->json($transformedQuestions, 200);
 
         } catch (\Exception $e) {
             return response()->json([

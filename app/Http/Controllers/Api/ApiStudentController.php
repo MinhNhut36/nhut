@@ -27,7 +27,16 @@ class ApiStudentController extends Controller
                 ], 404);
             }
 
-            return response()->json($student, 200);
+            // Transform student to ensure enum values are properly serialized
+            $studentArray = $student->toArray();
+            if ($student->gender) {
+                $studentArray['gender'] = $student->gender->value;
+            }
+            if ($student->is_status) {
+                $studentArray['is_status'] = $student->is_status->value;
+            }
+
+            return response()->json($studentArray, 200);
 
         } catch (\Exception $e) {
             return response()->json([
@@ -45,7 +54,20 @@ class ApiStudentController extends Controller
     {
         try {
             $students = Student::where('is_status', 1)->get();
-            return response()->json($students, 200);
+
+            // Transform students to ensure enum values are properly serialized
+            $transformedStudents = $students->map(function($student) {
+                $studentArray = $student->toArray();
+                if ($student->gender) {
+                    $studentArray['gender'] = $student->gender->value;
+                }
+                if ($student->is_status) {
+                    $studentArray['is_status'] = $student->is_status->value;
+                }
+                return $studentArray;
+            });
+
+            return response()->json($transformedStudents, 200);
 
         } catch (\Exception $e) {
             return response()->json([
@@ -72,7 +94,16 @@ class ApiStudentController extends Controller
 
             $student->update($request->all());
 
-            return response()->json($student, 200);
+            // Transform student to ensure enum values are properly serialized
+            $studentArray = $student->toArray();
+            if ($student->gender) {
+                $studentArray['gender'] = $student->gender->value;
+            }
+            if ($student->is_status) {
+                $studentArray['is_status'] = $student->is_status->value;
+            }
+
+            return response()->json($studentArray, 200);
 
         } catch (\Exception $e) {
             return response()->json([
